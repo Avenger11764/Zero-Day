@@ -1,0 +1,86 @@
+{
+  "_meta": {
+    "description": "Maps synthetic identity anomaly types to MITRE ATT&CK Enterprise tactics/techniques",
+    "version": "14.1",
+    "url": "https://attack.mitre.org",
+    "note": "Fill in technique IDs by searching at https://attack.mitre.org/techniques/enterprise/"
+  },
+
+  "anomaly_mappings": [
+    {
+      "anomaly_type": "impossible_travel",
+      "description": "User appears in two far-apart locations too quickly \u2014 credentials likely stolen",
+      "suspected_tactic": "Initial Access",
+      "suspected_technique": "Valid Accounts",
+      "technique_id": "T1078",
+      "technique_url": "https://attack.mitre.org/techniques/T1078/",
+      "notes": "Attacker uses stolen creds from a different geo. Sub-technique depends on account type: T1078.002 (Domain Accounts) for AD, T1078.004 (Cloud Accounts) for SaaS."
+    },
+    {
+      "anomaly_type": "new_country_odd_hour",
+      "description": "Login from a new country during user's typical sleeping hours",
+      "suspected_tactic": "Initial Access",
+      "suspected_technique": "Valid Accounts",
+      "technique_id": "T1078",
+      "technique_url": "https://attack.mitre.org/techniques/T1078/",
+      "notes": "Combine T1078 (Valid Accounts) with geography/temporal context. Possible compromised credential resale. See also: DET0560 (Detection of Valid Account Abuse) analytic AN1546 for IdP geographic anomalies."
+    },
+    {
+      "anomaly_type": "brute_force_pattern",
+      "description": "Multiple rapid login failures indicating password guessing",
+      "suspected_tactic": "Credential Access",
+      "suspected_technique": "Brute Force: Password Spraying",
+      "technique_id": "T1110.003",
+      "technique_url": "https://attack.mitre.org/techniques/T1110/",
+      "notes": "T1110.003 (Password Spraying) fits best = one password tried across many accounts. Could also be T1110.001 (Guessing) if targeted. See analytic AN1276."
+    },
+    {
+      "anomaly_type": "unknown_device_vpn",
+      "description": "First-seen device connecting via VPN \u2014 possible credential theft with anonymization",
+      "suspected_tactic": "Command and Control",
+      "suspected_technique": "Proxy: External Proxy",
+      "technique_id": "T1090.002",
+      "technique_url": "https://attack.mitre.org/techniques/T1090/",
+      "notes": "T1090.002 (External Proxy) covers VPN/anonymization services. Combine with T1078 (Valid Accounts) for stolen creds + VPN. See also: T1090.003 (Multi-hop Proxy) for layered anonymization."
+    },
+    {
+      "anomaly_type": "bulk_transfer_new_ip",
+      "description": "Large data transfer to/from a previously unseen IP \u2014 possible exfiltration",
+      "suspected_tactic": "Exfiltration",
+      "suspected_technique": "Exfiltration Over C2 Channel",
+      "technique_id": "T1041",
+      "technique_url": "https://attack.mitre.org/techniques/T1041/",
+      "notes": "T1041 = data exfiltrated over existing C2 channel. Could also be T1567 (Exfiltration Over Web Service) if using cloud storage APIs. Size + new IP = strong C2/Exfil signal."
+    }
+  ],
+
+  "tactic_descriptions": {
+    "Initial Access": "The attacker is trying to get into your network.",
+    "Credential Access": "The attacker is trying to steal account names and passwords.",
+    "Exfiltration": "The attacker is trying to steal data.",
+    "Command and Control": "The attacker is communicating with compromised systems to control them."
+  },
+
+  "alert_payload_template": {
+    "alert_id": "",
+    "timestamp": "",
+    "user_id": "",
+    "anomaly_type": "",
+    "anomaly_score": null,
+    "risk_score": null,
+    "mitre_tactic": "",
+    "mitre_technique": "",
+    "mitre_technique_id": "",
+    "mitre_technique_url": "",
+    "evidence": {
+      "geo_city": "",
+      "geo_country": "",
+      "device_fingerprint": "",
+      "vpn_detected": false,
+      "login_success": true,
+      "user_local_hour": null,
+      "implied_speed_kmh": null
+    },
+    "explanation": ""
+  }
+}
