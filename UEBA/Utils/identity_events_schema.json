@@ -1,0 +1,368 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/anomalyco/opencode/fyp/schemas/identity_events_v2",
+  "title": "Synthetic Identity Events Schema (v2)",
+  "description": "Validates synthetic identity/device telemetry for the Zero-Day Detection FYP UEBA risk model. 10 anomaly types, 24 fields.",
+  "version": "2.0.0",
+
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "event_id", "user_id", "timestamp",
+      "device_type", "device_fingerprint", "os", "browser",
+      "ip", "geo_city", "geo_country", "lat", "lon",
+      "role",
+      "vpn_detected", "login_success",
+      "data_size_mb", "cloud_domain",
+      "activity", "session_id",
+      "is_anomalous_ground_truth", "anomaly_type",
+      "implied_speed_kmh",
+      "user_home_tz", "user_local_hour", "event_city_tz"
+    ],
+    "properties": {
+      "event_id": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+        "description": "UUID v4 event identifier"
+      },
+      "user_id": {
+        "type": "string",
+        "pattern": "^u_\\d{3}$",
+        "description": "User identifier (e.g. u_000 through u_019)"
+      },
+      "timestamp": {
+        "type": "string",
+        "format": "date-time",
+        "pattern": "^2026-(0[6-9]|1[0-2])-\\d{2}T\\d{2}:\\d{2}:\\d{2}",
+        "description": "Event timestamp in ISO 8601 (UTC)"
+      },
+
+      "device_type": {
+        "type": "string",
+        "enum": ["desktop", "laptop", "mobile", "tablet"],
+        "description": "Form factor of the device used"
+      },
+      "device_fingerprint": {
+        "type": "string",
+        "pattern": "^(desktop|laptop|mobile|tablet)-[a-z0-9.]+-(chrome|firefox|edge|safari|brave)-[0-9a-f]{6}$",
+        "description": "Composite device fingerprint: device_type-os_normalized-browser-hex6"
+      },
+      "os": {
+        "type": "string",
+        "enum": [
+          "Windows 11", "Windows 10", "macOS 14", "Ubuntu 22.04",
+          "ChromeOS", "Android 14", "Android 15", "iOS 18", "iPadOS 18"
+        ],
+        "description": "Operating system of the device"
+      },
+      "browser": {
+        "type": "string",
+        "enum": ["Chrome 125", "Firefox 127", "Edge 125", "Safari 18", "Brave 1.68"],
+        "description": "Browser and version"
+      },
+
+      "ip": {
+        "type": "string",
+        "oneOf": [
+          {"pattern": "^10\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$", "description": "Home/known IP (10.x.x.x range)"},
+          {"pattern": "^172\\.16\\.\\d{1,3}\\.\\d{1,3}$", "description": "Unknown/new IP (172.16.x.x range)"}
+        ],
+        "description": "IP address. 10.x = known (bound to a city), 172.16.x = unknown/new"
+      },
+      "geo_city": {
+        "type": "string",
+        "enum": [
+          "Delhi", "Mumbai", "Bengaluru", "London", "New York",
+          "Moscow", "Lagos", "Singapore", "Sao Paulo", "Sydney",
+          "Tokyo", "Seoul", "Dubai", "Berlin", "Paris",
+          "Toronto", "Mexico City", "Cairo", "Nairobi", "Jakarta",
+          "Bangkok", "Buenos Aires", "Madrid", "Rome", "Amsterdam"
+        ],
+        "description": "City of the event (one of 25 known cities)"
+      },
+      "geo_country": {
+        "type": "string",
+        "enum": [
+          "IN", "GB", "US", "RU", "NG", "SG", "BR", "AU",
+          "JP", "KR", "AE", "DE", "FR", "CA", "MX",
+          "EG", "KE", "ID", "TH", "AR", "ES", "IT", "NL"
+        ],
+        "description": "ISO 3166-1 alpha-2 country code"
+      },
+      "lat": {
+        "type": "number",
+        "minimum": -35.0,
+        "maximum": 56.0,
+        "description": "Latitude of event city"
+      },
+      "lon": {
+        "type": "number",
+        "minimum": -100.0,
+        "maximum": 152.0,
+        "description": "Longitude of event city"
+      },
+
+      "role": {
+        "type": "string",
+        "enum": ["student", "faculty", "admin", "researcher", "contractor"],
+        "description": "User role for behavioral baseline"
+      },
+
+      "vpn_detected": {
+        "type": "boolean",
+        "description": "Whether the connection was detected as VPN/proxy"
+      },
+      "login_success": {
+        "type": "boolean",
+        "description": "Whether the authentication was successful"
+      },
+
+      "data_size_mb": {
+        "type": ["number", "null"],
+        "minimum": 0,
+        "maximum": 50000,
+        "description": "Data transfer size in MB. Non-null for bulk/cloud events."
+      },
+      "cloud_domain": {
+        "type": ["string", "null"],
+        "enum": [
+          null,
+          "drive.google.com", "dropbox.com", "onedrive.live.com",
+          "icloud.com", "box.com", "mega.io"
+        ],
+        "description": "Cloud storage domain for data_to_personal_cloud. Null for all other events."
+      },
+
+      "activity": {
+        "type": "string",
+        "enum": [
+          "web_browsing", "email_access", "file_download",
+          "github_access", "college_portal", "vpn_admin_panel",
+          "bulk_data_transfer", "dns_heavy_session", "login_attempt",
+          "cloud_upload", "code_commit", "slack_teams",
+          "database_query", "ssh_session", "admin_action",
+          "config_change", "share_link"
+        ],
+        "description": "Type of user activity"
+      },
+      "session_id": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+        "description": "Session identifier. Used for cookie_reuse pairing."
+      },
+
+      "is_anomalous_ground_truth": {
+        "type": "boolean",
+        "description": "Ground-truth label. True if this event is part of an anomaly pattern."
+      },
+      "anomaly_type": {
+        "type": ["string", "null"],
+        "enum": [
+          null,
+          "impossible_travel",
+          "new_country_odd_hour",
+          "unknown_device_vpn",
+          "bulk_transfer_new_ip",
+          "brute_force_pattern",
+          "off_hours_access",
+          "dormant_account_reactivation",
+          "data_to_personal_cloud",
+          "cookie_reuse",
+          "unusual_login_frequency"
+        ],
+        "description": "Anomaly type. Null for normal events."
+      },
+      "implied_speed_kmh": {
+        "type": ["number", "null"],
+        "minimum": 0,
+        "maximum": 100000,
+        "description": "Haversine speed in km/h for impossible_travel. Null for all other events."
+      },
+
+      "user_home_tz": {
+        "type": "string",
+        "enum": [
+          "Asia/Kolkata", "Europe/London", "America/New_York",
+          "Europe/Moscow", "Africa/Lagos", "Asia/Singapore",
+          "America/Sao_Paulo", "Australia/Sydney",
+          "Asia/Tokyo", "Asia/Seoul", "Asia/Dubai",
+          "Europe/Berlin", "Europe/Paris", "America/Toronto",
+          "America/Mexico_City", "Africa/Cairo", "Africa/Nairobi",
+          "Asia/Jakarta", "Asia/Bangkok",
+          "America/Argentina/Buenos_Aires",
+          "Europe/Madrid", "Europe/Rome", "Europe/Amsterdam"
+        ],
+        "description": "IANA timezone of user's home city"
+      },
+      "user_local_hour": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 23,
+        "description": "Hour of the event in the user's home timezone (0-23). Computed from timestamp + TZ_OFFSET."
+      },
+      "event_city_tz": {
+        "type": "string",
+        "enum": [
+          "Asia/Kolkata", "Europe/London", "America/New_York",
+          "Europe/Moscow", "Africa/Lagos", "Asia/Singapore",
+          "America/Sao_Paulo", "Australia/Sydney",
+          "Asia/Tokyo", "Asia/Seoul", "Asia/Dubai",
+          "Europe/Berlin", "Europe/Paris", "America/Toronto",
+          "America/Mexico_City", "Africa/Cairo", "Africa/Nairobi",
+          "Asia/Jakarta", "Asia/Bangkok",
+          "America/Argentina/Buenos_Aires",
+          "Europe/Madrid", "Europe/Rome", "Europe/Amsterdam"
+        ],
+        "description": "IANA timezone of the event city (may differ from user_home_tz for travel anomalies)"
+      }
+    },
+
+    "allOf": [
+      {
+        "description": "impossible_travel must have implied_speed_kmh, and vice versa",
+        "if": {
+          "properties": { "anomaly_type": { "const": "impossible_travel" } },
+          "required": ["anomaly_type"]
+        },
+        "then": {
+          "properties": { "implied_speed_kmh": { "type": "number", "minimum": 0 } },
+          "required": ["implied_speed_kmh"]
+        }
+      },
+      {
+        "description": "non-impossible-travel events must NOT have implied_speed_kmh",
+        "if": {
+          "properties": { "anomaly_type": { "not": { "const": "impossible_travel" } } },
+          "required": ["anomaly_type"]
+        },
+        "then": {
+          "properties": { "implied_speed_kmh": { "const": null } }
+        }
+      },
+      {
+        "description": "data_to_personal_cloud must have cloud_domain and large data_size_mb",
+        "if": {
+          "properties": { "anomaly_type": { "const": "data_to_personal_cloud" } },
+          "required": ["anomaly_type"]
+        },
+        "then": {
+          "properties": {
+            "cloud_domain": { "type": "string" },
+            "data_size_mb": { "type": "number", "minimum": 50 }
+          },
+          "required": ["cloud_domain", "data_size_mb"]
+        }
+      },
+      {
+        "description": "bulk_transfer_new_ip must have data_size_mb",
+        "if": {
+          "properties": { "anomaly_type": { "const": "bulk_transfer_new_ip" } },
+          "required": ["anomaly_type"]
+        },
+        "then": {
+          "properties": { "data_size_mb": { "type": "number", "minimum": 100 } },
+          "required": ["data_size_mb"]
+        }
+      },
+      {
+        "description": "unknown_device_vpn must have vpn_detected=True",
+        "if": {
+          "properties": { "anomaly_type": { "const": "unknown_device_vpn" } },
+          "required": ["anomaly_type"]
+        },
+        "then": {
+          "properties": { "vpn_detected": { "const": true } }
+        }
+      },
+      {
+        "description": "brute_force_pattern must have login_success=False",
+        "if": {
+          "properties": { "anomaly_type": { "const": "brute_force_pattern" } },
+          "required": ["anomaly_type"]
+        },
+        "then": {
+          "properties": { "login_success": { "const": false } }
+        }
+      },
+      {
+        "description": "off_hours_access must have user_local_hour between 1 and 5",
+        "if": {
+          "properties": { "anomaly_type": { "const": "off_hours_access" } },
+          "required": ["anomaly_type"]
+        },
+        "then": {
+          "properties": { "user_local_hour": { "type": "integer", "minimum": 1, "maximum": 5 } },
+          "required": ["user_local_hour"]
+        }
+      },
+      {
+        "description": "new_country_odd_hour must have user_local_hour between 1 and 4",
+        "if": {
+          "properties": { "anomaly_type": { "const": "new_country_odd_hour" } },
+          "required": ["anomaly_type"]
+        },
+        "then": {
+          "properties": { "user_local_hour": { "type": "integer", "minimum": 1, "maximum": 4 } },
+          "required": ["user_local_hour"]
+        }
+      },
+      {
+        "description": "cookie_reuse events from the same session must share session_id",
+        "if": {
+          "properties": { "anomaly_type": { "const": "cookie_reuse" } },
+          "required": ["anomaly_type"]
+        },
+        "then": {
+          "properties": { "session_id": { "type": "string" } }
+        }
+      },
+      {
+        "description": "normal events must have anomaly_type=null",
+        "if": {
+          "properties": { "is_anomalous_ground_truth": { "const": false } },
+          "required": ["is_anomalous_ground_truth"]
+        },
+        "then": {
+          "properties": { "anomaly_type": { "const": null } }
+        }
+      },
+      {
+        "description": "anomalous events must have a non-null anomaly_type",
+        "if": {
+          "properties": { "is_anomalous_ground_truth": { "const": true } },
+          "required": ["is_anomalous_ground_truth"]
+        },
+        "then": {
+          "properties": { "anomaly_type": { "type": "string" } },
+          "required": ["anomaly_type"]
+        }
+      },
+      {
+        "description": "IP must be consistent with geo_city: 10.x.x.x is always a known/allocated IP",
+        "if": {
+          "properties": { "ip": { "pattern": "^10\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$" } },
+          "required": ["ip"]
+        },
+        "then": {
+          "properties": {
+            "ip": { "description": "10.x IPs are allocated to known cities" }
+          }
+        }
+      },
+      {
+        "description": "normal events with login failures must have activity=login_attempt",
+        "if": {
+          "properties": {
+            "is_anomalous_ground_truth": { "const": false },
+            "login_success": { "const": false }
+          },
+          "required": ["is_anomalous_ground_truth", "login_success"]
+        },
+        "then": {
+          "properties": { "activity": { "const": "login_attempt" } }
+        }
+      }
+    ]
+  }
+}
