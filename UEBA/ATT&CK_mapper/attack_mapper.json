@@ -9,7 +9,7 @@
   "anomaly_mappings": [
     {
       "anomaly_type": "impossible_travel",
-      "description": "User appears in two far-apart locations too quickly \u2014 credentials likely stolen",
+      "description": "User appears in two far-apart locations too quickly — credentials likely stolen",
       "suspected_tactic": "Initial Access",
       "suspected_technique": "Valid Accounts",
       "technique_id": "T1078",
@@ -36,7 +36,7 @@
     },
     {
       "anomaly_type": "unknown_device_vpn",
-      "description": "First-seen device connecting via VPN \u2014 possible credential theft with anonymization",
+      "description": "First-seen device connecting via VPN — possible credential theft with anonymization",
       "suspected_tactic": "Command and Control",
       "suspected_technique": "Proxy: External Proxy",
       "technique_id": "T1090.002",
@@ -45,12 +45,57 @@
     },
     {
       "anomaly_type": "bulk_transfer_new_ip",
-      "description": "Large data transfer to/from a previously unseen IP \u2014 possible exfiltration",
+      "description": "Large data transfer to/from a previously unseen IP — possible exfiltration",
       "suspected_tactic": "Exfiltration",
       "suspected_technique": "Exfiltration Over C2 Channel",
       "technique_id": "T1041",
       "technique_url": "https://attack.mitre.org/techniques/T1041/",
       "notes": "T1041 = data exfiltrated over existing C2 channel. Could also be T1567 (Exfiltration Over Web Service) if using cloud storage APIs. Size + new IP = strong C2/Exfil signal."
+    },
+    {
+      "anomaly_type": "off_hours_access",
+      "description": "Login during 1–5 AM user-local time (same city, no geo change)",
+      "suspected_tactic": "Initial Access",
+      "suspected_technique": "Valid Accounts",
+      "technique_id": "T1078",
+      "technique_url": "https://attack.mitre.org/techniques/T1078/",
+      "notes": "Non-geographic temporal anomaly. User-local timezone matters — UTC hour is meaningless alone. Low signal in isolation, strong with other indicators."
+    },
+    {
+      "anomaly_type": "dormant_account_reactivation",
+      "description": "Account inactive >90 days suddenly becomes active",
+      "suspected_tactic": "Initial Access",
+      "suspected_technique": "Valid Accounts",
+      "technique_id": "T1078",
+      "technique_url": "https://attack.mitre.org/techniques/T1078/",
+      "notes": "Stale/forgotten account compromise. High risk because dormant accounts often lack MFA or policy updates. Combine with off-hours or new geo for escalation."
+    },
+    {
+      "anomaly_type": "data_to_personal_cloud",
+      "description": "Large data upload to known personal cloud storage (Google Drive, Dropbox, iCloud, etc.)",
+      "suspected_tactic": "Exfiltration",
+      "suspected_technique": "Exfiltration Over Web Service",
+      "technique_id": "T1567",
+      "technique_url": "https://attack.mitre.org/techniques/T1567/",
+      "notes": "T1567 covers exfil over web services. Sub-technique depends on service: T1567.001 (Code Repository) for GitHub/GitLab, T1567.002 (Cloud Storage) for Google Drive/Dropbox. Insider threat signal."
+    },
+    {
+      "anomaly_type": "cookie_reuse",
+      "description": "Same device fingerprint and session token used from two different IPs within minutes",
+      "suspected_tactic": "Credential Access",
+      "suspected_technique": "Steal Web Session Cookie",
+      "technique_id": "T1539",
+      "technique_url": "https://attack.mitre.org/techniques/T1539/",
+      "notes": "Session hijack / token theft. Same session_id across distinct IPs in short time window. Also maps to T1528 (Steal Application Access Token) for OAuth tokens."
+    },
+    {
+      "anomaly_type": "unusual_login_frequency",
+      "description": "Burst of 5–10 login events from the same user in under 3 minutes",
+      "suspected_tactic": "Credential Access",
+      "suspected_technique": "Brute Force: Password Guessing",
+      "technique_id": "T1110.001",
+      "technique_url": "https://attack.mitre.org/techniques/T1110/",
+      "notes": "Rapid-fire automated login attempts. Could indicate scripted brute force or credential stuffing. Different from T1110.003 (Password Spraying) which spreads across accounts."
     }
   ],
 
@@ -79,7 +124,11 @@
       "vpn_detected": false,
       "login_success": true,
       "user_local_hour": null,
-      "implied_speed_kmh": null
+      "implied_speed_kmh": null,
+      "data_size_mb": null,
+      "cloud_domain": null,
+      "session_id": "",
+      "role": ""
     },
     "explanation": ""
   }
