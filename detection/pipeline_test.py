@@ -41,14 +41,18 @@ class Autoencoder(nn.Module):
     def __init__(self, input_dim=76):
         super().__init__()
         self.encoder = nn.Sequential(
-            nn.Linear(input_dim, 16),
+            nn.Linear(input_dim, 256),
             nn.ReLU(),
-            nn.Linear(16, 8)
+            nn.Linear(256, 128),
+            nn.ReLU(),
+            nn.Linear(128, 32)
         )
         self.decoder = nn.Sequential(
-            nn.Linear(8, 16),
+            nn.Linear(32, 128),
             nn.ReLU(),
-            nn.Linear(16, input_dim),
+            nn.Linear(128, 256),
+            nn.ReLU(),
+            nn.Linear(256, input_dim),
             nn.Sigmoid()
         )
 
@@ -61,7 +65,7 @@ class Autoencoder(nn.Module):
             return torch.mean((recon - x) ** 2, dim=1)
 
 model = Autoencoder(input_dim=df.shape[1])
-model.load_state_dict(torch.load("detection/autoencoder_v1.pt",
+model.load_state_dict(torch.load("detection/autoencoder_v2-256.pt",
                                   map_location="cpu", weights_only=True))
 model.eval()
 

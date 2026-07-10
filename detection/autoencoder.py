@@ -58,15 +58,18 @@ class Autoencoder(nn.Module):
     def __init__(self,input_dim=20):
         super().__init__()
         self.encoder = nn.Sequential(
-            nn.Linear(input_dim, 16),
+            nn.Linear(input_dim, 256),
             nn.ReLU(),
-            nn.Linear(16, 8),
+            nn.Linear(256, 128),
             nn.ReLU(),
+            nn.Linear(128, 32)   
         )
         self.decoder = nn.Sequential(
-            nn.Linear(8, 16),
+            nn.Linear(32, 128),
             nn.ReLU(),
-            nn.Linear(16, input_dim),
+            nn.Linear(128, 256),
+            nn.ReLU(),
+            nn.Linear(256, input_dim),
             nn.Sigmoid()
         )
     def forward(self, x):
@@ -89,7 +92,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = Autoencoder(input_dim=n_features).to(device)
 print(f"  Running on: {device}")
 
-Optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+Optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
 loss_fn = nn.MSELoss()
 losses = []
 
@@ -118,8 +121,8 @@ print("Training finished.")
 
 
 """Save the model"""
-torch.save(model.state_dict(), "detection/autoencoder_v1.pt")
-print("  Saved to detection/autoencoder_v1.pt")
+torch.save(model.state_dict(), "detection/autoencoder_v2-256.pt")
+print("  Saved to detection/autoencoder_v2-256.pt")
 
 
 
