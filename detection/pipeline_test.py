@@ -3,35 +3,40 @@ import torch.nn as nn
 import pandas as pd 
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
-
 import sys
-csv_path =sys.argv[1] if len(sys.argv) > 1 else "D:\Test OD\Zero-Day\training_data\dataset_10k_normal.csv"
 
-print(f"loading Saharsh  dataset from {csv_path}")
-df=pd.read_csv(csv_path)
-df.columns=df.columns.str.strip()
+csv_path = sys.argv[1] if len(sys.argv) > 1 else r"D:\Test OD\Zero-Day\training_data\dataset_10k_normal.csv"
 
-df=df.drop(columns=['Label', 'Flow ID', 'Source IP' ,'Destination IP' , 'Timestamp' ], errors='ignore')
-df=df.replace([float('inf'), float('-inf')], float('nan'))
-df=df.dropna(axis=1)
+print(f"Loading A's dataset from {csv_path}")
+df = pd.read_csv(csv_path)
+df.columns = df.columns.str.strip()
 
-print(f"Loaded {len(df)} Flows,{df.shape[1]} Features")
+# Drop known metadata columns by name
+df = df.drop(columns=['Label', 'Flow ID', 'Source IP', 'Destination IP',
+                       'Timestamp', 'src_ip', 'dst_ip', 'src_port',
+                       'dst_port', 'protocol', 'timestamp'], errors='ignore')
 
-#-- Checking if features number matches expectations--#
+# Drop infinity and NaN
+df = df.replace([float('inf'), float('-inf')], float('nan'))
+df = df.dropna(axis=1)
+
+# Drop any remaining non-numeric columns regardless of name
+df = df.select_dtypes(include=[float, int])
+
+print(f"  Loaded {len(df)} flows, {df.shape[1]} features")
 
 if df.shape[1] != 76:
-    print(f"Warning: Expected 76 features, but got {df.shape[1]} features. Please check the dataset.")
-    print ("Saharsh dataset Pass your dataset through CICFlowMeter to get 76 features. The dataset you provided has different number of features.")
+    print(f"  WARNING: Expected 76 features, got {df.shape[1]}")
+    print(f"  Tell A to re-export using CICFlowMeter to get exactly 76 features")
 else:
-    print("Dataset has 76 features, proceeding with normalization and scoring.")
+    print("  Feature count: 76 ✓")
 
-#-- Normalizing the dataset --#
+# Normalize
 scaler = MinMaxScaler()
-data=scaler.fit_transform(df)
-X=torch.tensor(data, dtype=torch.float32)
+data = scaler.fit_transform(df)
+X = torch.tensor(data, dtype=torch.float32)
 
-#-- Loading my Trained Autoencoder --#
-
+# Load trained model
 class Autoencoder(nn.Module):
     def __init__(self, input_dim=76):
         super().__init__()
@@ -55,21 +60,20 @@ class Autoencoder(nn.Module):
             recon = self.forward(x)
             return torch.mean((recon - x) ** 2, dim=1)
 
-
-model=Autoencoder(input_dim=df.shape[1])
-model.load_state_dict(torch.load("detection/autoencoder_v1.pt", map_location="cpu"))
+model = Autoencoder(input_dim=df.shape[1])
+model.load_state_dict(torch.load("detection/autoencoder_v1.pt",
+                                  map_location="cpu", weights_only=True))
 model.eval()
 
-#-- Score all flows --#
+# Score all flows
+scores = model.anomaly_score(X).numpy()
+threshold = 0.5
 
-scores=model.anomaly_score(X).numpy()
-threshold=0.5
-
-flagged =(scores>threshold).sum()
-print(f"\n Results on Saharsh dataset:")
-print(f"\n Total Flows: {len(scores)}")
-print(f"\n Mean scores: {scores.mean():.6f}")
-print(f"\n Max scores: {scores.max():.6f}")
-print(f"\n Min scores: {scores.min():.6f}")
-print(f"\n Flagged Anomalies: {flagged} (100*{flagged/len(scores):.1f}%)")
+flagged = (scores > threshold).sum()
+print(f"\n  Results on A's dataset:")
+print(f"  Total flows    : {len(scores)}")
+print(f"  Mean score     : {scores.mean():.6f}")
+print(f"  Max score      : {scores.max():.6f}")
+print(f"  Min score      : {scores.min():.6f}")
+print(f"  Flagged        : {flagged} ({100*flagged/len(scores):.1f}%)")
 print("\n  Pipeline test complete — A's data flows into model correctly.")
