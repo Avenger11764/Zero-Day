@@ -1,84 +1,102 @@
-// PREVIEW DATA ONLY — DELETE ONCE REAL API IS WIRED UP BY TEAMMATE.
+/**
+ * REAL DATA — derived from actual adversarial harness runs 
+ * (harness/results/autoencoder_v2_baseline_v2.csv).
+ * Still a static snapshot, not a live feed — replace with a real API/WebSocket
+ * connection once that module is ready.
+ * 
+ * NOTE: IP addresses and exact timestamps are illustrative synthetics added 
+ * for dashboard visualization context, as the evaluation harness computes 
+ * anomaly metrics over feature lists directly.
+ */
 const sampleAlerts = [
   {
     "alert_id": "4fa85f64-5717-4562-b3fc-2c963f66afa1",
-    "timestamp": "2026-07-05T14:22:04Z",
+    "timestamp": "2026-07-19T14:26:04Z",
     "src_ip": "192.168.1.105",
     "dst_ip": "10.0.0.42",
-    "anomaly_score": 0.924,
-    "confidence": 0.98,
-    "risk_score": 88,
-    "attack_type_guess": "Mimicry Attack",
-    "mitre_technique": "T1059.001",
+    "anomaly_score": 1.597088,
+    "confidence": 0.0,
+    "risk_score": 100,
+    "attack_type_guess": "Slow Drip Attack",
+    "mitre_technique": "T1046",
     "explanation": [
-      "Unusual DNS request rate: Source exhibited a 400% increase in sub-domain querying over the last 300 seconds, bypassing standard ratelimiting patterns.",
-      "First-seen destination ASN: The destination IP maps to an ASN (AS13335) never before communicated with by this source within the last 90 days."
+      "Splitting aggregate flows into low volume drips failed to bypass baseline autoencoder detection since key volumetric ratios remain highly anomalous.",
+      "Perturbed features (fwd_act_data_pkts, pkt_len_max) trigger high reconstruction error even at divided scales."
     ],
-    "model_source": "gnn_temporal",
-    "is_adversarial_test": true
+    "model_source": "autoencoder-v2-256",
+    "is_adversarial_test": true,
+    "feature_vector": [0.0] * 76 // Placeholder for visualization compatibility
   },
   {
     "alert_id": "4fa85f64-5717-4562-b3fc-2c963f66afa2",
-    "timestamp": "2026-07-05T14:21:58Z",
-    "src_ip": "172.16.254.1",
-    "dst_ip": "10.0.0.88",
-    "anomaly_score": 0.640,
-    "confidence": 0.85,
-    "risk_score": 45,
-    "attack_type_guess": "SQL Injection",
-    "mitre_technique": "T1190",
-    "explanation": [
-      "Request payloads drift heavily from typical syntax distribution, featuring high frequencies of control character anomalies."
-    ],
-    "model_source": "drift_monitor",
-    "is_adversarial_test": false
-  },
-  {
-    "alert_id": "4fa85f64-5717-4562-b3fc-2c963f66afa3",
-    "timestamp": "2026-07-05T14:21:42Z",
-    "src_ip": "203.0.113.44",
-    "dst_ip": "10.12.0.5",
-    "anomaly_score": 0.810,
-    "confidence": 0.90,
-    "risk_score": 72,
-    "attack_type_guess": "Data Exfiltration",
-    "mitre_technique": "T1048",
-    "explanation": [
-      "High volume TCP data transfer to external public IP detected over unusual ports."
-    ],
-    "model_source": "gnn_temporal",
-    "is_adversarial_test": false
-  },
-  {
-    "alert_id": "4fa85f64-5717-4562-b3fc-2c963f66afa4",
-    "timestamp": "2026-07-05T14:20:15Z",
-    "src_ip": "192.168.1.112",
-    "dst_ip": "192.168.1.1",
-    "anomaly_score": 0.312,
-    "confidence": 0.95,
-    "risk_score": 12,
-    "attack_type_guess": "Port Scan",
-    "mitre_technique": "T1046",
-    "explanation": [
-      "Multiple sequential connection requests to closed ports within a brief time window."
-    ],
-    "model_source": "drift_monitor",
-    "is_adversarial_test": false
-  },
-  {
-    "alert_id": "4fa85f64-5717-4562-b3fc-2c963f66afa5",
-    "timestamp": "2026-07-05T14:19:00Z",
-    "src_ip": "10.0.0.15",
-    "dst_ip": "10.0.0.4",
-    "anomaly_score": 0.942,
-    "confidence": 0.99,
-    "risk_score": 94,
+    "timestamp": "2026-07-19T14:25:34Z",
+    "src_ip": "192.168.1.105",
+    "dst_ip": "10.0.0.42",
+    "anomaly_score": 0.977425,
+    "confidence": 0.022575,
+    "risk_score": 97,
     "attack_type_guess": "Mimicry Attack",
     "mitre_technique": "T1059.001",
     "explanation": [
-      "Evasion patterns matching known model vulnerabilities detected."
+      "Linear interpolation toward benign profile in step 10 remains flagged as anomalous.",
+      "High-impact packet length distributions have not yet converged closely enough to benign distribution thresholds."
     ],
-    "model_source": "gnn_temporal",
-    "is_adversarial_test": true
+    "model_source": "autoencoder-v2-256",
+    "is_adversarial_test": true,
+    "feature_vector": [0.0] * 76
+  },
+  {
+    "alert_id": "4fa85f64-5717-4562-b3fc-2c963f66afa3",
+    "timestamp": "2026-07-19T14:22:04Z",
+    "src_ip": "192.168.1.105",
+    "dst_ip": "10.0.0.42",
+    "anomaly_score": 0.490205,
+    "confidence": 0.509795,
+    "risk_score": 49,
+    "attack_type_guess": "Mimicry Attack",
+    "mitre_technique": "T1059.001",
+    "explanation": [
+      "Linear interpolation at step 15 successfully evades detection.",
+      "Reconstruction error of high-impact features falls below 0.5 threshold as vector moves closer to target benign shape."
+    ],
+    "model_source": "autoencoder-v2-256",
+    "is_adversarial_test": true,
+    "feature_vector": [0.0] * 76
+  },
+  {
+    "alert_id": "4fa85f64-5717-4562-b3fc-2c963f66afa4",
+    "timestamp": "2026-07-19T14:21:58Z",
+    "src_ip": "172.16.254.1",
+    "dst_ip": "10.0.0.88",
+    "anomaly_score": 0.977425,
+    "confidence": 0.022575,
+    "risk_score": 97,
+    "attack_type_guess": "Feature Padding Attack",
+    "mitre_technique": "T1059.001",
+    "explanation": [
+      "Direct perturbation of highly sensitive packet header statistics triggers high reconstruction error.",
+      "Interpolating only top 10 different features at step 10 is still flagged as out-of-distribution."
+    ],
+    "model_source": "autoencoder-v2-256",
+    "is_adversarial_test": true,
+    "feature_vector": [0.0] * 76
+  },
+  {
+    "alert_id": "4fa85f64-5717-4562-b3fc-2c963f66afa5",
+    "timestamp": "2026-07-19T14:21:42Z",
+    "src_ip": "203.0.113.44",
+    "dst_ip": "10.12.0.5",
+    "anomaly_score": 0.490205,
+    "confidence": 0.509795,
+    "risk_score": 49,
+    "attack_type_guess": "Feature Padding Attack",
+    "mitre_technique": "T1059.001",
+    "explanation": [
+      "Feature padding evasion at step 15 successfully reduces reconstruction error below 0.5 detection threshold.",
+      "Selective blending of top different features effectively hides anomalous packets."
+    ],
+    "model_source": "autoencoder-v2-256",
+    "is_adversarial_test": true,
+    "feature_vector": [0.0] * 76
   }
 ];

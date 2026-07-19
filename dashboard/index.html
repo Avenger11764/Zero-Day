@@ -280,21 +280,21 @@
                                 <h4 class="text-body-lg font-bold text-primary">Mimicry Evaluation</h4>
                                 <p class="text-xs text-on-surface-variant mt-sm">Inject traffic crafted to match typical packet length distribution.</p>
                             </div>
-                            <button class="mt-lg w-full bg-primary-container text-on-primary-container font-bold py-sm px-sm text-label-caps text-xs hover:brightness-110 active:scale-95" onclick="triggerNotification('Mimicry test scheduled!', 'success')">Deploy Simulation</button>
+                            <button class="mt-lg w-full bg-primary-container text-on-primary-container font-bold py-sm px-sm text-label-caps text-xs hover:brightness-110 active:scale-95" onclick="deployHarnessSimulation('mimicry_attack')">Deploy Simulation</button>
                         </div>
                         <div class="p-md bg-surface-container-high border border-outline-variant flex flex-col justify-between">
                             <div>
                                 <h4 class="text-body-lg font-bold text-primary">Slow-Drip Portscan</h4>
                                 <p class="text-xs text-on-surface-variant mt-sm">Generate low frequency connections designed to slip past drift sensors.</p>
                             </div>
-                            <button class="mt-lg w-full bg-primary-container text-on-primary-container font-bold py-sm px-sm text-label-caps text-xs hover:brightness-110 active:scale-95" onclick="triggerNotification('Slow-Drip evaluation started.', 'info')">Deploy Simulation</button>
+                            <button class="mt-lg w-full bg-primary-container text-on-primary-container font-bold py-sm px-sm text-label-caps text-xs hover:brightness-110 active:scale-95" onclick="deployHarnessSimulation('slow_drip_attack')">Deploy Simulation</button>
                         </div>
                         <div class="p-md bg-surface-container-high border border-outline-variant flex flex-col justify-between">
                             <div>
                                 <h4 class="text-body-lg font-bold text-primary">Feature Padding</h4>
                                 <p class="text-xs text-on-surface-variant mt-sm">Append junk bytes to request packets to evade threshold indicators.</p>
                             </div>
-                            <button class="mt-lg w-full bg-primary-container text-on-primary-container font-bold py-sm px-sm text-label-caps text-xs hover:brightness-110 active:scale-95" onclick="triggerNotification('Feature Padding script active.', 'info')">Deploy Simulation</button>
+                            <button class="mt-lg w-full bg-primary-container text-on-primary-container font-bold py-sm px-sm text-label-caps text-xs hover:brightness-110 active:scale-95" onclick="deployHarnessSimulation('feature_padding_attack')">Deploy Simulation</button>
                         </div>
                     </div>
                 </div>

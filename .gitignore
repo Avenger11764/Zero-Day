@@ -4,3 +4,5 @@
 /venv/
 .vscode/
 README.md
+__pycache__/
+*.pyc
