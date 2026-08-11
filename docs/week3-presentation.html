@@ -1,0 +1,578 @@
+<title>Pillar 1 · Detection Modeling — Week 3</title>
+<style>
+  :root {
+    --ground:    #FBFCFD;
+    --surface:   #F1F4F7;
+    --surface-2: #E7ECF1;
+    --ink:       #10161D;
+    --ink-soft:  #3D4A57;
+    --muted:     #6B7A88;
+    --rule:      #D3DBE3;
+    --relational:#0E8F78;
+    --perflow:   #8593A1;
+    --alert:     #B0700F;
+    --ok:        #0E8F78;
+    --bad:       #B33A2B;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:    #0D1117;
+      --surface:   #151B23;
+      --surface-2: #1D242E;
+      --ink:       #E4EBF2;
+      --ink-soft:  #B6C2CE;
+      --muted:     #7E8C9A;
+      --rule:      #262E38;
+      --relational:#45C0A8;
+      --perflow:   #6B7A88;
+      --alert:     #E39A3C;
+      --ok:        #45C0A8;
+      --bad:       #E06B5A;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:    #0D1117;
+    --surface:   #151B23;
+    --surface-2: #1D242E;
+    --ink:       #E4EBF2;
+    --ink-soft:  #B6C2CE;
+    --muted:     #7E8C9A;
+    --rule:      #262E38;
+    --relational:#45C0A8;
+    --perflow:   #6B7A88;
+    --alert:     #E39A3C;
+    --ok:        #45C0A8;
+    --bad:       #E06B5A;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: system-ui, "Segoe UI", -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .mono {
+    font-family: Consolas, "SF Mono", ui-monospace, Menlo, Monaco, monospace;
+  }
+
+  /* ---- slide frame ---- */
+  .slide {
+    min-height: 100vh;
+    scroll-snap-align: start;
+    display: grid;
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    gap: 0 2rem;
+    padding: 4.5rem 3rem 4rem 1.5rem;
+    border-bottom: 1px solid var(--rule);
+    align-content: start;
+  }
+  @media (max-width: 860px) {
+    .slide { grid-template-columns: 1fr; padding: 3rem 1.25rem; gap: 1.5rem; }
+    .rail { flex-direction: row; align-items: baseline; gap: .75rem; }
+  }
+
+  .rail {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+    position: sticky;
+    top: 4.5rem;
+    align-self: start;
+  }
+  .rail .num {
+    font-family: Consolas, "SF Mono", ui-monospace, Menlo, monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.05em;
+    color: var(--relational);
+    font-variant-numeric: tabular-nums;
+  }
+  .rail .sec {
+    font-family: Consolas, "SF Mono", ui-monospace, Menlo, monospace;
+    font-size: .6rem;
+    text-transform: uppercase;
+    letter-spacing: .16em;
+    color: var(--muted);
+    writing-mode: vertical-rl;
+  }
+  @media (max-width: 860px) {
+    .rail .sec { writing-mode: horizontal-tb; }
+    .rail { position: static; }
+  }
+
+  .body { max-width: 62rem; }
+
+  h1, h2 {
+    font-family: Consolas, "SF Mono", ui-monospace, Menlo, Monaco, monospace;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+    margin: 0 0 1rem;
+    font-weight: 700;
+  }
+  h1 { font-size: clamp(2.2rem, 5.5vw, 3.9rem); line-height: 1.02; }
+  h2 { font-size: clamp(1.5rem, 3.2vw, 2.3rem); line-height: 1.1; }
+
+  .eyebrow {
+    font-family: Consolas, "SF Mono", ui-monospace, Menlo, monospace;
+    font-size: .68rem;
+    text-transform: uppercase;
+    letter-spacing: .2em;
+    color: var(--muted);
+    margin: 0 0 1rem;
+  }
+
+  p { margin: 0 0 1rem; max-width: 60ch; color: var(--ink-soft); }
+  p.lead { font-size: 1.15rem; color: var(--ink); max-width: 54ch; }
+  strong { color: var(--ink); font-weight: 650; }
+
+  .stack { display: flex; flex-direction: column; gap: 1.5rem; }
+  .row   { display: flex; flex-wrap: wrap; gap: 1rem; }
+
+  /* ---- data ---- */
+  .scroller { overflow-x: auto; border: 1px solid var(--rule); border-radius: 3px; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-family: Consolas, "SF Mono", ui-monospace, Menlo, monospace;
+    font-size: .82rem;
+    font-variant-numeric: tabular-nums;
+    min-width: 34rem;
+  }
+  th, td { padding: .55rem .8rem; text-align: right; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  thead th {
+    background: var(--surface);
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: .64rem;
+    letter-spacing: .1em;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.total td { background: var(--surface); font-weight: 700; color: var(--ink); }
+  td.good { color: var(--ok); font-weight: 650; }
+  td.warn { color: var(--alert); font-weight: 650; }
+  td.bad  { color: var(--bad); font-weight: 650; }
+
+  /* ---- terminal block ---- */
+  pre {
+    margin: 0;
+    padding: 1rem 1.1rem;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-left: 2px solid var(--relational);
+    border-radius: 3px;
+    overflow-x: auto;
+    font-family: Consolas, "SF Mono", ui-monospace, Menlo, monospace;
+    font-size: .8rem;
+    line-height: 1.65;
+    color: var(--ink-soft);
+  }
+  pre b { color: var(--relational); font-weight: 650; }
+  pre i { color: var(--alert); font-style: normal; font-weight: 650; }
+  pre s { color: var(--perflow); text-decoration: none; }
+
+  /* ---- cards ---- */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 1.1rem 1.2rem;
+    flex: 1 1 15rem;
+  }
+  .card .k {
+    font-family: Consolas, "SF Mono", ui-monospace, Menlo, monospace;
+    font-size: .64rem; text-transform: uppercase; letter-spacing: .14em;
+    color: var(--muted); margin-bottom: .45rem;
+  }
+  .card .v {
+    font-family: Consolas, "SF Mono", ui-monospace, Menlo, monospace;
+    font-size: 1.9rem; font-weight: 700; letter-spacing: -0.04em; line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .card .s { font-size: .78rem; color: var(--muted); margin-top: .45rem; }
+  .card.rel .v { color: var(--relational); }
+  .card.pf  .v { color: var(--perflow); }
+  .card.al  .v { color: var(--alert); }
+
+  /* two-view comparison — encodes the thesis */
+  .versus { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 700px) { .versus { grid-template-columns: 1fr; } }
+  .view { border: 1px solid var(--rule); border-radius: 3px; padding: 1.1rem 1.2rem; background: var(--surface); }
+  .view.a { border-top: 2px solid var(--perflow); }
+  .view.b { border-top: 2px solid var(--relational); }
+  .view h3 {
+    font-family: Consolas, "SF Mono", ui-monospace, Menlo, monospace;
+    font-size: .82rem; margin: 0 0 .6rem; letter-spacing: .02em;
+  }
+  .view.a h3 { color: var(--perflow); }
+  .view.b h3 { color: var(--relational); }
+  .view p { font-size: .88rem; margin-bottom: 0; }
+
+  ul { margin: 0 0 1rem; padding-left: 1.1rem; color: var(--ink-soft); max-width: 60ch; }
+  li { margin-bottom: .45rem; }
+  li::marker { color: var(--muted); }
+
+  .tag {
+    display: inline-block;
+    font-family: Consolas, "SF Mono", ui-monospace, Menlo, monospace;
+    font-size: .66rem; text-transform: uppercase; letter-spacing: .1em;
+    padding: .18rem .5rem; border-radius: 2px; border: 1px solid currentColor;
+  }
+  .tag.ok  { color: var(--ok); }
+  .tag.no  { color: var(--bad); }
+  .tag.wip { color: var(--alert); }
+
+  .note {
+    border-left: 2px solid var(--alert);
+    padding: .3rem 0 .3rem 1rem;
+    color: var(--ink-soft);
+    font-size: .92rem;
+    max-width: 58ch;
+  }
+
+  /* progress + nav */
+  .progress {
+    position: fixed; top: 0; left: 0; height: 2px; width: 0%;
+    background: var(--relational); z-index: 50; transition: width .12s linear;
+  }
+  .hint {
+    position: fixed; bottom: 1rem; right: 1.25rem; z-index: 50;
+    font-family: Consolas, "SF Mono", ui-monospace, Menlo, monospace;
+    font-size: .64rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); background: var(--ground);
+    border: 1px solid var(--rule); border-radius: 2px; padding: .3rem .6rem;
+  }
+  @media (max-width: 860px) { .hint { display: none; } }
+
+  .title-slide { align-content: center; min-height: 100vh; }
+  .meta {
+    font-family: Consolas, "SF Mono", ui-monospace, Menlo, monospace;
+    font-size: .82rem; color: var(--muted); margin-top: 2rem;
+    display: flex; flex-wrap: wrap; gap: .5rem 1.5rem;
+  }
+  .meta span { white-space: nowrap; }
+  .rule { height: 1px; background: var(--rule); border: 0; margin: .5rem 0; }
+</style>
+
+<div class="progress" id="prog"></div>
+<div class="hint">↓ / space to advance</div>
+
+<!-- ============================================ -->
+<section class="slide title-slide">
+  <div class="rail"><span class="num">00</span></div>
+  <div class="body">
+    <p class="eyebrow">Zero-Day Detection FYP · Week 3 Review</p>
+    <h1>Per-flow features<br>destroy the evidence.<br>Structure recovers it.</h1>
+    <p class="lead">Completing Pillar&nbsp;1's relational detector — graph construction,
+      a graph-temporal autoencoder, and the controlled ablation that tests whether
+      the complex model actually earns its place.</p>
+    <div class="meta">
+      <span><strong>Deep</strong> — Person B, Detection Modeling</span>
+      <span>M5a · M5b · M5c</span>
+      <span>CICIDS2017, held-out families</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<section class="slide">
+  <div class="rail"><span class="num">01</span><span class="sec">The gap</span></div>
+  <div class="body stack">
+    <div>
+      <h2>A detector that only sees one conversation at a time</h2>
+      <p>The baseline autoencoder scores each network flow independently: a 76-number
+        vector describing a single conversation — packet counts, durations, flag counts.
+        It learned what normal looks like and flags what doesn't fit. It works.</p>
+      <p>But reducing traffic to independent per-flow rows throws away three things:
+        <strong>who sent it</strong>, <strong>who received it</strong>, and
+        <strong>what else those hosts were doing at the same time</strong>.</p>
+    </div>
+
+    <div class="versus">
+      <div class="view a">
+        <h3>What M5a can see</h3>
+        <p>A 4&nbsp;GB transfer. Impossible TCP flag combinations. A connection to a port
+          that appears nowhere in training. All of it lives <em>inside</em> the flow's own
+          numbers.</p>
+      </div>
+      <div class="view b">
+        <h3>What it cannot</h3>
+        <p>One host opening short, well-formed connections to 200 machines. Every single
+          flow is ordinary. The attack exists only in the <em>relationship between</em>
+          flows.</p>
+      </div>
+    </div>
+
+    <p class="note">This is not a training problem. Give M5a a perfect model and infinite
+      data and it still misses — the evidence was destroyed at feature-extraction time.</p>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<section class="slide">
+  <div class="rail"><span class="num">02</span><span class="sec">The insight</span></div>
+  <div class="body stack">
+    <div>
+      <h2>“One host contacted 200 peers” is just out-degree</h2>
+      <p>That sentence cannot be written into a single 76-dimensional row, because the row
+        describes one conversation. But it is trivially readable as a property of a
+        <strong>node in a graph</strong>.</p>
+      <p>Change the data structure and a whole class of attack stops being a subtle
+        statistical anomaly and becomes a number you read straight off the node.</p>
+    </div>
+    <pre><span>flows                          graph</span>
+<s>┌──────────────────┐</s>           <b>192.168.1.66</b>
+<s>│ flow  1 ... 76d  │</s>          ╱ │ │ │ ╲        out_degree = <i>200</i>
+<s>│ flow  2 ... 76d  │</s>    ●   ●   ●   ●   ●   ●   median   = <b>2</b>
+<s>│ ...              │</s>
+<s>│ flow 200 ... 76d │</s>   every flow individually normal
+<s>└──────────────────┘</s>   the <i>fan-out</i> is the attack</pre>
+    <p>That reframing is the entire justification for the second detector — not that
+      graph neural networks are fashionable.</p>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<section class="slide">
+  <div class="rail"><span class="num">03</span><span class="sec">Blocker</span></div>
+  <div class="body stack">
+    <div>
+      <h2>None of our datasets could form a graph</h2>
+      <p>Before any modelling, the data had to be checked. All three failed, each
+        differently — and the failures were silent.</p>
+    </div>
+    <div class="scroller">
+      <table>
+        <thead><tr><th>Dataset</th><th>Failure mode</th><th>Verdict</th></tr></thead>
+        <tbody>
+          <tr><td>CICIDS2017 <span class="mono">MachineLearningCVE</span></td>
+              <td>79 columns, <strong>no IP columns at all</strong></td><td class="bad">unusable</td></tr>
+          <tr><td><span class="mono">dataset_10k_normal.csv</span></td>
+              <td>508 clients, all touching the identical 2 services</td><td class="bad">collapses</td></tr>
+          <tr><td><span class="mono">live_capture.csv</span></td>
+              <td>12,503 unique services across 12,504 flows</td><td class="bad">degenerate</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The second one matters most, and it is subtle. A GNN builds each node's
+      representation by aggregating its neighbours. If every client has the same
+      neighbour set, every embedding collapses to the same vector — the model would have
+      trained happily and learned nothing.</p>
+    <p class="note">The existing temporal model's per-host grouping had been silently
+      dead for the same reason: its <span class="mono">'Source IP' in df.columns</span>
+      guard was always false, so it chunked flows in file order instead. Fixed, and
+      <span class="mono">graph_health()</span> now detects collapse before a wasted run.</p>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<section class="slide">
+  <div class="rail"><span class="num">04</span><span class="sec">Built</span></div>
+  <div class="body stack">
+    <div>
+      <h2>Graph construction, and the decisions behind it</h2>
+      <p>Flows become one host-communication graph per time window.</p>
+    </div>
+    <div class="row">
+      <div class="card rel"><div class="k">Nodes</div><div class="v">hosts</div>
+        <div class="s">8 features. Out-degree literally counts scan targets.</div></div>
+      <div class="card rel"><div class="k">Edges</div><div class="v">directed</div>
+        <div class="s">One-to-many (scan) and many-to-one (DDoS) must not collapse together.</div></div>
+      <div class="card rel"><div class="k">Windows</div><div class="v">60s</div>
+        <div class="s">Time-based, not fixed-count — “200 peers in a minute” is a rate.</div></div>
+    </div>
+    <ul>
+      <li><strong>Autoencoder, not classifier.</strong> A classifier only recognises
+        families present in its labels — which defeats the entire zero-day premise. It
+        would also break the ablation: M5a scores a reconstruction distance, so scoring
+        M5b as a probability leaves no shared threshold and no comparable ROC.</li>
+      <li><strong>SAGEConv over GCNConv.</strong> GCN's symmetric normalisation washes
+        out exactly the degree signal we are trying to detect.</li>
+      <li><strong>Edge-level alerting.</strong> The frozen <span class="mono">ScoredAlert</span>
+        schema requires both source and destination, so an edge maps onto an alert
+        cleanly; a node does not.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<section class="slide">
+  <div class="rail"><span class="num">05</span><span class="sec">Fusion</span></div>
+  <div class="body stack">
+    <div>
+      <h2>Two halves that had never been connected</h2>
+      <p>The specification defines this detector as <em>graph structure + sequence</em>.
+        The project had both halves as separate files that never spoke to each other.
+        Two disconnected models is not a graph-temporal model.</p>
+    </div>
+    <pre>window₁ ──▶ graph ──▶ <b>GNN</b> ──▶ embedding ┐
+window₂ ──▶ graph ──▶ <b>GNN</b> ──▶ embedding ├──▶ <b>LSTM</b> ──▶ reconstruct
+window₃ ──▶ graph ──▶ <b>GNN</b> ──▶ embedding ┤          features
+window₄ ──▶ graph ──▶ <b>GNN</b> ──▶ embedding ┘              │
+                                                     reconstruction
+   structure, per window        change over time    error = <i>score</i></pre>
+    <p>A single window cannot distinguish <em>a backup server that always fans out to 200
+      machines at 02:00</em> from <em>a laptop that never has and just started</em>. Both
+      are the same graph. Only the sequence separates a stable pattern from a change —
+      which is precisely the slow, gradual attacker the red-team harness simulates.</p>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<section class="slide">
+  <div class="rail"><span class="num">06</span><span class="sec">Results</span></div>
+  <div class="body stack">
+    <div>
+      <h2>Seven attack families, none seen in training</h2>
+      <p>Trained once on Monday — 100% benign — then evaluated against every attack day.
+        Not an 80/20 split, which would only prove the model memorised samples.</p>
+    </div>
+    <div class="scroller">
+      <table>
+        <thead><tr><th>Attack family</th><th>ROC-AUC</th><th>P@100</th><th>Best rank</th><th>Top feature</th><th>Sep</th></tr></thead>
+        <tbody>
+          <tr><td>Patator (FTP/SSH)</td><td class="good">0.9913</td><td class="bad">0.000</td><td>185 / 34,066</td><td class="mono">out_flows</td><td>30×</td></tr>
+          <tr><td>DoS / Heartbleed</td><td class="good">0.9536</td><td>0.280</td><td>2 / 17,022</td><td class="mono">out_flows</td><td>321×</td></tr>
+          <tr><td>WebAttacks</td><td class="good">0.9515</td><td class="bad">0.000</td><td>433 / 26,443</td><td class="mono">bytes_sent</td><td>18×</td></tr>
+          <tr><td>DDoS</td><td class="good">0.9436</td><td>0.320</td><td>1 / 4,741</td><td class="mono">bytes_sent</td><td>557×</td></tr>
+          <tr><td>Botnet</td><td class="good">0.9287</td><td>0.440</td><td>8 / 24,281</td><td class="mono">bytes_sent</td><td>73×</td></tr>
+          <tr><td>Infiltration</td><td class="good">0.9282</td><td>0.200</td><td>4 / 19,718</td><td class="mono">unique_dst_ports</td><td>72×</td></tr>
+          <tr><td>PortScan</td><td class="good">0.9081</td><td>0.040</td><td>1 / 14,595</td><td class="mono">out_flows</td><td>585×</td></tr>
+          <tr class="total"><td>mean</td><td>0.9436</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">The P@100 column is deliberately shown next to ROC-AUC. Two families
+      score above 0.95 AUC while returning <strong>zero</strong> true positives in the
+      top 100 alerts. That contradiction is slide 08.</p>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<section class="slide">
+  <div class="rail"><span class="num">07</span><span class="sec">Ablation</span></div>
+  <div class="body stack">
+    <div>
+      <h2>Does the complex model actually earn its place?</h2>
+      <p>A controlled comparison changes exactly one variable: the data structure. Same
+        flows, same benign-only training, same reconstruction-error scoring.</p>
+      <p>The test scan is built from <strong>real benign flows with every feature value
+        left untouched</strong> — only the source and destination are re-attributed. So
+        the baseline <em>must</em> score them benign. That is the point, not a rigged test.</p>
+    </div>
+    <div class="row">
+      <div class="card pf">
+        <div class="k">M5a · per-flow</div>
+        <div class="v">MISSED</div>
+        <div class="s">Flags the scan at 2.5% versus a 1.0% false-positive floor on benign
+          traffic — a +1.5pp lift, i.e. noise.</div>
+      </div>
+      <div class="card rel">
+        <div class="k">M5b · relational</div>
+        <div class="v">RANK 1</div>
+        <div class="s">Attacker is the single most anomalous host of 710, scoring 532×
+          the median.</div>
+      </div>
+    </div>
+    <p class="note">The verdict compares against the false-positive floor, not zero. At a
+      99th-percentile threshold ~1% of benign traffic flags by construction — counting
+      that as detection would be counting the model's own noise.</p>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<section class="slide">
+  <div class="rail"><span class="num">08</span><span class="sec">Limits</span></div>
+  <div class="body stack">
+    <div>
+      <h2>Where this is weak — said before you ask</h2>
+    </div>
+    <ul>
+      <li><strong>High AUC does not mean good alerts.</strong> Patator scores 0.9913 AUC
+        with <strong>zero</strong> true positives in the top 100, because 184 benign
+        host-windows outrank the first attacker. AUC measures average ranking across the
+        whole set; an analyst only ever sees the top of the queue. P@100 is the honest
+        operational metric, and it is zero on two of seven families.</li>
+      <li><strong>The port-scan win is aggregation, not topology.</strong> CICIDS2017's
+        PortScan is <em>vertical</em> — one attacker, one victim, 1000 ports — so
+        out-degree is 1 and does not fire (0.72× separation). What separates the classes
+        is <span class="mono">unique_dst_ports</span> at 199×. The defensible claim is
+        “per-flow features destroyed the evidence, per-host structure recovered it,” not
+        “the graph topology caught it.” DDoS is the family that genuinely exercises
+        topology, and out-degree does fire there.</li>
+      <li><strong>The fused model needs history.</strong> A host must appear in five
+        consecutive windows to produce a sequence, so single-burst attackers are
+        invisible to it — the graph-only model catches those instead. The two are
+        genuinely complementary, which is the strongest argument for the ensembler.</li>
+      <li><strong>Evaluation is capped at 150k rows per file</strong> pending a longer
+        run on larger hardware.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<section class="slide">
+  <div class="rail"><span class="num">09</span><span class="sec">Status</span></div>
+  <div class="body stack">
+    <div>
+      <h2>Where Pillar 1 stands</h2>
+    </div>
+    <div class="scroller">
+      <table>
+        <thead><tr><th>Module</th><th>Component</th><th>State</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">M5a</td><td>Baseline autoencoder</td><td><span class="tag ok">live</span></td></tr>
+          <tr><td class="mono">M5b</td><td>Graph construction</td><td><span class="tag ok">built</span></td></tr>
+          <tr><td class="mono">M5b</td><td>Graph autoencoder</td><td><span class="tag ok">built</span></td></tr>
+          <tr><td class="mono">M5b</td><td>Graph + temporal fusion</td><td><span class="tag ok">built</span></td></tr>
+          <tr><td class="mono">M5c</td><td>Ensembler + comparison table</td><td><span class="tag wip">in progress</span></td></tr>
+          <tr><td class="mono">M6</td><td>Drift monitor on new scores</td><td><span class="tag no">next</span></td></tr>
+          <tr><td class="mono">M12</td><td>Red-team harness vs the graph model</td><td><span class="tag no">next</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Next: wire the fused score through the alert path so the dashboard and the
+      red-team harness both exercise it, then carry the relational approach across to the
+      host-syscall pillar in weeks 4–6.</p>
+  </div>
+</section>
+
+<script>
+  const prog = document.getElementById('prog');
+  const update = () => {
+    const h = document.documentElement;
+    const max = h.scrollHeight - h.clientHeight;
+    prog.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+  };
+  addEventListener('scroll', update, { passive: true });
+  addEventListener('resize', update);
+  update();
+
+  const slides = [...document.querySelectorAll('.slide')];
+  const go = (dir) => {
+    const y = scrollY + 4;
+    let i = slides.findIndex(s => s.offsetTop > y);
+    if (dir < 0) {
+      i = slides.map(s => s.offsetTop).filter(t => t < y - 8).length - 1;
+    }
+    const t = slides[Math.max(0, Math.min(slides.length - 1, i))];
+    if (t) t.scrollIntoView({ behavior: 'smooth' });
+  };
+  addEventListener('keydown', (e) => {
+    if (['ArrowDown', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); go(1); }
+    if (['ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); go(-1); }
+  });
+</script>
