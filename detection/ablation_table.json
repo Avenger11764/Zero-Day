@@ -1,0 +1,205 @@
+[
+  {
+    "family": "PortScan",
+    "host_windows": 14595,
+    "malicious": 17,
+    "M5a": {
+      "roc_auc": 0.5489,
+      "precision_at_100": 0.0,
+      "recall_at_100": 0.0,
+      "best_rank": 1551
+    },
+    "M5b": {
+      "roc_auc": 0.935,
+      "precision_at_100": 0.04,
+      "recall_at_100": 0.235,
+      "best_rank": 1
+    },
+    "fused_max": {
+      "roc_auc": 0.6709,
+      "precision_at_100": 0.01,
+      "recall_at_100": 0.059,
+      "best_rank": 31
+    },
+    "fused_mean": {
+      "roc_auc": 0.9355,
+      "precision_at_100": 0.04,
+      "recall_at_100": 0.235,
+      "best_rank": 3
+    }
+  },
+  {
+    "family": "DDoS",
+    "host_windows": 4741,
+    "malicious": 58,
+    "M5a": {
+      "roc_auc": 0.9845,
+      "precision_at_100": 0.26,
+      "recall_at_100": 0.448,
+      "best_rank": 1
+    },
+    "M5b": {
+      "roc_auc": 0.9718,
+      "precision_at_100": 0.36,
+      "recall_at_100": 0.621,
+      "best_rank": 1
+    },
+    "fused_max": {
+      "roc_auc": 0.9845,
+      "precision_at_100": 0.26,
+      "recall_at_100": 0.448,
+      "best_rank": 1
+    },
+    "fused_mean": {
+      "roc_auc": 0.9755,
+      "precision_at_100": 0.37,
+      "recall_at_100": 0.638,
+      "best_rank": 1
+    }
+  },
+  {
+    "family": "Botnet",
+    "host_windows": 24281,
+    "malicious": 1077,
+    "M5a": {
+      "roc_auc": 0.9625,
+      "precision_at_100": 0.56,
+      "recall_at_100": 0.052,
+      "best_rank": 3
+    },
+    "M5b": {
+      "roc_auc": 0.9128,
+      "precision_at_100": 0.56,
+      "recall_at_100": 0.052,
+      "best_rank": 14
+    },
+    "fused_max": {
+      "roc_auc": 0.9607,
+      "precision_at_100": 0.57,
+      "recall_at_100": 0.053,
+      "best_rank": 1
+    },
+    "fused_mean": {
+      "roc_auc": 0.9241,
+      "precision_at_100": 0.64,
+      "recall_at_100": 0.059,
+      "best_rank": 5
+    }
+  },
+  {
+    "family": "Infiltration",
+    "host_windows": 19718,
+    "malicious": 124,
+    "M5a": {
+      "roc_auc": 0.9772,
+      "precision_at_100": 0.1,
+      "recall_at_100": 0.081,
+      "best_rank": 12
+    },
+    "M5b": {
+      "roc_auc": 0.9059,
+      "precision_at_100": 0.2,
+      "recall_at_100": 0.161,
+      "best_rank": 1
+    },
+    "fused_max": {
+      "roc_auc": 0.9777,
+      "precision_at_100": 0.15,
+      "recall_at_100": 0.121,
+      "best_rank": 8
+    },
+    "fused_mean": {
+      "roc_auc": 0.9148,
+      "precision_at_100": 0.22,
+      "recall_at_100": 0.177,
+      "best_rank": 1
+    }
+  },
+  {
+    "family": "WebAttacks",
+    "host_windows": 26443,
+    "malicious": 71,
+    "M5a": {
+      "roc_auc": 0.415,
+      "precision_at_100": 0.0,
+      "recall_at_100": 0.0,
+      "best_rank": 6834
+    },
+    "M5b": {
+      "roc_auc": 0.9291,
+      "precision_at_100": 0.0,
+      "recall_at_100": 0.0,
+      "best_rank": 794
+    },
+    "fused_max": {
+      "roc_auc": 0.4148,
+      "precision_at_100": 0.0,
+      "recall_at_100": 0.0,
+      "best_rank": 6844
+    },
+    "fused_mean": {
+      "roc_auc": 0.9357,
+      "precision_at_100": 0.0,
+      "recall_at_100": 0.0,
+      "best_rank": 749
+    }
+  },
+  {
+    "family": "Patator (FTP/SSH)",
+    "host_windows": 34066,
+    "malicious": 63,
+    "M5a": {
+      "roc_auc": 0.846,
+      "precision_at_100": 0.0,
+      "recall_at_100": 0.0,
+      "best_rank": 5149
+    },
+    "M5b": {
+      "roc_auc": 0.9909,
+      "precision_at_100": 0.0,
+      "recall_at_100": 0.0,
+      "best_rank": 149
+    },
+    "fused_max": {
+      "roc_auc": 0.8888,
+      "precision_at_100": 0.0,
+      "recall_at_100": 0.0,
+      "best_rank": 3675
+    },
+    "fused_mean": {
+      "roc_auc": 0.9331,
+      "precision_at_100": 0.0,
+      "recall_at_100": 0.0,
+      "best_rank": 2174
+    }
+  },
+  {
+    "family": "DoS / Heartbleed",
+    "host_windows": 17022,
+    "malicious": 65,
+    "M5a": {
+      "roc_auc": 0.9634,
+      "precision_at_100": 0.04,
+      "recall_at_100": 0.062,
+      "best_rank": 3
+    },
+    "M5b": {
+      "roc_auc": 0.9523,
+      "precision_at_100": 0.26,
+      "recall_at_100": 0.4,
+      "best_rank": 6
+    },
+    "fused_max": {
+      "roc_auc": 0.9719,
+      "precision_at_100": 0.1,
+      "recall_at_100": 0.154,
+      "best_rank": 11
+    },
+    "fused_mean": {
+      "roc_auc": 0.959,
+      "precision_at_100": 0.26,
+      "recall_at_100": 0.4,
+      "best_rank": 6
+    }
+  }
+]

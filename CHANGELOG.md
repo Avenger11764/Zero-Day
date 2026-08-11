@@ -24,6 +24,70 @@ Template:
 
 ---
 
+## 2026-08-11 — M5c ensembler, alert pipeline, and the ablation result
+**Author:** Deep (Person B — Detection Modeling) · assisted by Claude
+**Commit:** _(see git log)_
+
+### What changed
+
+`ensembler.py` (M5c), `alert_pipeline.py` (integration seam),
+`ablation_table.md` / `.json`, and `docs/week3-presentation.html`.
+
+### The result — read this one carefully, it is not a clean win
+
+Mean ROC-AUC across 7 held-out families:
+
+| | M5a per-flow | **M5b relational** | Fused mean | Fused max |
+| --- | --- | --- | --- | --- |
+| mean ROC-AUC | 0.8139 | **0.9425** | 0.9397 | 0.8385 |
+| range | **0.4150 – 0.9845** | **0.9059 – 0.9909** | | |
+
+Per family:
+
+| Family | M5a | M5b | Fused mean | Fused max | Winner |
+| --- | --- | --- | --- | --- | --- |
+| PortScan | 0.5489 | 0.9350 | 0.9355 | 0.6709 | fused mean |
+| DDoS | 0.9845 | 0.9718 | 0.9755 | 0.9845 | **M5a** |
+| Botnet | 0.9625 | 0.9128 | 0.9241 | 0.9607 | **M5a** |
+| Infiltration | 0.9772 | 0.9059 | 0.9148 | 0.9777 | fused max |
+| WebAttacks | 0.4150 | 0.9291 | 0.9357 | 0.4148 | fused mean |
+| Patator (FTP/SSH) | 0.8460 | 0.9909 | 0.9331 | 0.8888 | **M5b** |
+| DoS / Heartbleed | 0.9634 | 0.9523 | 0.9590 | 0.9719 | fused max |
+
+Three findings, all worth more than "the complex model won":
+
+1. **M5a beats M5b outright on DDoS and Botnet.** Where attack volume is visible
+   inside a single flow, the simple baseline is better. Do not claim otherwise —
+   PDF §20 pre-authorised exactly this outcome.
+2. **M5a is volatile; M5b is consistent.** M5a swings 57 points (0.4150 on
+   WebAttacks — *worse than random* — to 0.9845 on DDoS). M5b never drops below
+   0.9059. The defensible claim is **robustness across unseen families**, not
+   peak performance.
+3. **Fusion by max actively hurts (0.8385, worse than M5b alone).** Taking the
+   max propagates M5a's false positives wholesale. Fusion by mean (0.9397) is
+   fine but does not beat M5b alone either. A negative result, reported.
+
+### Caveats / notes for the team
+
+- **P@100 is 0.000 for every model on WebAttacks and Patator.** Nothing we have
+  works operationally on those two families. AUC hides this completely.
+- Two real bugs fixed in `ensembler.py` while building it:
+  - `dst_port` was being dropped as metadata, but in the CICIDS2017 releases
+    "Destination Port" **is** one of the 76 model features. Verified the 76
+    columns are identical and in the same order across both releases.
+  - Feature columns are now **pinned once from the training file** and reused.
+    Deriving them per-file with `dropna(axis=1)` would silently drop different
+    columns on different attack days and feed the model misaligned features —
+    the scores would have looked plausible and meant nothing.
+- `alert_pipeline.py` is a **new** module rather than an edit to
+  `stub_detector.py`, which Checkpoint-1 depends on. `score_flow()` also has the
+  wrong shape for a graph detector: a graph score is undefined for one flow in
+  isolation. `score_window()` is the correct seam. Sub-scores are additive, so
+  nothing downstream breaks.
+- All numbers still use `--limit 150000` rows per file. Full-file runs pending.
+
+---
+
 ## 2026-08-11 — M5b complete: graph+temporal fusion, and the full family sweep
 **Author:** Deep (Person B — Detection Modeling) · assisted by Claude
 **Commit:** _(see git log)_

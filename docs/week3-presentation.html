@@ -473,23 +473,33 @@ window₄ ──▶ graph ──▶ <b>GNN</b> ──▶ embedding ┘          
         left untouched</strong> — only the source and destination are re-attributed. So
         the baseline <em>must</em> score them benign. That is the point, not a rigged test.</p>
     </div>
-    <div class="row">
-      <div class="card pf">
-        <div class="k">M5a · per-flow</div>
-        <div class="v">MISSED</div>
-        <div class="s">Flags the scan at 2.5% versus a 1.0% false-positive floor on benign
-          traffic — a +1.5pp lift, i.e. noise.</div>
-      </div>
-      <div class="card rel">
-        <div class="k">M5b · relational</div>
-        <div class="v">RANK 1</div>
-        <div class="s">Attacker is the single most anomalous host of 710, scoring 532×
-          the median.</div>
-      </div>
+    <div class="scroller">
+      <table>
+        <thead><tr><th>Family</th><th>M5a per-flow</th><th>M5b relational</th><th>Fused mean</th><th>Fused max</th><th>Winner</th></tr></thead>
+        <tbody>
+          <tr><td>PortScan</td><td class="bad">0.5489</td><td class="good">0.9350</td><td>0.9355</td><td>0.6709</td><td>fused mean</td></tr>
+          <tr><td>DDoS</td><td class="good">0.9845</td><td>0.9718</td><td>0.9755</td><td>0.9845</td><td>M5a</td></tr>
+          <tr><td>Botnet</td><td class="good">0.9625</td><td>0.9128</td><td>0.9241</td><td>0.9607</td><td>M5a</td></tr>
+          <tr><td>Infiltration</td><td class="good">0.9772</td><td>0.9059</td><td>0.9148</td><td>0.9777</td><td>fused max</td></tr>
+          <tr><td>WebAttacks</td><td class="bad">0.4150</td><td class="good">0.9291</td><td>0.9357</td><td>0.4148</td><td>fused mean</td></tr>
+          <tr><td>Patator (FTP/SSH)</td><td class="warn">0.8460</td><td class="good">0.9909</td><td>0.9331</td><td>0.8888</td><td>M5b</td></tr>
+          <tr><td>DoS / Heartbleed</td><td class="good">0.9634</td><td>0.9523</td><td>0.9590</td><td>0.9719</td><td>fused max</td></tr>
+          <tr class="total"><td>mean</td><td>0.8139</td><td>0.9425</td><td>0.9397</td><td>0.8385</td><td>M5b</td></tr>
+        </tbody>
+      </table>
     </div>
-    <p class="note">The verdict compares against the false-positive floor, not zero. At a
-      99th-percentile threshold ~1% of benign traffic flags by construction — counting
-      that as detection would be counting the model's own noise.</p>
+    <div class="row">
+      <div class="card pf"><div class="k">M5a spread</div><div class="v">0.415–0.985</div>
+        <div class="s">Volatile. Below random on WebAttacks, near-perfect on DDoS.</div></div>
+      <div class="card rel"><div class="k">M5b spread</div><div class="v">0.906–0.991</div>
+        <div class="s">Never drops below 0.90 on any unseen family.</div></div>
+      <div class="card al"><div class="k">Fusion by max</div><div class="v">HURTS</div>
+        <div class="s">0.8385 — worse than M5b alone. It propagates M5a's false positives.</div></div>
+    </div>
+    <p class="note">The honest headline is <strong>consistency, not superiority</strong>.
+      M5a wins outright on DDoS and Botnet — where attack volume is visible in a single
+      flow. It is the 57-point swing that makes it unsafe alone, and that is what the
+      relational view fixes.</p>
   </div>
 </section>
 
@@ -538,7 +548,8 @@ window₄ ──▶ graph ──▶ <b>GNN</b> ──▶ embedding ┘          
           <tr><td class="mono">M5b</td><td>Graph construction</td><td><span class="tag ok">built</span></td></tr>
           <tr><td class="mono">M5b</td><td>Graph autoencoder</td><td><span class="tag ok">built</span></td></tr>
           <tr><td class="mono">M5b</td><td>Graph + temporal fusion</td><td><span class="tag ok">built</span></td></tr>
-          <tr><td class="mono">M5c</td><td>Ensembler + comparison table</td><td><span class="tag wip">in progress</span></td></tr>
+          <tr><td class="mono">M5c</td><td>Ensembler + comparison table</td><td><span class="tag ok">built</span></td></tr>
+          <tr><td class="mono">—</td><td>Alert pipeline (both scores → ScoredAlert)</td><td><span class="tag ok">built</span></td></tr>
           <tr><td class="mono">M6</td><td>Drift monitor on new scores</td><td><span class="tag no">next</span></td></tr>
           <tr><td class="mono">M12</td><td>Red-team harness vs the graph model</td><td><span class="tag no">next</span></td></tr>
         </tbody>
