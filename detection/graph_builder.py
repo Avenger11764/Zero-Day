@@ -254,11 +254,15 @@ def _synthetic_flows(n_clients=60, n_servers=8, scan=True, seed=0) -> pd.DataFra
                     "totlen_bwd_pkts": float(rng.integers(100, 9000)),
                 })
     if scan:
-        for i in range(200):  # one attacker sweeping the /24
+        # Spread the sweep across many minutes. A scan confined to one window
+        # would be invisible to any model that needs temporal history, so
+        # bunching it into a single timestamp would make the fused
+        # graph-temporal self-test vacuous rather than passing.
+        for i in range(200):
             rows.append({
                 "src_ip": "192.168.1.66", "dst_ip": f"192.168.1.{i % 254 + 1}",
                 "dst_port": int(rng.choice([22, 445, 3389])),
-                "timestamp": "2017-07-03 09:30:00",
+                "timestamp": f"2017-07-03 09:{i % 60:02d}:00",
                 "flow_duration": 50.0,
                 "totlen_fwd_pkts": 60.0, "totlen_bwd_pkts": 0.0,
             })

@@ -24,6 +24,79 @@ Template:
 
 ---
 
+## 2026-08-11 — M5b complete: graph+temporal fusion, and the full family sweep
+**Author:** Deep (Person B — Detection Modeling) · assisted by Claude
+**Commit:** _(see git log)_
+
+### What changed
+
+| File | Purpose |
+| --- | --- |
+| `gnn_temporal_fused.py` | **the fused graph-temporal model — this is M5b proper** |
+| `run_evaluation_suite.py` | trains once, sweeps every attack family |
+| `evaluation_results.md` / `.json` | the results table |
+
+### Why
+
+The PDF defines M5b as *"graph structure **+ sequence**"*. The project had both
+halves and they did not talk: `gnn_temporal.py` was the LSTM sequence half,
+`gnn_model.py` the graph half. Two disconnected models is not a graph-temporal
+model. This fuses them, trained jointly end-to-end:
+
+1. Window traffic → one host-communication graph per window
+2. GNN encodes each window → structure-aware embedding per host
+3. Per host, the embeddings across T=5 windows form a sequence
+4. An LSTM autoencoder reconstructs that host's original **feature** sequence
+
+Reconstructing features rather than embeddings is deliberate: it keeps error in
+the same interpretable units as M5a and the graph-only model (so the ablation
+stays controlled), and stops the model trivially learning an identity map on its
+own embeddings.
+
+**What fusion buys:** a single window cannot tell "a backup server that always
+fans out to 200 machines at 02:00" from "a laptop that never has and just
+started". Both are the same graph. Only the sequence separates a stable pattern
+from a change — the slow, gradual attacker the red-team harness simulates, and
+precisely where the graph-only model is weakest.
+
+### Results
+
+Held-out family sweep, trained once on Monday (benign only), 182 graphs:
+
+| Attack family | ROC-AUC | P@100 | R@100 | Best rank | Top feature | Sep |
+| --- | --- | --- | --- | --- | --- | --- |
+| Patator (FTP/SSH) | 0.9913 | 0.000 | 0.000 | 185 of 34,066 | `out_flows` | 30x |
+| DoS / Heartbleed | 0.9536 | 0.280 | 0.431 | 2 of 17,022 | `out_flows` | 321x |
+| WebAttacks | 0.9515 | 0.000 | 0.000 | 433 of 26,443 | `bytes_sent` | 18x |
+| DDoS | 0.9436 | 0.320 | 0.552 | 1 of 4,741 | `bytes_sent` | 557x |
+| Botnet | 0.9287 | 0.440 | 0.041 | 8 of 24,281 | `bytes_sent` | 73x |
+| Infiltration | 0.9282 | 0.200 | 0.161 | 4 of 19,718 | `unique_dst_ports` | 72x |
+| PortScan | 0.9081 | 0.040 | 0.235 | 1 of 14,595 | `out_flows` | 585x |
+
+**Mean ROC-AUC across 7 unseen families: 0.9436.**
+
+### Caveats / notes for the team
+
+- **High AUC does not mean good alerts. Say this before an examiner does.**
+  Patator scores AUC 0.9913 but **P@100 = 0.000** — not one true positive in the
+  top 100 alerts, because 184 benign host-windows outrank the first attacker.
+  WebAttacks is the same (0.9515 AUC, 0.000 P@100). AUC measures average
+  ranking across the whole set; a SOC analyst only ever sees the top of the
+  queue. **P@100 is the honest operational metric here, and on two of seven
+  families it is zero.** This is a real weakness, not a presentation detail.
+- The fused model needs a host to appear in **≥5 consecutive windows**. A
+  single-burst attacker produces no sequence and is invisible to it — the
+  graph-only model catches those. The two are genuinely complementary, which is
+  the strongest available argument for building M5c rather than picking one.
+- Synthetic scan traffic in `graph_builder._synthetic_flows()` now spans many
+  minutes rather than one timestamp. Previously the whole scan sat in a single
+  window, so the fused self-test filtered the attacker out and passed
+  vacuously.
+- Numbers above use `--limit 150000` rows per file. Full-file runs are pending
+  a machine with more headroom (RTX 3090).
+
+---
+
 ## 2026-08-11 — Week 3: graph construction + GNN autoencoder (M5b) + ablation
 **Author:** Deep (Person B — Detection Modeling) · assisted by Claude
 **Commit:** _(see git log)_

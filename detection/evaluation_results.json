@@ -1,0 +1,126 @@
+[
+  {
+    "family": "PortScan",
+    "file": "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv",
+    "host_windows": 14595,
+    "malicious": 17,
+    "roc_auc": 0.9081,
+    "precision_at_100": 0.04,
+    "recall_at_100": 0.235,
+    "best_rank": 1,
+    "mean_score_malicious": 0.02354082465171814,
+    "mean_score_benign": 0.0001568030857015401,
+    "top_feature": "out_flows",
+    "top_feature_separation": 584.9,
+    "attackers": [
+      "172.16.0.1"
+    ]
+  },
+  {
+    "family": "DDoS",
+    "file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv",
+    "host_windows": 4741,
+    "malicious": 58,
+    "roc_auc": 0.9436,
+    "precision_at_100": 0.32,
+    "recall_at_100": 0.552,
+    "best_rank": 1,
+    "mean_score_malicious": 0.08250845968723297,
+    "mean_score_benign": 0.00040802854346111417,
+    "top_feature": "bytes_sent",
+    "top_feature_separation": 556.6,
+    "attackers": [
+      "172.16.0.1",
+      "192.168.10.50"
+    ]
+  },
+  {
+    "family": "Botnet",
+    "file": "Friday-WorkingHours-Morning.pcap_ISCX.csv",
+    "host_windows": 24281,
+    "malicious": 1077,
+    "roc_auc": 0.9287,
+    "precision_at_100": 0.44,
+    "recall_at_100": 0.041,
+    "best_rank": 8,
+    "mean_score_malicious": 0.0017832675948739052,
+    "mean_score_benign": 0.00011904753046110272,
+    "top_feature": "bytes_sent",
+    "top_feature_separation": 72.6,
+    "attackers": [
+      "192.168.10.12",
+      "192.168.10.14",
+      "192.168.10.15",
+      "192.168.10.17",
+      "192.168.10.5"
+    ]
+  },
+  {
+    "family": "Infiltration",
+    "file": "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv",
+    "host_windows": 19718,
+    "malicious": 124,
+    "roc_auc": 0.9282,
+    "precision_at_100": 0.2,
+    "recall_at_100": 0.161,
+    "best_rank": 4,
+    "mean_score_malicious": 0.011001107282936573,
+    "mean_score_benign": 0.0001904017844935879,
+    "top_feature": "unique_dst_ports",
+    "top_feature_separation": 72.3,
+    "attackers": [
+      "192.168.10.8"
+    ]
+  },
+  {
+    "family": "WebAttacks",
+    "file": "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv",
+    "host_windows": 26443,
+    "malicious": 71,
+    "roc_auc": 0.9515,
+    "precision_at_100": 0.0,
+    "recall_at_100": 0.0,
+    "best_rank": 433,
+    "mean_score_malicious": 0.0005411882884800434,
+    "mean_score_benign": 0.0001650941849220544,
+    "top_feature": "bytes_sent",
+    "top_feature_separation": 18.2,
+    "attackers": [
+      "172.16.0.1"
+    ]
+  },
+  {
+    "family": "Patator (FTP/SSH)",
+    "file": "Tuesday-WorkingHours.pcap_ISCX.csv",
+    "host_windows": 34066,
+    "malicious": 63,
+    "roc_auc": 0.9913,
+    "precision_at_100": 0.0,
+    "recall_at_100": 0.0,
+    "best_rank": 185,
+    "mean_score_malicious": 0.0024260671343654394,
+    "mean_score_benign": 0.00011521454871399328,
+    "top_feature": "out_flows",
+    "top_feature_separation": 30.1,
+    "attackers": [
+      "172.16.0.1"
+    ]
+  },
+  {
+    "family": "DoS / Heartbleed",
+    "file": "Wednesday-workingHours.pcap_ISCX.csv",
+    "host_windows": 17022,
+    "malicious": 65,
+    "roc_auc": 0.9536,
+    "precision_at_100": 0.28,
+    "recall_at_100": 0.431,
+    "best_rank": 2,
+    "mean_score_malicious": 0.025313232094049454,
+    "mean_score_benign": 0.00020301387121435255,
+    "top_feature": "out_flows",
+    "top_feature_separation": 321.3,
+    "attackers": [
+      "172.16.0.1"
+    ]
+  }
+]
