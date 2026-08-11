@@ -24,6 +24,31 @@ Template:
 
 ---
 
+## 2026-08-11 — CLAUDE.md so a second machine's agent starts with context
+**Author:** Deep (Person B — Detection Modeling) · assisted by Claude
+**Commit:** _(see git log)_
+
+### What changed
+
+Added `CLAUDE.md` at the repo root. Claude Code loads it automatically, so an
+agent session on the PC starts knowing the project instead of rediscovering it.
+
+### Why
+
+Everything expensive learned today was invisible from the code alone: which of
+the two CICIDS2017 releases can form a graph, that `Destination Port` is a
+feature rather than metadata, that per-file `dropna` silently misaligns
+features, that A's synthetic datasets collapse, that a venv can't be copied
+between machines. A fresh agent would burn hours rediscovering each one — and
+some fail *silently*, producing plausible numbers that mean nothing.
+
+Contents: role split and what B owns, the seven hard-won gotchas, the module
+map, design decisions to defend rather than revisit, current results with the
+"not a clean win" framing, repo conventions (append-only changelog,
+`Assisted-by:` trailer, never push `Knowledge/`), and what's next.
+
+---
+
 ## 2026-08-11 — M5c ensembler, alert pipeline, and the ablation result
 **Author:** Deep (Person B — Detection Modeling) · assisted by Claude
 **Commit:** _(see git log)_
