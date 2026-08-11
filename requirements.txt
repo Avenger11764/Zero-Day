@@ -1,0 +1,36 @@
+# Zero-Day FYP — Python dependencies
+#
+# A venv is NEVER portable: it hardcodes absolute paths to the machine that
+# created it. Do not commit venv/ and do not copy it between machines.
+# Each machine builds its own venv from this file. See README.md.
+#
+# Versions below are pinned to what the working laptop venv actually had,
+# so PC and laptop resolve to identical builds.
+
+# ── Core numerics / data ─────────────────────────────────────────────
+numpy==2.4.4
+pandas==3.0.3
+scipy==1.18.0
+scikit-learn==1.9.0
+
+# ── Plotting ─────────────────────────────────────────────────────────
+matplotlib==3.11.0
+
+# ── Deep learning ────────────────────────────────────────────────────
+# CUDA 12.1 build. Requires the PyTorch index below.
+# On a machine with NO NVIDIA GPU, delete the --extra-index-url line and use
+# the plain CPU build instead:   torch==2.5.1
+--extra-index-url https://download.pytorch.org/whl/cu121
+torch==2.5.1+cu121
+
+# ── Explainability (Person C seam / used by detection/shap_explainer.py) ──
+# NOT currently installed in the laptop venv, which is why
+# stub_detector._try_shap_explanation() silently falls back to "unknown".
+shap
+
+# ── Week 3: graph construction + GNN (detection/graph_builder.py) ────
+# PyTorch Geometric is the toolkit locked in the reference PDF §10.
+torch-geometric
+
+# Pin `shap` and `torch-geometric` to exact versions after the first
+# successful install on both machines (pip freeze | grep -E 'shap|geometric').

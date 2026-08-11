@@ -3,9 +3,12 @@ import torch.nn as nn
 import pandas as pd 
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
+from pathlib import Path
 import sys
 
-csv_path = sys.argv[1] if len(sys.argv) > 1 else r"D:\Test OD\Zero-Day\training_data\dataset_10k_normal.csv"
+# Repo-root-relative default so this runs on any machine
+DEFAULT_CSV = Path(__file__).resolve().parent.parent / "training_data" / "dataset_10k_normal.csv"
+csv_path = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_CSV
 
 print(f"Loading A's dataset from {csv_path}")
 df = pd.read_csv(csv_path)

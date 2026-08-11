@@ -6,3 +6,10 @@
 README.md
 __pycache__/
 *.pyc
+
+# Environment
+.env
+.env.local
+
+# Local-only reference material (not for the shared repo)
+/Knowledge/

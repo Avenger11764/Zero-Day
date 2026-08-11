@@ -1,9 +1,13 @@
 import torch
 import torch.nn as nn
 import numpy as np
+from pathlib import Path
 from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
 import pandas as pd
+
+# Repo-root-relative so this runs on any machine, not just the one it was written on
+DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "MachineLearningCSV" / "MachineLearningCVE"
 # #Generate synthetic data for testing
 # #
 
@@ -25,7 +29,7 @@ import pandas as pd
 
 
 # Monday = pure normal traffic, perfect for training
-df = pd.read_csv(r"D:\Test OD\Zero-Day\data\MachineLearningCSV\MachineLearningCVE\Monday-WorkingHours.pcap_ISCX.csv")
+df = pd.read_csv(DATA_DIR / "Monday-WorkingHours.pcap_ISCX.csv")
 
 
 df.columns = df.columns.str.strip()
@@ -121,7 +125,7 @@ print("Training finished.")
 
 
 """Save the model"""
-torch.save(model.state_dict(), "detection/autoencoder_v2-256.pt")
+torch.save(model.state_dict(), Path(__file__).resolve().parent / "autoencoder_v2-256.pt")
 print("  Saved to detection/autoencoder_v2-256.pt")
 
 
@@ -153,6 +157,6 @@ plt.title("Autoencoder training loss")
 plt.xlabel("Epoch")
 plt.ylabel("MSE Loss")
 plt.tight_layout()
-plt.savefig("detection/loss_curve.png")
+plt.savefig(Path(__file__).resolve().parent / "loss_curve.png")
 print("  Loss curve saved to detection/loss_curve.png")
 

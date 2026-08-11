@@ -2,9 +2,14 @@ import torch
 import torch.nn as nn
 import numpy as np
 import pandas as pd
+from pathlib import Path
 from sklearn.preprocessing import MinMaxScaler
 from collections import defaultdict
 import matplotlib.pyplot as plt
+
+# Repo-root-relative so this runs on any machine, not just the one it was written on
+DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "MachineLearningCSV" / "MachineLearningCVE"
+OUT_DIR = Path(__file__).resolve().parent
 
 SEQUENCE_LEN = 10
 HIDDEN_DIM = 64
@@ -18,12 +23,18 @@ BATCH_SIZE = 128
 
 print("Step 1: Loading data and building sequences...")
 
-df = pd.read_csv(r"D:\Test OD\Zero-Day\data\MachineLearningCSV\MachineLearningCVE\Monday-WorkingHours.pcap_ISCX.csv")
+df = pd.read_csv(DATA_DIR / "Monday-WorkingHours.pcap_ISCX.csv")
 df.columns = df.columns.str.strip()
 df = df[df['Label'] == 'BENIGN']
 
-# Save source IP for grouping before dropping
+# Save source IP for grouping before dropping.
+# NOTE: the MachineLearningCVE CSVs have NO IP columns at all (79 cols, only
+# 'Destination Port' + 'Label' identify anything), so this is always None and we
+# fall back to sequential chunking below. Real per-host grouping needs the
+# GeneratedLabelledFlows (85-col) release or A's CICFlowMeter output.
 src_ip = df['Source IP'].values if 'Source IP' in df.columns else None
+if src_ip is None:
+    print("  WARNING: no 'Source IP' column — sequences are NOT grouped by host.")
 
 df = df.drop(columns=['Label', 'Flow ID', 'Source IP', 'Destination IP',
                        'Timestamp'], errors='ignore')
@@ -116,7 +127,7 @@ model = TemporalAutoencoder(
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 if device.type == "cpu":
-    raise RuntimeError("GPU not found. Check CUDA installation.")
+    print("  WARNING: CUDA not available — training on CPU (slower, but it will run).")
 
 model = model.to(device)
 print(f"  Running on: {device}")
@@ -188,7 +199,7 @@ else:
 # STEP 5: Save
 # ─────────────────────────────────────────────
 
-torch.save(model.state_dict(), "detection/temporal_autoencoder_v1.pt")
+torch.save(model.state_dict(), OUT_DIR / "temporal_autoencoder_v1.pt")
 print("\n  Saved to detection/temporal_autoencoder_v1.pt")
 
 plt.figure(figsize=(8, 4))
@@ -197,6 +208,6 @@ plt.title("Temporal Autoencoder training loss")
 plt.xlabel("Epoch")
 plt.ylabel("MSE Loss")
 plt.tight_layout()
-plt.savefig("detection/temporal_loss_curve.png")
+plt.savefig(OUT_DIR / "temporal_loss_curve.png")
 print("  Loss curve saved to detection/temporal_loss_curve.png")
 print("\nBlock 3 complete.")

@@ -87,12 +87,16 @@ if __name__ == "__main__":
     import torch
     import torch.nn as nn
     import pandas as pd
+    from pathlib import Path
     from sklearn.preprocessing import MinMaxScaler
 
     print("Testing drift monitor on CICIDS2017 Monday data...\n")
 
+    # Repo-root-relative so this runs on any machine
+    DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "MachineLearningCSV" / "MachineLearningCVE"
+
     # Load a sample of training data to set baseline
-    df = pd.read_csv(r"D:\Test OD\Zero-Day\data\MachineLearningCSV\MachineLearningCVE\Monday-WorkingHours.pcap_ISCX.csv")
+    df = pd.read_csv(DATA_DIR / "Monday-WorkingHours.pcap_ISCX.csv")
     df.columns = df.columns.str.strip()
     df = df[df['Label'] == 'BENIGN'].head(5000)  # sample for speed
     df = df.drop(columns=['Label', 'Flow ID', 'Source IP',
