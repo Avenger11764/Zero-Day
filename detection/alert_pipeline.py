@@ -63,15 +63,17 @@ def _load_m5b():
 
 
 def score_window(df: pd.DataFrame, feature_columns: list[str] | None = None,
-                 threshold: float = 0.5, window_seconds: int = 60) -> list[dict]:
+                 threshold: float = 0.5, window_seconds: int = 60, k: int = 0) -> list[dict]:
     """Score a window of flows with both detectors and emit ScoredAlerts.
 
     One alert per graph EDGE (a src -> dst conversation), because the frozen
     ScoredAlert schema requires src_ip and dst_ip -- an edge maps onto that
     cleanly, a node does not.
+
+    If k > 0, builds graphs with k nearest-neighbour auxiliary edges per host.
     """
     df = normalize_columns(df)
-    graphs = build_graphs(df, window_seconds=window_seconds)
+    graphs = build_graphs(df, window_seconds=window_seconds, k=k)
     if not graphs:
         return []
 
@@ -99,8 +101,13 @@ def score_window(df: pd.DataFrame, feature_columns: list[str] | None = None,
                 scaler.transform(g.x), g.edge_index
             ).numpy()
 
-        src_idx, dst_idx = g.edge_index[0].tolist(), g.edge_index[1].tolist()
-        for e, (si, di) in enumerate(zip(src_idx, dst_idx)):
+        # Filter to REAL edges only (aux edges have edge_attr[:,0] == 0)
+        real_mask = g.edge_attr[:, 0] > 0
+        if not real_mask.any():
+            continue
+        src_idx = g.edge_index[0][real_mask].tolist()
+        dst_idx = g.edge_index[1][real_mask].tolist()
+        for si, di in zip(src_idx, dst_idx):
             src, dst = g.hosts[si], g.hosts[di]
             relational = float((node_scores[si] + node_scores[di]) / 2.0)
             per_flow = float(per_host_flow_score.get(src, 0.0))

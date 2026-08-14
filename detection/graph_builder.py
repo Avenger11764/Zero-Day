@@ -143,6 +143,33 @@ def graph_health(df: pd.DataFrame) -> dict:
     }
 
 
+def add_sim_edges(g: Data, k: int) -> Data:
+    """Add k nearest neighbour auxiliary edges per host by cosine similarity
+    on log1p-normalised node features. Aux edges are directed both ways,
+    edge_attr = zeros (scaffolding, not traffic)."""
+    if k <= 0 or g.num_nodes < 2:
+        return g
+    x = np.log1p(g.x.numpy().clip(min=0))
+    n = x / (np.linalg.norm(x, axis=1, keepdims=True) + 1e-9)
+    sim = n @ n.T
+    np.fill_diagonal(sim, -1.0)
+    k_eff = min(k, max(g.num_nodes - 1, 1))
+    aux = []
+    for i in range(g.num_nodes):
+        top = np.argpartition(sim[i], -k_eff)[-k_eff:]
+        for j in top:
+            if sim[i][j] > 0:
+                aux.append((i, int(j)))
+    if not aux:
+        return g
+    ae = torch.tensor(aux, dtype=torch.long).t()
+    re = torch.cat([g.edge_index, ae], dim=1)
+    ra = torch.cat([g.edge_attr, torch.zeros(len(aux), g.edge_attr.shape[1])], dim=0)
+    out = Data(x=g.x, edge_index=re, edge_attr=ra)
+    out.hosts = g.hosts
+    return out
+
+
 def _window_key(df: pd.DataFrame, window_seconds: int) -> pd.Series:
     """Assign each flow to a time bucket; fall back to row order if no clock."""
     if "timestamp" not in df.columns:
@@ -156,11 +183,14 @@ def _window_key(df: pd.DataFrame, window_seconds: int) -> pd.Series:
     return (epoch // window_seconds).astype(int)
 
 
-def build_graph(window_df: pd.DataFrame) -> Data | None:
+def build_graph(window_df: pd.DataFrame, k: int = 0) -> Data | None:
     """Turn one time window of flows into a PyG graph.
 
     Nodes are hosts, edges are aggregated (src -> dst) communication.
     Returns None if the window has fewer than 2 hosts (no graph to speak of).
+
+    If k > 0, adds k nearest-neighbour auxiliary edges per host
+    (cosine similarity on log1p-normalised node features).
     """
     hosts = sorted(set(window_df["src_ip"]) | set(window_df["dst_ip"]))
     if len(hosts) < 2:
@@ -216,17 +246,24 @@ def build_graph(window_df: pd.DataFrame) -> Data | None:
         edge_attr=torch.tensor(edge_attr, dtype=torch.float32),
     )
     data.hosts = hosts  # keep IPs so an edge can become a ScoredAlert later
+
+    if k > 0:
+        data = add_sim_edges(data, k)
+
     return data
 
 
-def build_graphs(df: pd.DataFrame, window_seconds: int = 60) -> list[Data]:
-    """Full pipeline: raw flow dataframe -> list of per-window graphs."""
+def build_graphs(df: pd.DataFrame, window_seconds: int = 60, k: int = 0) -> list[Data]:
+    """Full pipeline: raw flow dataframe -> list of per-window graphs.
+
+    If k > 0, adds k nearest-neighbour auxiliary edges per host per window.
+    """
     df = normalize_columns(df)
     assert_graphable(df)
 
     graphs = []
     for _, window_df in df.groupby(_window_key(df, window_seconds)):
-        g = build_graph(window_df)
+        g = build_graph(window_df, k=k)
         if g is not None:
             graphs.append(g)
     return graphs

@@ -153,20 +153,41 @@ def metrics(scores: np.ndarray, labels: np.ndarray) -> dict:
     }
 
 
+def _rank01(x: np.ndarray) -> np.ndarray:
+    """Normalised position of each score in its own pool (ties averaged)."""
+    order = np.argsort(np.argsort(x, kind="stable"), kind="stable")
+    return order / max(len(x) - 1, 1)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="M5c ensembler + ablation table.")
     ap.add_argument("--limit", type=int, default=150000)
     ap.add_argument("--window", type=int, default=60)
     ap.add_argument("--epochs", type=int, default=60)
+    ap.add_argument("--seed", type=int, default=None,
+                    help="seed torch/numpy before M5b training (default: unseeded)")
     args = ap.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    limit = args.limit if args.limit and args.limit > 0 else None
+    if args.seed is not None:
+        torch.manual_seed(args.seed)
+        np.random.seed(args.seed)
     print("=" * 74)
     print("M5c ENSEMBLER -- controlled ablation, M5a vs M5b vs fused")
+    print(f"device={device}  limit={'FULL FILE' if limit is None else limit}")
     print("=" * 74)
 
     def load(name):
-        df = normalize_columns(read_flows(FLOWS / name, limit=args.limit))
+        df = normalize_columns(read_flows(FLOWS / name, limit=limit))
+        before = len(df)
+        df = df[df["src_ip"].map(lambda v: isinstance(v, str))
+                & df["dst_ip"].map(lambda v: isinstance(v, str))]
+        dropped = before - len(df)
+        if dropped:
+            print(f"  dropped {dropped:,}/{before:,} rows "
+                  f"({100 * dropped / before:.1f}%) with missing or "
+                  f"non-string src_ip/dst_ip")
         if "label" in df.columns:
             df["label"] = df["label"].astype(str).str.strip()
         return df
@@ -235,6 +256,7 @@ def main() -> None:
             pa, pb = cal_a(np.array(sa)), cal_b(np.array(sb))
             fused_max = np.maximum(pa, pb)          # either detector suspicious
             fused_mean = (pa + pb) / 2.0            # both must agree somewhat
+            fused_rank_max = np.maximum(_rank01(pa), _rank01(pb))
 
             r = {
                 "family": family,
@@ -243,12 +265,14 @@ def main() -> None:
                 "M5b": metrics(pb, y),
                 "fused_max": metrics(fused_max, y),
                 "fused_mean": metrics(fused_mean, y),
+                "fused_rank_max": metrics(fused_rank_max, y),
             }
             rows.append(r)
             print(f"  M5a AUC={r['M5a']['roc_auc']:.4f}  "
                   f"M5b AUC={r['M5b']['roc_auc']:.4f}  "
                   f"fused(max) AUC={r['fused_max']['roc_auc']:.4f}  "
-                  f"fused(mean) AUC={r['fused_mean']['roc_auc']:.4f}")
+                  f"fused(mean) AUC={r['fused_mean']['roc_auc']:.4f}  "
+                  f"fused(rank-max) AUC={r['fused_rank_max']['roc_auc']:.4f}")
         except Exception as exc:
             print(f"  FAILED: {type(exc).__name__}: {exc}")
 
@@ -262,30 +286,37 @@ def main() -> None:
          "Held-out attack families. Trained on Monday (benign only); every family",
          "below was unseen. Scores calibrated to percentiles against a benign",
          "baseline, then compared at **host-window** granularity.", "",
+         f"Seed: {args.seed} · Limit: {args.limit} · Window: {args.window}s",
+         "",
          "## ROC-AUC", "",
-         "| Family | M5a (per-flow) | M5b (relational) | Fused max | Fused mean | Winner |",
-         "| --- | --- | --- | --- | --- | --- |"]
+         "| Family | M5a (per-flow) | M5b (relational) | Fused max | Fused mean | Fused rank-max | Winner |",
+         "| --- | --- | --- | --- | --- | --- | --- |"]
 
-    wins = {"M5a": 0, "M5b": 0, "fused_max": 0, "fused_mean": 0}
+    wins = {"M5a": 0, "M5b": 0, "fused_max": 0, "fused_mean": 0, "fused_rank_max": 0}
     for r in rows:
-        cand = {k: r[k]["roc_auc"] for k in ("M5a", "M5b", "fused_max", "fused_mean")}
+        cand = {k: r[k]["roc_auc"] for k in ("M5a", "M5b", "fused_max",
+                                             "fused_mean", "fused_rank_max")}
         best = max(cand, key=lambda k: cand[k])
         wins[best] += 1
         L.append(f"| {r['family']} | {cand['M5a']:.4f} | {cand['M5b']:.4f} | "
-                 f"{cand['fused_max']:.4f} | {cand['fused_mean']:.4f} | **{best}** |")
+                 f"{cand['fused_max']:.4f} | {cand['fused_mean']:.4f} | "
+                 f"{cand['fused_rank_max']:.4f} | **{best}** |")
 
     means = {k: np.mean([r[k]["roc_auc"] for r in rows])
-             for k in ("M5a", "M5b", "fused_max", "fused_mean")}
+             for k in ("M5a", "M5b", "fused_max", "fused_mean", "fused_rank_max")}
     L.append(f"| **mean** | **{means['M5a']:.4f}** | **{means['M5b']:.4f}** | "
-             f"**{means['fused_max']:.4f}** | **{means['fused_mean']:.4f}** | |")
+             f"**{means['fused_max']:.4f}** | **{means['fused_mean']:.4f}** | "
+             f"**{means['fused_rank_max']:.4f}** | |")
 
     L += ["", "## Precision@100 — what a SOC analyst actually sees", "",
-          "| Family | M5a | M5b | Fused max | Fused mean |", "| --- | --- | --- | --- | --- |"]
+          "| Family | M5a | M5b | Fused max | Fused mean | Fused rank-max |",
+          "| --- | --- | --- | --- | --- | --- |"]
     for r in rows:
         L.append(f"| {r['family']} | {r['M5a']['precision_at_100']:.3f} | "
                  f"{r['M5b']['precision_at_100']:.3f} | "
                  f"{r['fused_max']['precision_at_100']:.3f} | "
-                 f"{r['fused_mean']['precision_at_100']:.3f} |")
+                 f"{r['fused_mean']['precision_at_100']:.3f} | "
+                 f"{r['fused_rank_max']['precision_at_100']:.3f} |")
 
     L += ["", f"Family wins by ROC-AUC: {wins}", ""]
     overall = max(means, key=lambda k: means[k])
