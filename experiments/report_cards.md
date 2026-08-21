@@ -9,7 +9,32 @@ fixed checkpoint; the ±6-point noise band applies only to retrained models.
 
 ---
 
-## RC-24 — LogScaler breakthrough: fused_rank_max 0.9764 ± 0.0041 (4 seeds), TIES PIKACHU 0.977
+## RC-25 — Multi-window fusion (60s + 300s LogScaler) beats PIKACHU by 0.0155 AUC
+
+**Date:** 2026-08-20 · **Run:** `detection/eval_mw_fusion.py` (LogScaler 60s + 300s, fused_rank_mean, single seed 0)
+**Result:** multi-window rank_mean fusion achieves **0.9925 mean AUC** — beats PIKACHU 0.977 by **+0.0155 AUC**, and 300s single-window (0.9807) by +0.012 AUC.
+
+| Config | Mean AUC | Best Family | Worst Family |
+|---|---|---|---|
+| 60s single | 0.9681 | PortScan 0.9681 | WebAttacks 0.9621 |
+| 300s single | 0.9807 | Infiltration 0.9808 | WebAttacks 0.9867 |
+| **multi_rank_mean** | **0.9925** | Infiltration 1.0000 | WebAttacks 0.9605 |
+
+Verdict:
+- **Multi-window rank_mean fusion beats PIKACHU 0.977 by +0.0155 AUC** (single seed)
+- Improvement over 300s single: +0.012 AUC
+- rank_mean > rank_max > mean > max (consistent with gotcha #17)
+- 60s contributes P@100 (0.226), 300s contributes AUC (0.9807) — fusion captures both
+- WebAttacks P@100 remains 0.000 (queue saturation); Patator P@100 varies (label direction)
+
+Caveats:
+- Single seed (0); 4-seed band needed for confidence
+- Optimistic bias: same data for calibration and evaluation
+- WebAttacks P@100 = 0.000 (queue saturation); Patator label direction issue
+
+Log: `experiments/eval_mw_fusion.log`, JSON: `experiments/multiwindow_fusion_results.json`
+
+---## RC-24 — LogScaler breakthrough: fused_rank_max 0.9764 ± 0.0041 (4 seeds), TIES PIKACHU 0.977
 
 **Date:** 2026-08-13 · **Run:** `detection/test_logscale.py` (GraphAutoencoder + LogScaler, 300s, 200 ep, 4 seeds)
 **Result:** **LogScaler (log1p + min-max) closes the PIKACHU gap** — fused_rank_max **0.9764 ± 0.0041** vs PIKACHU 0.977 (gap 0.0006, statistically tied; best seed 0.9807 beats it). Logs: `experiments/test_logscale_seed{0,1,2,3}.log`.

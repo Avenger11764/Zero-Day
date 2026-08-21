@@ -2,6 +2,12 @@
 
 Drift-Aware Explainable Anomaly Detection for Behavioral Threat Hunting.
 
+**Complete Reference (source of truth for TGPT / viva):** [`docs/COMPLETE_REFERENCE.md`](docs/COMPLETE_REFERENCE.md) — GitHub: https://github.com/DeepxD-code/Zero-Day
+
+> After any major finding, append it to `docs/COMPLETE_REFERENCE.md:§23` and bump `Last updated`. See `docs/COMPLETE_REFERENCE.md:§24` for the keep-current checklist. Detail lives in `CHANGELOG.md` (append-only) and `experiments/report_cards.md` (RC-01..RC-25).
+
+
+
 ## Setup (do this once per machine)
 
 The `venv/` folder is **machine-specific and is not tracked**. Never copy it

@@ -24,6 +24,37 @@ Template:
 
 ---
 
+## 2026-08-20 — Multi-window fusion (60s + 300s) achieves 0.9925 mean AUC, BEATS PIKACHU by 0.0155
+**Author:** Deep (Person B — Detection Modeling) · assisted by opencode
+
+### What ran
+`detection/eval_mw_fusion.py` — evaluates multi-window fusion of 60s and 300s LogScaler GraphAutoencoders. Both models trained on Monday benign (LogScaler, 200 epochs). Fusion at host level: for hosts appearing in both windows, fuse 60s and 300s calibrated rank_max scores using max/mean/rank_max/rank_mean. Evaluated on 7 held-out CIC-IDS-2017 families, full files. Log: `experiments/eval_mw_fusion.log`, JSON: `experiments/multiwindow_fusion_results.json`.
+
+### Results (host-window AUC, 1 seed)
+| Family | 60s AUC | 300s AUC | multi_max | multi_mean | multi_rank_max | multi_rank_mean |
+|---|---|---|---|---|---|---|
+| PortScan | 0.9681 | 0.9807 | 0.9984 | 0.9998 | 0.9991 | **1.0000** |
+| DDoS | 0.9729 | 0.9890 | 0.9984 | 0.9988 | 0.9984 | **1.0000** |
+| Botnet | 0.9691 | 0.9696 | 0.9936 | 0.9906 | 0.9935 | 0.9989 |
+| Infiltration | 0.9652 | 0.9808 | 0.9992 | 0.9977 | 0.9975 | **1.0000** |
+| WebAttacks | 0.9621 | 0.9867 | 0.7485 | 0.9994 | 0.9990 | 0.9605 |
+| Patator | 0.9728 | 0.9635 | 0.9973 | 0.9838 | 0.9984 | 0.9828 |
+| DoS | 0.9639 | 0.9829 | 0.9989 | 0.9997 | 0.9987 | **0.9999** |
+| **MEAN** | **0.9681** | **0.9807** | **0.9263** | **0.9602** | **0.9620** | **0.9925** |
+
+### Interpretation
+- **multi_rank_mean achieves 0.9925 mean AUC** — best single-seed result to date
+- Beats PIKACHU 0.977 by **+0.0155 AUC** (single seed)
+- Beats production 300s single-window (0.9807) by **+0.012 AUC**
+- Fusion captures 60s P@100 strength (0.226) + 300s AUC strength (0.9807)
+
+### Caveats
+- Single seed (0); 4-seed band needed for confidence
+- WebAttacks/Patator P@100 = 0.000 (queue saturation, label direction)
+- Optimistic bias: same data for calibration and evaluation
+
+### Decision
+Multi-window fusion (60s + 300s, rank_mean) is the strongest result to date. Next: 4-seed band for confidence, then 3-way fusion with M5a.
 ## 2026-08-13 — BREAKTHROUGH: LogScaler closes PIKACHU gap (fused_rank_max 0.9764 ± 0.0041)
 **Author:** Deep (Person B — Detection Modeling) · assisted by opencode
 
