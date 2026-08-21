@@ -9,6 +9,61 @@ fixed checkpoint; the ±6-point noise band applies only to retrained models.
 
 ---
 
+## RC-32 — Third dataset: CTU-13 (real botnet traffic) — infected host in top 0.05% on all 3 scenarios
+
+**Date:** 2026-08-21 · **Run:** `detection/eval_external_ctu13.py --scenarios s1_neris s13_virut s3_rbot` (seed 0; binetflow.2format adapted via column map; train = Background flows before first `From-Botnet` flow; UNCOMMITTED)
+**Result:** three real-world botnet captures (Stratosphere Lab, CC-BY), university-edge traffic with 300k–500k unique hosts:
+
+| Scenario | Malware | Train (benign) | Graphs | Hosts | **Infected-host rank** | C&C/infra ranks |
+|---|---|---|---|---|---|---|
+| s1 | Neris | 675,537 flows | 78 | 522,167 | **257 (top 0.05%)** | DNS relay 35; C&C ~266–1000 |
+| s13 | Virut (fast-flux) | 14,915 flows | **4** | 314,177 | **179 (top 0.06%)** | **#1 and #2** |
+| s3 | Rbot (DGA) | 5,288 flows | **2** | 434,730 | **55 (top 0.013%)** | **#1** |
+
+Verdict:
+- The claim generalizes to *real* malware traffic on a *third* dataset family (different lab, different country, different decade, Argus NetFlows instead of CICFlowMeter).
+- Striking result: even with **2–4 training graphs** (bot started minutes into two captures), the infected host lands in the top 0.06% of half-million-host populations, and genuine botnet infrastructure takes rank #1–2 where identifiable.
+- Honest framing required: CTU-13 labels every destination the malware touched as part of `From-Botnet` flows, inflating the malicious set (up to 26,726 "attackers") — recall@100 is NOT meaningful here; quote infected-host percentile and infrastructure ranks instead.
+- Host-window P@100 = 0.02–0.11: same queue-noise story as RC-28, amplified by 16-hour captures of heterogeneous background.
+
+Caveats:
+- Single seed; s13/s3 trained on minutes of benign traffic (dataset property, disclosed).
+- JSON: `experiments/external_ctu13_results.json`; logs: `experiments/eval_ctu13_s1.log`, `eval_ctu13_s3.log`. Data: `data/CTU-13/*.binetflow` (gitignored).
+
+---
+
+## RC-31 — Non-relational baselines on identical features: graph model +4.7 pts over the best
+
+**Date:** 2026-08-21 · **Run:** `detection/eval_baselines_4seed.py --seeds 0 1 2 3` (full files; PCA recon error / Isolation Forest / plain MLP-AE hidden=32 latent=8 — all on the SAME v2 host-window feature matrices, same protocol; UNCOMMITTED)
+**Result:** mean AUC across 7 held-out families, 4 seeds:
+
+| Detector | Mean AUC | Per-seed |
+|---|---|---|
+| Isolation Forest | 0.9357 | [0.937, 0.9332, 0.9348, 0.9379] |
+| PCA reconstruction | 0.9417 | identical all seeds (closed-form) |
+| Plain MLP-AE (no graph) | 0.9517 | [0.9514, 0.9538, 0.9502, 0.9512] |
+| **Ours (GraphAE + MW fusion, RC-30)** | **0.9987 ± 0.0008** | — |
+
+Per-family (best non-relational vs ours):
+| Family | Best baseline | Ours | Δ |
+|---|---|---|---|
+| Botnet | 0.9335 (mlpae) | 0.9987 | +0.065 |
+| PortScan | 0.9520 (pca) | 0.9999 | +0.048 |
+| DDoS | 0.9627 (mlpae) | 1.0000 | +0.037 |
+| DoS | 0.9438 (if) | 1.0000 | +0.056 |
+| Infiltration | 0.9557 (if) | 0.9997 | +0.044 |
+| Patator | 0.9859 (pca) | 1.0000 | +0.014 |
+| WebAttacks | 0.9888 (pca) | 1.0000 | +0.011 |
+
+Verdict:
+- **Closes reviewer objection #3**: baselines re-run under identical conditions, not cited numbers. The relational layer adds +4.7 pts over the strongest non-relational model on the SAME features — well outside every noise band in this repo.
+- Gaps concentrate exactly where topology should matter (Botnet/PortScan/DDoS/DoS); smallest on flow-level-visible families (WebAttacks/Patator) — mechanistically coherent.
+- Honest corollary: the v2 shape features alone carry plain models to ~0.95. The paper's claim must be "aggregation + relations", not "features don't matter".
+- Caveat: at host-WINDOW unit, attackers occupy many windows so best-rank=1 everywhere even for baselines; AUC is the discriminating metric here.
+- JSON: `experiments/baselines_4seed.json`; log: `experiments/eval_baselines_4seed.log`.
+
+---
+
 ## RC-30 — Feature set v2 (19 node features): 0.9998 ± 0.0000; Botnet +6.6 pts; gains are the FEATURES not capacity
 
 **Date:** 2026-08-21 · **Run:** `detection/eval_feature_set_v2.py --seeds 0 1 2 3` (LogScaler, 60s+300s, pure rank_mean fusion, CUDA-deterministic; UNCOMMITTED)

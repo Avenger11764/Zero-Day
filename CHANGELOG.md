@@ -24,6 +24,41 @@ Template:
 
 ---
 
+## 2026-08-21b — Non-relational baselines re-run under identical conditions; third dataset family (CTU-13) replicates the claim
+**Author:** Deep (Person B — Detection Modeling) · assisted by opencode
+
+### What ran
+1. `detection/eval_baselines_4seed.py --seeds 0 1 2 3` — PCA / Isolation Forest /
+   plain MLP-AE on the SAME v2 host-window feature matrices as the graph model,
+   same held-out protocol (RC-31).
+2. `detection/eval_external_ctu13.py` — CTU-13 (Stratosphere Lab, real botnet
+   traffic, CC-BY): three scenarios downloaded and adapted via column map;
+   train = Background flows before the first `From-Botnet` flow (RC-32).
+
+### Results
+| Experiment | Numbers |
+|---|---|
+| Baselines (7 families, 4 seeds) | IF 0.9357 · PCA 0.9417 · MLP-AE 0.9517 vs **ours 0.9987 ± 0.0008** (+4.7 pts over best; biggest on Botnet/PortScan/DDoS/DoS) |
+| CTU-13 s1 Neris | infected host rank **257 of 522,167** (top 0.05%), 78 train graphs |
+| CTU-13 s13 Virut | rank **179 of 314,177** (top 0.06%) with only **4** train graphs; fast-flux C&C ranked #1–2 |
+| CTU-13 s3 Rbot | rank **55 of 434,730** (top 0.013%) with only **2** train graphs; C&C ranked #1 |
+
+### Interpretation
+- Reviewer objection "baselines were cited, not run" is closed: the relational
+  layer adds ~5 pts over the strongest non-relational model on identical
+  features, concentrated exactly in topology families.
+- The claim now replicates on a THIRD dataset family — real malware, different
+  lab/country/decade, Argus NetFlows — even from minutes of benign training.
+- Honest corollary: v2 features alone carry plain models to ~0.95; the paper's
+  claim is "aggregation + relations", not feature magic.
+
+### Caveats
+- CTU-13 labels every destination malware touched as botnet-flow endpoints,
+  inflating malicious sets (up to 26,726 hosts) — quote infected-host percentile
+  and infrastructure ranks there, NOT recall@100. Host-window P@100 = 0.02–0.11.
+- Single seed on CTU-13; s13/s3 trained on minutes of benign traffic (dataset
+  property). Data gitignored at `data/CTU-13/`.
+
 ## 2026-08-21 — Multi-window fusion confirmed & corrected; P@100 diagnosed; IDS2018 replication; feature set v2 lands
 **Author:** Deep (Person B — Detection Modeling) · assisted by opencode
 
