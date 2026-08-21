@@ -1,0 +1,122 @@
+{
+  "0": {
+    "PortScan": {
+      "auc": 1.0,
+      "p100": 0.01
+    },
+    "DDoS": {
+      "auc": 0.9993,
+      "p100": 0.02
+    },
+    "Botnet": {
+      "auc": 0.9359,
+      "p100": 0.07
+    },
+    "Infiltration": {
+      "auc": 0.9994,
+      "p100": 0.01
+    },
+    "WebAttacks": {
+      "auc": 0.9948,
+      "p100": 0.01
+    },
+    "Patator (FTP/SSH)": {
+      "auc": 0.9854,
+      "p100": 0.0
+    },
+    "DoS / Heartbleed": {
+      "auc": 1.0,
+      "p100": 0.01
+    }
+  },
+  "1": {
+    "PortScan": {
+      "auc": 1.0,
+      "p100": 0.01
+    },
+    "DDoS": {
+      "auc": 0.999,
+      "p100": 0.02
+    },
+    "Botnet": {
+      "auc": 0.9321,
+      "p100": 0.07
+    },
+    "Infiltration": {
+      "auc": 0.9996,
+      "p100": 0.01
+    },
+    "WebAttacks": {
+      "auc": 0.9952,
+      "p100": 0.01
+    },
+    "Patator (FTP/SSH)": {
+      "auc": 0.9853,
+      "p100": 0.0
+    },
+    "DoS / Heartbleed": {
+      "auc": 1.0,
+      "p100": 0.01
+    }
+  },
+  "2": {
+    "PortScan": {
+      "auc": 1.0,
+      "p100": 0.01
+    },
+    "DDoS": {
+      "auc": 0.9985,
+      "p100": 0.02
+    },
+    "Botnet": {
+      "auc": 0.9324,
+      "p100": 0.07
+    },
+    "Infiltration": {
+      "auc": 0.9996,
+      "p100": 0.01
+    },
+    "WebAttacks": {
+      "auc": 0.9955,
+      "p100": 0.01
+    },
+    "Patator (FTP/SSH)": {
+      "auc": 0.9784,
+      "p100": 0.0
+    },
+    "DoS / Heartbleed": {
+      "auc": 1.0,
+      "p100": 0.01
+    }
+  },
+  "3": {
+    "PortScan": {
+      "auc": 1.0,
+      "p100": 0.01
+    },
+    "DDoS": {
+      "auc": 0.9998,
+      "p100": 0.02
+    },
+    "Botnet": {
+      "auc": 0.9307,
+      "p100": 0.07
+    },
+    "Infiltration": {
+      "auc": 0.9998,
+      "p100": 0.01
+    },
+    "WebAttacks": {
+      "auc": 0.995,
+      "p100": 0.01
+    },
+    "Patator (FTP/SSH)": {
+      "auc": 0.9773,
+      "p100": 0.0
+    },
+    "DoS / Heartbleed": {
+      "auc": 1.0,
+      "p100": 0.01
+    }
+  }
+}

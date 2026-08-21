@@ -1,0 +1,39 @@
+Device: cpu
+Monday benign flows: 529,918
+Benign graphs: 60s=487, 300s=98
+  60s baseline: 83185 host-windows
+  300s baseline: 47805 host-windows
+  M5a baseline: 8239 hosts, 60s: 83185, 300s: 47805
+
+============================================================
+SEED 0
+============================================================
+
+Training 60s model (seed=0)...
+  60s final loss: 0.000007
+
+Training 300s model (seed=0)...
+  300s final loss: 0.000026
+  PortScan: AUC=1.0000 P@100=0.010
+  DDoS: AUC=1.0000 P@100=0.020
+  Botnet: AUC=0.9765 P@100=0.070
+  Infiltration: AUC=0.9996 P@100=0.010
+  WebAttacks: AUC=0.5048 P@100=0.000
+  Patator (FTP/SSH): AUC=0.9826 P@100=0.000
+  DoS / Heartbleed: AUC=0.9996 P@100=0.010
+
+============================================================
+SEED 1
+============================================================
+
+Training 60s model (seed=1)...
+  60s final loss: 0.000021
+
+Training 300s model (seed=1)...
+  300s final loss: 0.000016
+  PortScan: AUC=1.0000 P@100=0.010
+  DDoS: AUC=0.9990 P@100=0.020
+  Botnet: AUC=0.9728 P@100=0.070
+  Infiltration: AUC=0.9992 P@100=0.010
+  WebAttacks: AUC=0.5124 P@100=0.000
+  Patator (FTP/SSH): AUC=0.9809 P@100=0.000

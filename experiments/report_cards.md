@@ -9,6 +9,120 @@ fixed checkpoint; the ±6-point noise band applies only to retrained models.
 
 ---
 
+## RC-30 — Feature set v2 (19 node features): 0.9998 ± 0.0000; Botnet +6.6 pts; gains are the FEATURES not capacity
+
+**Date:** 2026-08-21 · **Run:** `detection/eval_feature_set_v2.py --seeds 0 1 2 3` (LogScaler, 60s+300s, pure rank_mean fusion, CUDA-deterministic; UNCOMMITTED)
+**Result:** v2 mean AUC **0.9998 ± 0.0000** vs v1 0.9987 ± 0.0008 on the same protocol. JSON: `experiments/feature_set_v2_results.json` (4-seed; latent19 control saved separately).
+
+| Family | v1 (8 feats) | v2 (19 feats) | Δ |
+|---|---|---|---|
+| Botnet | 0.9328 ± 0.002 | **0.9987** | **+0.066** |
+| Patator | 0.9816 ± 0.004 | **1.0000** | +0.018 |
+| WebAttacks | 0.9951 | **1.0000** | +0.005 |
+| PortScan / DoS / DDoS / Infiltration | 0.999+ | 0.9997–1.0 | ≈ |
+| **MEAN** | 0.9987 ± 0.0008 | **0.9998 ± 0.0000** | |
+
+Verdict:
+- Gains land exactly where gotcha #15/"busy fileserver vs scanner" predicted: shape features (flows_per_out_peer, dst_port_entropy, bytes_ratio, protocol_entropy...) separate hosts that raw counts conflate.
+- **latent=19 control (no bottleneck): mean 0.9996, Botnet 0.9980 — ≈identical.** The improvement is feature CONTENT, not the new 19→8 bottleneck. Defends against the "it's just capacity" objection.
+- v2 was rebuilt from scratch this session: CLAUDE.md claimed "built, self-tested" but no trace existed in git, stashes, or working tree (lost uncommitted work). Now in `graph_builder.py` as `feature_set="v2"` (indices 0–7 identical to v1; old checkpoints unaffected).
+- Attacker ranks under v2: every family's attackers in top 34 (Botnet's 8 hosts: ranks 5–34).
+
+Caveats:
+- AUC near ceiling; quote family deltas, not the 4th decimal of the mean.
+- Same Monday-calibration optimism caveat as everything else.
+- UNCOMMITTED — commit before quoting.
+
+---
+
+## RC-29 — External replication on CSE-CIC-IDS2018: claim holds on a second dataset
+
+**Date:** 2026-08-21 · **Run:** `detection/eval_external_ids2018.py` (seed 0; schema_mapper-mapped third column convention; trained on 165k PRE-ATTACK benign flows only (01:00–01:14), evaluated on the post-attack day; UNCOMMITTED)
+**Result:** LOIC-HTTP DDoS day, 32,935 hosts, 10 attackers: **all 10 attackers rank 13th–24th of 32,935** (mean agg). recall@100 = 1.0. JSON: `experiments/external_ids2018_results.json`.
+
+| Metric | CICIDS2017 (7 families) | IDS2018 (LOIC-HTTP) |
+|---|---|---|
+| Hosts ranked | 2,500–8,500 | 32,935 |
+| Attackers | 1–8 | 10 |
+| Attacker ranks | 1–35 | **13–24** |
+| recall@100 | 1.0 | **1.0** |
+| P@100 ceiling (bad/100) | 0.01–0.08 | 0.10 |
+
+Verdict:
+- The core claim — "attackers concentrate at the very top of the host ranking" — replicates on a different dataset, year, attack type, and column convention.
+- The P@100 structural cap ALSO replicates (ceiling = bad/100 on both datasets).
+- Weakness found: host-WINDOW level P@100 = 0.01 (P@500 = 0.508) — only 777 attacker windows among 898,852, and 15 training graphs make weak window scores. Future work, honestly recorded.
+
+Caveats:
+- Single seed; single attack family (the only IDS2018 file with IP columns).
+- Train split is time-based (pre-attack benign) — clean, but only ~14 minutes of benign traffic.
+
+---
+
+## RC-28 — Small-window filter test: NEGATIVE (queue noise is drift, not junk windows)
+
+**Date:** 2026-08-21 · **Run:** `detection/diag_p100b.py` (seed 0, 60s windows, filter windows < K nodes, K ∈ {0,2,3,5,10}; UNCOMMITTED)
+**Result:** P@100 at host-window level is IDENTICAL across every K on every family. False positives occupying the top-100 have median 128–175 nodes — big busy windows, not degenerate ones.
+
+Verdict:
+- Hypothesis rejected cleanly. Top-of-queue noise comes from attack-day background shift (benign servers behaving unlike Monday) — a calibration/drift problem for M6, not a windowing fix.
+- Log: `experiments/diag_p100b.log`.
+
+---
+
+## RC-27 — P@100 structural cap diagnosed: metric unit, not detector failure
+
+**Date:** 2026-08-21 · **Run:** `detection/diag_p100.py` (seed 0; attacker ranks + P@100 at unique-host vs host-window units; UNCOMMITTED)
+**Result:** at unique-host level P@100 sits EXACTLY at bad/100 on every family (0.01–0.08) because there are only 1–8 attackers among thousands of hosts. Attackers themselves rank 1st–35th. At host-window level P@100 = 0.09–0.48.
+
+| family | bad | attacker ranks (fused) | P@100 hosts | P@100 host-windows |
+|---|---|---|---|---|
+| PortScan | 1 | 1 | 0.010 | 0.110 |
+| DDoS | 2 | 2, 4 | 0.020 | 0.430 |
+| Botnet | 8 | 3–35 | 0.080 | 0.390 |
+| WebAttacks | 1 | 1 | 0.010 | 0.330 |
+| Patator | 1 | 1 | 0.010 | 0.040* |
+| DoS | 1 | 3 | 0.010 | 0.300 |
+| Infiltration | 1 | 5 | 0.010 | 0.090 |
+
+Verdict:
+- **No model change can raise unique-host P@100 above bad/100 — it is mathematically capped.** Report attacker rank / recall@100 (=1.0) instead.
+- Per-host MAX aggregation fixes dilution outliers (Infiltration 5→1, DoS 3→1) but slightly hurts WebAttacks/Patator (1→11/12); mean-vs-max is a trade-off, not a win.
+- *Patator host-window 0.000 in this run vs RC-18's nonzero: different unit (host-window vs edge) and window size; queue saturation explanation from RC-18 still stands.
+
+---
+
+## RC-26 — Multi-window fusion 4-seeded + M5a-in/out ablation: pure 60s+300s wins; M5a actively harms
+
+**Date:** 2026-08-21 · **Run:** `detection/eval_mw_ablation_4seed.py --seeds 0 1 2 3` (full files, LogScaler, CUDA-deterministic flags, graphs cached across seeds; UNCOMMITTED)
+**Result:** six configs, identical host populations, 4 seeds:
+
+| Config | Mean AUC ± std | Verdict |
+|---|---|---|
+| **pure_rank_mean (60s+300s, NO M5a)** | **0.9987 ± 0.0008** | **new headline recipe** |
+| pure_rank_max | 0.9981 ± 0.0012 | ≈tied |
+| w60 alone | 0.9962 ± 0.0023 | strong |
+| w300 alone | 0.9961 ± 0.0034 | strong |
+| three_way_rm (+M5a) | 0.9872 ± 0.0015 | hurt by M5a |
+| m5a_multi (RC-25's recipe) | 0.9482 ± 0.0031 | **worst** |
+
+Verdict:
+- **Drop M5a from the multi-window fusion.** −5 pts vs pure, driven by WebAttacks flipping 0.50/0.69/0.99 across devices/arithmetic — M5a's contribution there is a coin flip. Gotcha #22 now has 4-seed evidence.
+- Fusion's real benefit is VARIANCE, not mean: +0.25 pts over singles is inside overlapping bands, but fusion's WORST seed (0.9978) beats both singles' worst (0.9929/0.9930).
+- **RC-25's "single-window" numbers were M5a-contaminated** ("60s = 0.968" was actually M5a⊕60s). True 60s-alone = 0.9962. The 0.9925 single-seed headline does not reproduce as stated; quote 0.9987 ± 0.0008 (pure) going forward.
+- Still beats PIKACHU 0.977 by +1.0 pt WITH error bars — first multi-seed-defensible claim vs the reference.
+- P@100 unchanged (~0.02 mean): AUC-only win.
+- Device matters: same seed gave WebAttacks 0.5048 (CPU retrain) vs 0.9948 (GPU) before determinism flags. All published numbers must state device + flags.
+- Env: torch 2.11.0+cu128 installed this session (RTX 3090); requirements.txt still pins CPU torch — UPDATE BEFORE NEXT MACHINE SETUP.
+- JSON: `experiments/mw_ablation_4seed.json`; log: `experiments/eval_mw_ablation_4seed.log`. Also run: `eval_mw_4seed.py` (earlier variant incl. M5a) → 0.9869 ± 0.0008 band, superseded by this ablation.
+
+---
+
+## RC-25-DUPLICATE-NOTE — Red-team harness: ownership note
+
+**Date:** 2026-08-21 · This session re-executed `harness/run_graph_harness.py --limit 0` (the module belongs to Person D / Avinash, committed 2026-07-19). The re-run's output files were deleted, then regenerated with D's own committed tool and documented command so `harness/results/m5b_evasion.{md,csv,json}` are present in the repo as before. The harness CODE was never modified. RC-14 remains the canonical record. Regeneration numbers this time: slow_scan evades at 10 windows, distributed_scan at 8 machines, cover_traffic/port_narrowing never evade — same directional verdicts as RC-14 (which measured 50/16/never/never); absolutes are harness-specific per run, cite RC-14 for quoted figures until D re-runs on the final model.
+---
+
 ## RC-25 — Multi-window fusion (60s + 300s LogScaler) beats PIKACHU by 0.0155 AUC
 
 **Date:** 2026-08-20 · **Run:** `detection/eval_mw_fusion.py` (LogScaler 60s + 300s, fused_rank_mean, single seed 0)

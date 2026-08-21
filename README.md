@@ -2,11 +2,36 @@
 
 Drift-Aware Explainable Anomaly Detection for Behavioral Threat Hunting.
 
+**New here?** Read [`docs/PROJECT_GUIDE.md`](docs/PROJECT_GUIDE.md) — a plain-language tour of what the project does, what we did, and where it stands.
+
 **Complete Reference (source of truth for TGPT / viva):** [`docs/COMPLETE_REFERENCE.md`](docs/COMPLETE_REFERENCE.md) — GitHub: https://github.com/DeepxD-code/Zero-Day
 
-> After any major finding, append it to `docs/COMPLETE_REFERENCE.md:§23` and bump `Last updated`. See `docs/COMPLETE_REFERENCE.md:§24` for the keep-current checklist. Detail lives in `CHANGELOG.md` (append-only) and `experiments/report_cards.md` (RC-01..RC-25).
+> After any major finding, append it to `docs/COMPLETE_REFERENCE.md:§23` and bump `Last updated`. See `docs/COMPLETE_REFERENCE.md:§24` for the keep-current checklist. Detail lives in `CHANGELOG.md` (append-only) and `experiments/report_cards.md` (RC cards).
 
+## Repo map — what leads to where
 
+```
+Zero-Day/
+├── docs/                     ← read-me-first material
+│   ├── PROJECT_GUIDE.md      ← plain-language tour (start here)
+│   ├── COMPLETE_REFERENCE.md ← full technical reference
+│   └── papers_faceoff.md     ← our numbers vs published papers
+├── detection/                ← THE PRODUCT: detector code + eval scripts
+│   └── README.md             ← file-by-file map with status labels
+├── experiments/              ← evidence: every number's reproducible source
+│   └── README.md             ← what each script established
+├── harness/                  ← Person D: adversarial evasion testing
+├── capture/                  ← Person A: flow capture & schema tools
+├── data/                     ← datasets (downloaded locally, never in git)
+├── CHANGELOG.md              ← append-only lab notebook (what & why, dated)
+├── CLAUDE.md                 ← project rules, gotchas, conventions
+└── experiments/report_cards.md ← one card per experiment (RC-01…RC-30)
+```
+
+**The one-sentence version:** `capture/` gets the data, `detection/graph_builder.py`
+turns it into graphs, `detection/gnn_model.py` learns what normal looks like,
+`detection/eval_*` scripts prove how well, `experiments/report_cards.md` records
+the proof, and `harness/` tries to break it.
 
 ## Setup (do this once per machine)
 

@@ -1,0 +1,39 @@
+{
+  "attack_labels": [
+    "DDoS attacks-LOIC-HTTP"
+  ],
+  "attack_start": "2018-02-20 01:14:17",
+  "train_flows": 165120,
+  "eval_flows": 7783628,
+  "train_graphs": 15,
+  "eval_graphs": 706,
+  "hosts": {
+    "n_total": 32935,
+    "n_bad": 10,
+    "p100_ceiling": 0.1,
+    "attacker_ranks_meanagg": {
+      "18.219.32.43": 13,
+      "18.218.115.60": 14,
+      "18.218.55.126": 15,
+      "18.218.229.235": 16,
+      "18.216.200.189": 17,
+      "18.219.9.1": 18,
+      "18.218.11.51": 19,
+      "52.14.136.135": 20,
+      "18.219.5.43": 22,
+      "18.216.24.42": 24
+    },
+    "recall_at_100_meanagg": 0.1,
+    "recall_at_100_maxagg": 0.1
+  },
+  "host_window": {
+    "n_windows": 898852,
+    "n_attacker_windows": 777,
+    "p100_raw": 0.01,
+    "p500_raw": 0.508,
+    "p100_min2nodes": 0.01,
+    "p100_min3nodes": 0.01,
+    "p100_min5nodes": 0.01,
+    "p100_min10nodes": 0.01
+  }
+}

@@ -1,0 +1,21 @@
+Device: cuda
+Flows loaded: 7,948,748
+Attack labels: ['DDoS attacks-LOIC-HTTP']
+First attack flow: 2018-02-20 01:14:17
+Window: 2018-02-20 01:00:00 .. 2018-02-20 12:59:59
+Train (pre-attack benign): 165,120 flows
+Eval  (post-attack-start): 7,783,628 flows
+Train graphs: 15
+Final loss: 0.000027
+Eval graphs: 706
+
+Hosts: 32,935 total, 10 malicious (P@100 ceiling 0.10)
+Attacker ranks (mean agg): {'18.219.32.43': 13, '18.218.115.60': 14, '18.218.55.126': 15, '18.218.229.235': 16, '18.216.200.189': 17, '18.219.9.1': 18, '18.218.11.51': 19, '52.14.136.135': 20, '18.219.5.43': 22, '18.216.24.42': 24}
+Host-windows: 898,852, attacker windows 777
+P@100 raw=0.01  P@500=0.508
+  P@100 min-2-node windows: 0.01
+  P@100 min-3-node windows: 0.01
+  P@100 min-5-node windows: 0.01
+  P@100 min-10-node windows: 0.01
+
+Saved: C:\Users\trex2\Potential-Gold\Zero-Day\experiments\external_ids2018_results.json

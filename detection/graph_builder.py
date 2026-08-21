@@ -82,6 +82,38 @@ NODE_FEATURE_NAMES = [
     "mean_duration",
 ]
 
+# v2 keeps indices 0-7 identical to v1 and appends shape features. The raw
+# counts alone cannot separate a busy fileserver from a scanner ("many peers,
+# many flows, many ports" describes both); ratios and entropies can.
+V2_FEATURE_NAMES = NODE_FEATURE_NAMES + [
+    "bytes_ratio",           # sent / (sent+recv): exfil vs download asymmetry
+    "flows_per_out_peer",    # scanner ~1 flow/peer; DDoS victim many flows/1 peer
+    "flows_per_in_peer",
+    "bytes_sent_per_flow",
+    "bytes_recv_per_flow",
+    "unique_src_ports",      # servers contacted by many client ports
+    "dst_port_entropy",      # uniform spread across ports = scanning
+    "protocol_entropy",
+    "tcp_frac",
+    "udp_frac",
+    "duration_std",
+]
+
+
+def node_feature_names(feature_set: str = "v1") -> list[str]:
+    if feature_set == "v2":
+        return V2_FEATURE_NAMES
+    return NODE_FEATURE_NAMES
+
+
+def _entropy(values: pd.Series) -> float:
+    """Shannon entropy (bits) of a value distribution; 0.0 for empty."""
+    vc = values.value_counts()
+    if len(vc) <= 1:
+        return 0.0
+    p = vc / vc.sum()
+    return float(-(p * np.log2(p)).sum())
+
 
 def read_flows(path, limit: int | None = None) -> pd.DataFrame:
     """Read a flow CSV. The CICIDS2017 TrafficLabelling files are not UTF-8."""
@@ -183,7 +215,8 @@ def _window_key(df: pd.DataFrame, window_seconds: int) -> pd.Series:
     return (epoch // window_seconds).astype(int)
 
 
-def build_graph(window_df: pd.DataFrame, k: int = 0) -> Data | None:
+def build_graph(window_df: pd.DataFrame, k: int = 0,
+                feature_set: str = "v1") -> Data | None:
     """Turn one time window of flows into a PyG graph.
 
     Nodes are hosts, edges are aggregated (src -> dst) communication.
@@ -191,7 +224,10 @@ def build_graph(window_df: pd.DataFrame, k: int = 0) -> Data | None:
 
     If k > 0, adds k nearest-neighbour auxiliary edges per host
     (cosine similarity on log1p-normalised node features).
+    feature_set="v2" appends 11 shape features (19 total); indices 0-7 are
+    identical to v1 so old checkpoints and SHAP mappings stay valid.
     """
+    feat_names = node_feature_names(feature_set)
     hosts = sorted(set(window_df["src_ip"]) | set(window_df["dst_ip"]))
     if len(hosts) < 2:
         return None
@@ -211,7 +247,7 @@ def build_graph(window_df: pd.DataFrame, k: int = 0) -> Data | None:
         ])
 
     # ---- nodes: per-host aggregates ----------------------------------------
-    x = np.zeros((len(hosts), len(NODE_FEATURE_NAMES)), dtype=np.float32)
+    x = np.zeros((len(hosts), len(feat_names)), dtype=np.float32)
     out_peers = window_df.groupby("src_ip")["dst_ip"].nunique()
     in_peers = window_df.groupby("dst_ip")["src_ip"].nunique()
     out_flows = window_df.groupby("src_ip").size()
@@ -240,6 +276,41 @@ def build_graph(window_df: pd.DataFrame, k: int = 0) -> Data | None:
         for host, i in index.items():
             x[i, 7] = float(dur.get(host, 0.0))
 
+    if feature_set == "v2":
+        sent_f = window_df.groupby("src_ip")["fwd_bytes"].sum() if "fwd_bytes" in window_df else None
+        recv_f = window_df.groupby("dst_ip")["bwd_bytes"].sum() if "bwd_bytes" in window_df else None
+        for host, i in index.items():
+            s = float(sent_f.get(host, 0.0)) if sent_f is not None else 0.0
+            r = float(recv_f.get(host, 0.0)) if recv_f is not None else 0.0
+            of = max(float(out_flows.get(host, 0)), 1.0)
+            inf = max(float(in_flows.get(host, 0)), 1.0)
+            x[i, 8] = s / (s + r + 1.0)
+            x[i, 9] = float(out_flows.get(host, 0)) / max(float(out_peers.get(host, 0)), 1.0)
+            x[i, 10] = float(in_flows.get(host, 0)) / max(float(in_peers.get(host, 0)), 1.0)
+            x[i, 11] = s / of
+            x[i, 12] = r / inf
+
+        if "src_port" in window_df.columns:
+            usp = window_df.groupby("dst_ip")["src_port"].nunique()
+            for host, i in index.items():
+                x[i, 13] = float(usp.get(host, 0))
+        if "dst_port" in window_df.columns:
+            pe = window_df.groupby("src_ip")["dst_port"].agg(_entropy)
+            for host, i in index.items():
+                x[i, 14] = float(pe.get(host, 0.0))
+        if "protocol" in window_df.columns:
+            proto_e = window_df.groupby("src_ip")["protocol"].agg(_entropy)
+            tcp = window_df.groupby("src_ip")["protocol"].apply(lambda s: (s == 6).mean())
+            udp = window_df.groupby("src_ip")["protocol"].apply(lambda s: (s == 17).mean())
+            for host, i in index.items():
+                x[i, 15] = float(proto_e.get(host, 0.0))
+                x[i, 16] = float(tcp.get(host, 0.0))
+                x[i, 17] = float(udp.get(host, 0.0))
+        if "flow_duration" in window_df.columns:
+            dstd = window_df.groupby("src_ip")["flow_duration"].std().fillna(0.0)
+            for host, i in index.items():
+                x[i, 18] = float(dstd.get(host, 0.0))
+
     data = Data(
         x=torch.tensor(x, dtype=torch.float32),
         edge_index=torch.tensor(edge_index, dtype=torch.long).t().contiguous(),
@@ -253,7 +324,8 @@ def build_graph(window_df: pd.DataFrame, k: int = 0) -> Data | None:
     return data
 
 
-def build_graphs(df: pd.DataFrame, window_seconds: int = 60, k: int = 0) -> list[Data]:
+def build_graphs(df: pd.DataFrame, window_seconds: int = 60, k: int = 0,
+                 feature_set: str = "v1") -> list[Data]:
     """Full pipeline: raw flow dataframe -> list of per-window graphs.
 
     If k > 0, adds k nearest-neighbour auxiliary edges per host per window.
@@ -263,7 +335,7 @@ def build_graphs(df: pd.DataFrame, window_seconds: int = 60, k: int = 0) -> list
 
     graphs = []
     for _, window_df in df.groupby(_window_key(df, window_seconds)):
-        g = build_graph(window_df, k=k)
+        g = build_graph(window_df, k=k, feature_set=feature_set)
         if g is not None:
             graphs.append(g)
     return graphs

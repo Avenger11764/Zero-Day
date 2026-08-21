@@ -1,0 +1,61 @@
+==========================================================================
+RED-TEAM HARNESS -- M5b (relational detector)
+device=cuda  limit=FULL FILE
+==========================================================================
+
+Benign traffic: 529,918 flows from Monday-WorkingHours.pcap_ISCX.csv
+  487 benign graphs -> training M5b...
+  final loss 0.000060
+  M5b threshold (99th pct of 83,185 benign host-windows) = 0.000924
+  M5a threshold (99th pct of 529,918 benign flows) = 0.003746
+
+slow_scan
+      1  M5b DETECTED score=0.053104 rank=14/83385   M5a flags 0.5% of the flows (blind)
+      2  M5b DETECTED score=0.015056 rank=56/83386   M5a flags 0.5% of the flows (blind)
+      5  M5b DETECTED score=0.002486 rank=373/83389   M5a flags 0.5% of the flows (blind)
+     10  M5b EVADED   score=0.000661 rank=1077/83394   M5a flags 0.5% of the flows (blind)
+     20  M5b EVADED   score=0.000185 rank=2242/83404   M5a flags 0.5% of the flows (blind)
+     50  M5b EVADED   score=0.000060 rank=3869/83434   M5a flags 0.5% of the flows (blind)
+
+distributed_scan
+      1  M5b DETECTED score=0.053104 rank=14/83385   M5a flags 0.5% of the flows (blind)
+      2  M5b DETECTED score=0.014534 rank=59/83386   M5a flags 0.5% of the flows (blind)
+      4  M5b DETECTED score=0.003463 rank=271/83388   M5a flags 0.5% of the flows (blind)
+      8  M5b EVADED   score=0.000858 rank=892/83392   M5a flags 0.5% of the flows (blind)
+     16  M5b EVADED   score=0.000211 rank=2104/83400   M5a flags 0.5% of the flows (blind)
+     32  M5b EVADED   score=0.000061 rank=3822/83416   M5a flags 0.5% of the flows (blind)
+
+cover_traffic
+      0  M5b DETECTED score=0.053104 rank=14/83385   M5a flags 0.5% of the flows (blind)
+     50  M5b DETECTED score=0.051919 rank=14/83385   M5a flags 0.8% of the flows (blind)
+    200  M5b DETECTED score=0.050409 rank=15/83385   M5a flags 1.0% of the flows (blind)
+    500  M5b DETECTED score=0.056911 rank=14/83385   M5a flags 1.0% of the flows (blind)
+   1000  M5b DETECTED score=0.090531 rank=12/83385   M5a flags 0.9% of the flows (blind)
+   2000  M5b DETECTED score=0.116689 rank=6/83385   M5a flags 0.9% of the flows (blind)
+
+port_narrowing
+      8  M5b DETECTED score=0.053120 rank=14/83385   M5a flags 0.5% of the flows (blind)
+      4  M5b DETECTED score=0.053106 rank=14/83385   M5a flags 0.5% of the flows (blind)
+      3  M5b DETECTED score=0.053104 rank=14/83385   M5a flags 0.5% of the flows (blind)
+      2  M5b DETECTED score=0.053103 rank=14/83385   M5a flags 0.5% of the flows (blind)
+      1  M5b DETECTED score=0.053102 rank=14/83385   M5a flags 0.5% of the flows (blind)
+
+==========================================================================
+# Red-team evaluation — M5b (relational detector)
+
+Benign: `Monday-WorkingHours.pcap_ISCX.csv`, 529,918 flows, 487 graphs. Sweep size 200 hosts.
+
+Detection threshold: 99th percentile of benign host-window scores (`0.000924`). Anything at or below that is inside the false-positive floor and does not count as a catch.
+
+| Technique | Evades at | Cost to the attacker |
+| --- | --- | --- |
+| slow_scan | `10` | sweep stretched over 10 windows (20 hosts/min) |
+| distributed_scan | `8` | needs 8 attacker machines |
+| cover_traffic | **never** | detected at every setting tried |
+| port_narrowing | **never** | detected at every setting tried |
+
+## Control — was the attack fair to M5a?
+
+M5a stayed at its false-positive floor on **100%** of variants. The attacker's flows are real benign flows with only `src_ip`/`dst_ip`/`dst_port`/`timestamp` rewritten, so M5a is blind to them by construction. That is what makes any M5b detection attributable to structure rather than to odd-looking flows.
+
+Wrote C:\Users\trex2\Potential-Gold\Zero-Day\harness\results\m5b_evasion.md (+ .csv, .json)

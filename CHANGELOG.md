@@ -24,6 +24,55 @@ Template:
 
 ---
 
+## 2026-08-21 — Multi-window fusion confirmed & corrected; P@100 diagnosed; IDS2018 replication; feature set v2 lands
+**Author:** Deep (Person B — Detection Modeling) · assisted by opencode
+
+### What ran
+All GPU (RTX 3090, torch 2.11.0+cu128 installed this session), CUDA-deterministic
+flags (`cudnn.deterministic`, `CUBLAS_WORKSPACE_CONFIG`), full files, LogScaler:
+1. `detection/eval_mw_ablation_4seed.py --seeds 0 1 2 3` — six fusion configs on
+   identical host populations (RC-26).
+2. `detection/diag_p100.py`, `diag_p100b.py` — P@100 structural-cap diagnosis and
+   the small-window-filter test (RC-27/28).
+3. `detection/eval_external_ids2018.py` — schema-mapped CSE-CIC-IDS2018 Feb-20
+   (LOIC-HTTP), trained on pre-attack benign only (RC-29).
+4. `feature_set="v2"` REBUILT into `graph_builder.py` (19 node features, indices
+   0–7 identical to v1) — CLAUDE.md claimed v2 existed but no trace survived in
+   git/stashes; treated as lost uncommitted work. Evaluated 4 seeds plus a
+   `latent=19` capacity control via `detection/eval_feature_set_v2.py` (RC-30).
+5. Red-team harness re-run outputs deleted then regenerated with D's own
+   committed tool (ownership preserved; see RC-25-DUPLICATE-NOTE).
+6. Repo hygiene: superseded eval scripts and `Resources_Stash/` removed;
+   `docs/PROJECT_GUIDE.md`, root repo map and `detection/README.md` added.
+
+### Results
+| Finding | Numbers |
+|---|---|
+| **New headline recipe: pure 60s+300s rank_mean, NO M5a** | **0.9987 ± 0.0008** (4 seeds) |
+| M5a forced into the fusion (RC-25's recipe) | 0.9482 ± 0.0031 — worst config; WebAttacks flips 0.50/0.69/0.99 across devices |
+| True single windows (RC-25's were M5a-contaminated) | w60 0.9962 ± 0.0023, w300 0.9961 ± 0.0034 |
+| Fusion benefit is variance, not mean | worst seed 0.9978 vs singles' worst 0.9929/0.9930 |
+| P@100 unique-host cap | sits exactly at bad/100 (0.01–0.08); attackers rank 1–35; recall@100 = 1.0 → report rank/recall, not P@100 |
+| Small-window filter | NEGATIVE — FP queue median 128–175 nodes; noise is drift, not junk windows |
+| IDS2018 external replication | all 10 attackers rank 13–24 of 32,935 hosts; recall@100 = 1.0; host-window P@100 = 0.01 (777 attacker windows; future work) |
+| Feature set v2 | **0.9998 ± 0.0000**; Botnet 0.9328 → 0.9987 (+6.6 pts), Patator → 1.0000, WebAttacks → 1.0000 |
+| latent=19 control | ≈identical (0.9996) → gains are FEATURES, not the new bottleneck |
+
+### Caveats
+- Device changes results: same seed gave WebAttacks 0.5048 (CPU retrain) vs
+  0.9948 (GPU) before determinism flags. State device + flags on every number.
+- Monday-calibration optimism bias applies to everything above.
+- AUC near ceiling: quote family-level deltas, not the mean's fourth decimal.
+- `requirements.txt` still pins CPU torch — update before next machine setup.
+- IDS2018 used only ~14 min of benign training traffic (15 graphs).
+
+### Decisions
+- Adopt pure rank_mean (no M5a) as the multi-window production recipe.
+- Report attacker rank / recall@100 operationally; host-level P@100 is retired
+  as a headline metric (structurally capped).
+- `feature_set="v2"` is available but is a build-path change — demo/sign-off
+  before making it default (gotcha #23 position-stability applies).
+
 ## 2026-08-20 — Multi-window fusion (60s + 300s) achieves 0.9925 mean AUC, BEATS PIKACHU by 0.0155
 **Author:** Deep (Person B — Detection Modeling) · assisted by opencode
 

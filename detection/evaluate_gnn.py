@@ -37,14 +37,24 @@ import numpy as np
 import pandas as pd
 import torch
 
-from graph_builder import (
-    NODE_FEATURE_NAMES,
-    build_graphs,
-    graph_health,
-    normalize_columns,
-    read_flows,
-)
-from gnn_model import NodeScaler, train
+try:
+    from detection.graph_builder import (
+        NODE_FEATURE_NAMES,
+        build_graphs,
+        graph_health,
+        normalize_columns,
+        read_flows,
+    )
+    from detection.gnn_model import NodeScaler, train
+except ImportError:  # script-style execution: python detection/evaluate_gnn.py
+    from graph_builder import (
+        NODE_FEATURE_NAMES,
+        build_graphs,
+        graph_health,
+        normalize_columns,
+        read_flows,
+    )
+    from gnn_model import NodeScaler, train
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 FLOWS = REPO_ROOT / "data" / "GeneratedLabelledFlows" / "TrafficLabelling"

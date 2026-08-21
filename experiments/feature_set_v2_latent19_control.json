@@ -1,0 +1,89 @@
+{
+  "0": {
+    "PortScan": {
+      "w60_auc": 0.9998,
+      "w300_auc": 1.0,
+      "pure_rank_mean_auc": 1.0,
+      "p100": 0.01,
+      "attacker_ranks": [
+        1
+      ],
+      "n_hosts": 4404,
+      "n_bad": 1
+    },
+    "DDoS": {
+      "w60_auc": 1.0,
+      "w300_auc": 0.9996,
+      "pure_rank_mean_auc": 0.9998,
+      "p100": 0.02,
+      "attacker_ranks": [
+        1,
+        3
+      ],
+      "n_hosts": 2567,
+      "n_bad": 2
+    },
+    "Botnet": {
+      "w60_auc": 0.9932,
+      "w300_auc": 0.9984,
+      "pure_rank_mean_auc": 0.998,
+      "p100": 0.08,
+      "attacker_ranks": [
+        7,
+        8,
+        9,
+        10,
+        15,
+        18,
+        19,
+        37
+      ],
+      "n_hosts": 5350,
+      "n_bad": 8
+    },
+    "Infiltration": {
+      "w60_auc": 0.9936,
+      "w300_auc": 0.9988,
+      "pure_rank_mean_auc": 0.9993,
+      "p100": 0.01,
+      "attacker_ranks": [
+        5
+      ],
+      "n_hosts": 6060,
+      "n_bad": 1
+    },
+    "WebAttacks": {
+      "w60_auc": 1.0,
+      "w300_auc": 1.0,
+      "pure_rank_mean_auc": 1.0,
+      "p100": 0.01,
+      "attacker_ranks": [
+        1
+      ],
+      "n_hosts": 5217,
+      "n_bad": 1
+    },
+    "Patator (FTP/SSH)": {
+      "w60_auc": 0.9999,
+      "w300_auc": 0.9999,
+      "pure_rank_mean_auc": 0.9999,
+      "p100": 0.01,
+      "attacker_ranks": [
+        2
+      ],
+      "n_hosts": 8494,
+      "n_bad": 1
+    },
+    "DoS / Heartbleed": {
+      "w60_auc": 1.0,
+      "w300_auc": 1.0,
+      "pure_rank_mean_auc": 1.0,
+      "p100": 0.01,
+      "attacker_ranks": [
+        1
+      ],
+      "n_hosts": 9015,
+      "n_bad": 1
+    }
+  }
+}

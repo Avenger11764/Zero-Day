@@ -1,0 +1,86 @@
+Device: cuda
+Monday benign flows: 529,918
+Benign graphs: 60s=487, 300s=98
+  60s baseline: 83185 host-windows
+  300s baseline: 47805 host-windows
+  M5a baseline: 8239 hosts, 60s: 83185, 300s: 47805
+
+============================================================
+SEED 0
+============================================================
+
+Training 60s model (seed=0)...
+  60s final loss: 0.000008
+
+Training 300s model (seed=0)...
+  300s final loss: 0.000022
+  PortScan: AUC=1.0000 P@100=0.010
+  DDoS: AUC=0.9993 P@100=0.020
+  Botnet: AUC=0.9359 P@100=0.070
+  Infiltration: AUC=0.9994 P@100=0.010
+  WebAttacks: AUC=0.9948 P@100=0.010
+  Patator (FTP/SSH): AUC=0.9854 P@100=0.000
+  DoS / Heartbleed: AUC=1.0000 P@100=0.010
+
+============================================================
+SEED 1
+============================================================
+
+Training 60s model (seed=1)...
+  60s final loss: 0.000040
+
+Training 300s model (seed=1)...
+  300s final loss: 0.000014
+  PortScan: AUC=1.0000 P@100=0.010
+  DDoS: AUC=0.9990 P@100=0.020
+  Botnet: AUC=0.9321 P@100=0.070
+  Infiltration: AUC=0.9996 P@100=0.010
+  WebAttacks: AUC=0.9952 P@100=0.010
+  Patator (FTP/SSH): AUC=0.9853 P@100=0.000
+  DoS / Heartbleed: AUC=1.0000 P@100=0.010
+
+============================================================
+SEED 2
+============================================================
+
+Training 60s model (seed=2)...
+  60s final loss: 0.000033
+
+Training 300s model (seed=2)...
+  300s final loss: 0.000008
+  PortScan: AUC=1.0000 P@100=0.010
+  DDoS: AUC=0.9985 P@100=0.020
+  Botnet: AUC=0.9324 P@100=0.070
+  Infiltration: AUC=0.9996 P@100=0.010
+  WebAttacks: AUC=0.9955 P@100=0.010
+  Patator (FTP/SSH): AUC=0.9784 P@100=0.000
+  DoS / Heartbleed: AUC=1.0000 P@100=0.010
+
+============================================================
+SEED 3
+============================================================
+
+Training 60s model (seed=3)...
+  60s final loss: 0.000040
+
+Training 300s model (seed=3)...
+  300s final loss: 0.000055
+  PortScan: AUC=1.0000 P@100=0.010
+  DDoS: AUC=0.9998 P@100=0.020
+  Botnet: AUC=0.9307 P@100=0.070
+  Infiltration: AUC=0.9998 P@100=0.010
+  WebAttacks: AUC=0.9950 P@100=0.010
+  Patator (FTP/SSH): AUC=0.9773 P@100=0.000
+  DoS / Heartbleed: AUC=1.0000 P@100=0.010
+
+============================================================
+4-SEED BAND RESULTS
+============================================================
+Seed 0: mean AUC = 0.9878, std = 0.0218
+Seed 1: mean AUC = 0.9873, std = 0.0231
+Seed 2: mean AUC = 0.9863, std = 0.0232
+Seed 3: mean AUC = 0.9861, std = 0.0239
+
+Overall: mean = 0.9869, std = 0.0234
+
+Saved: C:\Users\trex2\Potential-Gold\Zero-Day\experiments\multiwindow_4seed_band.json

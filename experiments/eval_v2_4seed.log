@@ -1,0 +1,61 @@
+Device: cuda
+Monday benign flows: 529,918
+Benign graphs: 60s=487, 300s=98, x=(58, 19)
+  PortScan: cached (150x60s)
+  DDoS: cached (93x60s)
+  Botnet: cached (241x60s)
+  Infiltration: cached (245x60s)
+  WebAttacks: cached (241x60s)
+  Patator (FTP/SSH): cached (488x60s)
+  DoS / Heartbleed: cached (509x60s)
+
+===== SEED 0 =====
+losses: 60s=0.000220 300s=0.000105
+  PortScan: fused=0.9998 w60=0.9998 w300=1.0000 ranks=[2]
+  DDoS: fused=1.0000 w60=1.0000 w300=1.0000 ranks=[1, 2]
+  Botnet: fused=0.9987 w60=0.9987 w300=0.9975 ranks=[3, 7, 9, 10, 11, 13, 14, 25]
+  Infiltration: fused=0.9998 w60=0.9998 w300=0.9997 ranks=[2]
+  WebAttacks: fused=1.0000 w60=1.0000 w300=1.0000 ranks=[1]
+  Patator (FTP/SSH): fused=1.0000 w60=1.0000 w300=1.0000 ranks=[1]
+  DoS / Heartbleed: fused=1.0000 w60=1.0000 w300=1.0000 ranks=[1]
+
+===== SEED 1 =====
+losses: 60s=0.000206 300s=0.000088
+  PortScan: fused=1.0000 w60=0.9998 w300=0.9998 ranks=[1]
+  DDoS: fused=1.0000 w60=0.9988 w300=0.9998 ranks=[1, 2]
+  Botnet: fused=0.9986 w60=0.9941 w300=0.9943 ranks=[5, 6, 7, 8, 10, 12, 13, 34]
+  Infiltration: fused=0.9998 w60=0.9980 w300=0.9982 ranks=[2]
+  WebAttacks: fused=1.0000 w60=0.9998 w300=1.0000 ranks=[1]
+  Patator (FTP/SSH): fused=1.0000 w60=0.9994 w300=1.0000 ranks=[1]
+  DoS / Heartbleed: fused=1.0000 w60=0.9994 w300=1.0000 ranks=[1]
+
+===== SEED 2 =====
+losses: 60s=0.000179 300s=0.000090
+  PortScan: fused=1.0000 w60=0.9998 w300=1.0000 ranks=[1]
+  DDoS: fused=1.0000 w60=1.0000 w300=0.9996 ranks=[1, 2]
+  Botnet: fused=0.9990 w60=0.9989 w300=0.9974 ranks=[3, 4, 7, 8, 10, 11, 13, 24]
+  Infiltration: fused=0.9993 w60=0.9997 w300=0.9983 ranks=[5]
+  WebAttacks: fused=1.0000 w60=1.0000 w300=1.0000 ranks=[1]
+  Patator (FTP/SSH): fused=0.9999 w60=0.9999 w300=1.0000 ranks=[2]
+  DoS / Heartbleed: fused=1.0000 w60=1.0000 w300=1.0000 ranks=[1]
+
+===== SEED 3 =====
+losses: 60s=0.000191 300s=0.000089
+  PortScan: fused=0.9998 w60=0.9998 w300=0.9995 ranks=[2]
+  DDoS: fused=1.0000 w60=1.0000 w300=0.9996 ranks=[1, 2]
+  Botnet: fused=0.9985 w60=0.9974 w300=0.9984 ranks=[5, 6, 8, 9, 13, 15, 16, 26]
+  Infiltration: fused=0.9998 w60=0.9884 w300=0.9993 ranks=[2]
+  WebAttacks: fused=1.0000 w60=1.0000 w300=1.0000 ranks=[1]
+  Patator (FTP/SSH): fused=1.0000 w60=1.0000 w300=1.0000 ranks=[1]
+  DoS / Heartbleed: fused=1.0000 w60=1.0000 w300=0.9999 ranks=[1]
+
+=== V2 SUMMARY (mean over seeds) ===
+  Botnet               0.9987
+  DDoS                 1.0000
+  DoS / Heartbleed     1.0000
+  Infiltration         0.9997
+  Patator (FTP/SSH)    1.0000
+  PortScan             0.9999
+  WebAttacks           1.0000
+  MEAN                 0.9998 +/- 0.0000
+Saved: C:\Users\trex2\Potential-Gold\Zero-Day\experiments\feature_set_v2_results.json

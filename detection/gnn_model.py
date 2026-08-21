@@ -46,12 +46,20 @@ import torch
 import torch.nn as nn
 from torch_geometric.nn import SAGEConv
 
-from graph_builder import (  # noqa: E402
-    NODE_FEATURE_NAMES,
-    build_graphs,
-    normalize_columns,
-    _synthetic_flows,
-)
+try:
+    from detection.graph_builder import (  # noqa: E402
+        NODE_FEATURE_NAMES,
+        build_graphs,
+        normalize_columns,
+        _synthetic_flows,
+    )
+except ImportError:  # script-style execution: python detection/gnn_model.py
+    from graph_builder import (  # noqa: E402
+        NODE_FEATURE_NAMES,
+        build_graphs,
+        normalize_columns,
+        _synthetic_flows,
+    )
 
 OUT_DIR = Path(__file__).resolve().parent
 MODEL_PATH = OUT_DIR / "gnn_autoencoder_v1.pt"

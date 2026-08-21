@@ -1,0 +1,75 @@
+Device: cuda
+Monday benign flows: 529,918
+Benign graphs: 60s=487, 300s=98
+Caching attack graphs + M5a scores (once, seed-independent)...
+  PortScan: 150x60s 30x300s 1 malicious hosts
+  DDoS: 93x60s 19x300s 2 malicious hosts
+  Botnet: 241x60s 49x300s 8 malicious hosts
+  Infiltration: 245x60s 49x300s 1 malicious hosts
+  WebAttacks: 241x60s 49x300s 1 malicious hosts
+  Patator (FTP/SSH): 488x60s 99x300s 1 malicious hosts
+  DoS / Heartbleed: 509x60s 103x300s 1 malicious hosts
+
+============================================================
+SEED 0
+============================================================
+  60s final loss: 0.000006
+  300s final loss: 0.000011
+  PortScan: w60=0.9998 w300=0.9998 pure_rank_mean=0.9998 pure_rank_max=0.9998 m5a_multi=0.9998 three_way_rm=1.0000
+  DDoS: w60=0.9969 w300=0.9996 pure_rank_mean=0.9992 pure_rank_max=0.9992 m5a_multi=0.9998 three_way_rm=0.9998
+  Botnet: w60=0.9886 w300=0.9913 pure_rank_mean=0.9966 pure_rank_max=0.9933 m5a_multi=0.9711 three_way_rm=0.9930
+  Infiltration: w60=0.9652 w300=0.9988 pure_rank_mean=0.9992 pure_rank_max=0.9987 m5a_multi=1.0000 three_way_rm=1.0000
+  WebAttacks: w60=1.0000 w300=0.9998 pure_rank_mean=1.0000 pure_rank_max=0.9998 m5a_multi=0.6829 three_way_rm=0.9258
+  Patator (FTP/SSH): w60=0.9998 w300=1.0000 pure_rank_mean=1.0000 pure_rank_max=0.9999 m5a_multi=0.9806 three_way_rm=0.9967
+  DoS / Heartbleed: w60=1.0000 w300=0.9997 pure_rank_mean=0.9999 pure_rank_max=0.9998 m5a_multi=0.9999 three_way_rm=1.0000
+
+============================================================
+SEED 1
+============================================================
+  60s final loss: 0.000041
+  300s final loss: 0.000007
+  PortScan: w60=1.0000 w300=1.0000 pure_rank_mean=1.0000 pure_rank_max=1.0000 m5a_multi=1.0000 three_way_rm=1.0000
+  DDoS: w60=0.9945 w300=0.9943 pure_rank_mean=0.9982 pure_rank_max=0.9930 m5a_multi=0.9996 three_way_rm=0.9998
+  Botnet: w60=0.9913 w300=0.9655 pure_rank_mean=0.9908 pure_rank_max=0.9852 m5a_multi=0.9716 three_way_rm=0.9913
+  Infiltration: w60=0.9929 w300=0.9967 pure_rank_mean=0.9998 pure_rank_max=0.9997 m5a_multi=1.0000 three_way_rm=1.0000
+  WebAttacks: w60=0.9983 w300=0.9994 pure_rank_mean=0.9996 pure_rank_max=0.9988 m5a_multi=0.6961 three_way_rm=0.9224
+  Patator (FTP/SSH): w60=0.9984 w300=0.9996 pure_rank_mean=0.9998 pure_rank_max=0.9991 m5a_multi=0.9854 three_way_rm=0.9976
+  DoS / Heartbleed: w60=0.9998 w300=0.9992 pure_rank_mean=1.0000 pure_rank_max=0.9996 m5a_multi=1.0000 three_way_rm=1.0000
+
+============================================================
+SEED 2
+============================================================
+  60s final loss: 0.000007
+  300s final loss: 0.000006
+  PortScan: w60=0.9957 w300=1.0000 pure_rank_mean=0.9991 pure_rank_max=1.0000 m5a_multi=0.9995 three_way_rm=1.0000
+  DDoS: w60=0.9998 w300=0.9979 pure_rank_mean=1.0000 pure_rank_max=0.9992 m5a_multi=0.9996 three_way_rm=1.0000
+  Botnet: w60=0.9889 w300=0.9897 pure_rank_mean=0.9944 pure_rank_max=0.9890 m5a_multi=0.9709 three_way_rm=0.9892
+  Infiltration: w60=1.0000 w300=0.9647 pure_rank_mean=0.9917 pure_rank_max=1.0000 m5a_multi=1.0000 three_way_rm=1.0000
+  WebAttacks: w60=0.9967 w300=0.9998 pure_rank_mean=0.9996 pure_rank_max=0.9996 m5a_multi=0.7025 three_way_rm=0.9089
+  Patator (FTP/SSH): w60=0.9992 w300=0.9995 pure_rank_mean=1.0000 pure_rank_max=0.9989 m5a_multi=0.9827 three_way_rm=0.9972
+  DoS / Heartbleed: w60=1.0000 w300=0.9996 pure_rank_mean=0.9999 pure_rank_max=0.9999 m5a_multi=0.9998 three_way_rm=1.0000
+
+============================================================
+SEED 3
+============================================================
+  60s final loss: 0.000034
+  300s final loss: 0.000011
+  PortScan: w60=1.0000 w300=1.0000 pure_rank_mean=1.0000 pure_rank_max=1.0000 m5a_multi=0.9995 three_way_rm=1.0000
+  DDoS: w60=0.9949 w300=1.0000 pure_rank_mean=0.9988 pure_rank_max=1.0000 m5a_multi=0.9998 three_way_rm=0.9994
+  Botnet: w60=0.9957 w300=0.9976 pure_rank_mean=0.9987 pure_rank_max=0.9952 m5a_multi=0.9689 three_way_rm=0.9943
+  Infiltration: w60=0.9967 w300=0.9998 pure_rank_mean=0.9993 pure_rank_max=0.9998 m5a_multi=1.0000 three_way_rm=1.0000
+  WebAttacks: w60=1.0000 w300=1.0000 pure_rank_mean=1.0000 pure_rank_max=1.0000 m5a_multi=0.6582 three_way_rm=0.9291
+  Patator (FTP/SSH): w60=1.0000 w300=1.0000 pure_rank_mean=1.0000 pure_rank_max=1.0000 m5a_multi=0.9820 three_way_rm=0.9961
+  DoS / Heartbleed: w60=0.9999 w300=0.9999 pure_rank_mean=1.0000 pure_rank_max=0.9998 m5a_multi=0.9996 three_way_rm=1.0000
+
+======================================================================
+MEAN AUC PER CONFIG (4 seeds)
+======================================================================
+  w60             0.9962 +/- 0.0023   [0.9929, 0.9965, 0.9972, 0.9982]
+  w300            0.9961 +/- 0.0034   [0.9984, 0.9935, 0.993, 0.9996]
+  pure_rank_mean  0.9987 +/- 0.0008   [0.9992, 0.9983, 0.9978, 0.9995]
+  pure_rank_max   0.9981 +/- 0.0012   [0.9986, 0.9965, 0.9981, 0.9993]
+  m5a_multi       0.9482 +/- 0.0031   [0.9477, 0.9504, 0.9507, 0.944]
+  three_way_rm    0.9872 +/- 0.0015   [0.9879, 0.9873, 0.985, 0.9884]
+
+Saved: C:\Users\trex2\Potential-Gold\Zero-Day\experiments\mw_ablation_4seed.json
