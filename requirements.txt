@@ -17,11 +17,14 @@ scikit-learn==1.9.0
 matplotlib==3.11.0
 
 # ── Deep learning ────────────────────────────────────────────────────
-# CUDA 12.1 build. Requires the PyTorch index below.
+# CUDA 12.8 build (tested on RTX 3090, driver 591.86 / CUDA 13.1).
+# Requires the PyTorch index below.
 # On a machine with NO NVIDIA GPU, delete the --extra-index-url line and use
-# the plain CPU build instead:   torch==2.5.1
---extra-index-url https://download.pytorch.org/whl/cu121
-torch==2.5.1+cu121
+# the plain CPU build instead:   torch==2.11.0
+# NOTE: results are device-sensitive (see CLAUDE.md gotcha #24) — record which
+# build produced every published number.
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch==2.11.0+cu128
 
 # ── Explainability (Person C seam / used by detection/shap_explainer.py) ──
 # NOT currently installed in the laptop venv, which is why

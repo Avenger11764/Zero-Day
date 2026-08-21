@@ -175,6 +175,21 @@ push it.** It holds the full spec PDF and the weeks 4–6 roadmap.
     is used (19 features, not 8). Index by position instead; indices 0–7 are
     guaranteed stable across feature sets.
 
+24. **Results are device-sensitive — record the device on every number.**
+    The same seed gave WebAttacks 0.5048 on a CPU retrain and 0.9948 on GPU
+    (2026-08-21): cuBLAS/cuDNN reduction order changes training trajectories,
+    and knife-edge families flip. `torch.manual_seed` alone does NOT pin CUDA.
+    Every eval script must call the `set_seed()` helper (adds
+    `cuda.manual_seed_all`, `cudnn.deterministic=True`, `benchmark=False`,
+    `CUBLAS_WORKSPACE_CONFIG=:4096:8`) and every published number must state
+    device + torch build. Never mix devices inside one comparison table.
+
+25. **Feature set v2 was lost once — treat uncommitted work as nonexistent.**
+    CLAUDE.md previously claimed v2 was "built, self-tested" but no trace
+    survived in git, stashes, or the working tree; it was rebuilt from scratch
+    on 2026-08-21. Lesson: if it isn't committed, it doesn't exist. Commit
+    (even to a branch) before ending a session that produced code.
+
 ## Module map (`detection/`)
 
 | File | Module | What it is |
@@ -188,6 +203,11 @@ push it.** It holds the full spec PDF and the weeks 4–6 roadmap.
 | `ensembler.py` | M5c | fuses M5a + M5b, emits the ablation table |
 | `alert_pipeline.py` | seam | `score_window()` → ScoredAlerts with both sub-scores |
 | `evaluate_gnn.py` / `run_evaluation_suite.py` | eval | held-out attack-family protocol |
+| `eval_mw_ablation_4seed.py` | eval | **reference implementation** — 6-config fusion ablation, 4-seeded, CUDA-deterministic (RC-26) |
+| `eval_feature_set_v2.py` | eval | feature set v1 vs v2 + latent capacity control (RC-30) |
+| `eval_external_ids2018.py` / `eval_external_ctu13.py` | eval | external replication on IDS2018 / CTU-13 (RC-29/32) |
+| `eval_baselines_4seed.py` | eval | PCA/IF/MLP-AE baselines on identical features (RC-31) |
+| `diag_p100.py` / `diag_p100b.py` | eval | P@100 structural-cap diagnostics (RC-27/28) |
 | `ablation.py` | eval | M5a vs M5b mechanism demo on constructed traffic |
 | `capture/schema_mapper.py` | data | content-based column identification |
 | `capture/pcap_to_flows.py` | data | pcap → flows without CICFlowMeter |
@@ -217,38 +237,40 @@ Everything has a `--help` and most have a self-test that needs no dataset
   flows. Ground truth is per-host; projecting a host score onto every flow
   would fabricate precision.
 
-## Current results (as of 2026-08-11) — FULL FILES, seeded
+## Current results (as of 2026-08-21) — GPU, CUDA-deterministic, 4 seeds
 
-**M5b-graph, mean ROC-AUC 0.9300** across 7 held-out families, whole files,
-`--seed 0`, trained on Monday (487 graphs):
+**Headline: pure 60s+300s rank_mean fusion (NO M5a), feature set v2 (19 features):
+mean ROC-AUC 0.9987 ± 0.0008** across 7 held-out families
+(`eval_feature_set_v2.py`, RC-30). Without v2 features: 0.9987 ± 0.0008 also
+holds for the 8-feature variant at fusion level (RC-26) — v2's win is per-family
+(Botnet 0.9328 → 0.9987), not the mean.
 
-| Family | ROC-AUC | P@100 | Best rank |
-| --- | --- | --- | --- |
-| Patator (FTP/SSH) | 0.9706 | 0.000 | 245 of 67,896 |
-| WebAttacks | 0.9546 | 0.000 | 278 of 30,483 |
-| DoS / Heartbleed | 0.9343 | 0.290 | 13 of 69,008 |
-| DDoS | 0.9227 | 0.420 | 1 of 10,192 |
-| Infiltration | 0.9174 | 0.410 | 1 of 34,940 |
-| Botnet | 0.9115 | 0.600 | 7 of 32,009 |
-| PortScan | 0.8991 | 0.110 | 1 of 20,553 |
+| Family | v2 fused AUC | Attacker ranks |
+| --- | --- | --- |
+| PortScan / DoS / DDoS | 0.9999–1.0000 | 1–4 |
+| WebAttacks / Patator | 1.0000 | 1–5 |
+| Infiltration | 0.9997 | 2 |
+| Botnet | 0.9987 | 5–34 |
 
-Versus the old `--limit 150000` round: mean AUC **down** (0.9436 → 0.9300) but
-**P@100 up a lot** (Botnet 0.44 → 0.60, DDoS 0.32 → 0.42, Infiltration
-0.20 → 0.41). More data helps the metric an analyst actually experiences even as
-the averaged ranking metric falls. **Patator and WebAttacks are still
-P@100 = 0.000** at AUC 0.97 and 0.95 — that survived full data, so it is a real
-weakness, not a small-sample artefact.
+**Operational claim (quote this, not P@100):** every attacker ranks in the top
+~35 of thousands on CICIDS2017; top 24 of 32,935 on IDS2018 (RC-29); infected
+host in the top 0.06% of 300k–500k-host real botnet networks on all three CTU-13
+scenarios with genuine C&C infrastructure ranked #1–2 (RC-32). recall@100 = 1.0
+on both CIC datasets. Host-level P@100 is structurally capped at bad/100 — do
+not use it as a headline metric (RC-27).
 
-**The temporal half is a null result.** Compared at host granularity, both arms
-aggregated identically, mean Δ (fused − graph) = **+0.0005** across 7 families;
-five are identical to four decimal places. It also only covers hosts seen in 5+
-consecutive windows — **18–32% of hosts**. Caveat: most families have exactly
-**one** malicious host, so at host granularity both arms sit above 0.98 and the
-metric is near-saturated. A sharper test is needed before calling it final.
+**Baselines beaten under identical conditions** (RC-31): PCA 0.9417 · Isolation
+Forest 0.9357 · plain MLP-AE 0.9517 vs ours 0.9987 — same features, same units,
++4.7 pts over the best, concentrated in topology families.
 
-**The M5a-vs-M5b ablation numbers above have NOT been re-run since the fixes.**
-`ablation_table.md` still holds `--limit 150000`, unseeded figures produced
-before the WebAttacks and seeding bugs were found. Treat it as stale.
+**Closed negatives (do not revisit):** temporal/LSTM half adds nothing (RC-20);
+LODO 5× training data hurts (gotcha #10); k=5 sim edges hurt on production
+architecture; M5a in multi-window fusion is actively harmful (−5 pts, RC-26);
+small-window filtering changes nothing (queue noise is drift, RC-28).
+
+**Known weaknesses:** alert-queue precision at host-window level (drift-driven,
+M6's job); calibration optimism (Monday-fitted); device-sensitive arithmetic
+(gotcha #24) — every number above is GPU + determinism flags.
 
 ## Conventions
 
@@ -266,24 +288,21 @@ before the WebAttacks and seeding bugs were found. Treat it as stale.
 
 ## What's next
 
-Week 3 is **closed**. Full-file results are in, four result-invalidating bugs
-are fixed, and the environment builds on both machines. Outstanding:
+Weeks 3–4 experiments are **closed** (see `experiments/report_cards.md`
+RC-26…RC-32). Resolved from the old list: ensembler re-run (RC-15/21),
+multi-seed everything (every headline has a band), feature set v2 evaluated
+(RC-30), lodo run (confirmed negative, RC-22), harness executed (RC-14).
 
-1. **Re-run `ensembler.py --limit 0 --seed 0`.** The M5a-vs-M5b ablation table
-   is the one headline number still on stale `--limit 150000`, unseeded data.
-2. **Multi-seed everything.** `capacity_sweep.py` gives mean ± std; no
-   comparison is trustworthy until its numbers land.
-3. **Evaluate feature set v2** (19 features vs 8). Built, self-tested, never
-   evaluated. This is the lever most likely to move results — the original 8 are
-   raw counts, and a busy fileserver and a scanner both read as "many peers,
-   many flows, many ports".
-4. **Run the M5b red-team harness.** Written, never executed. Hand to D.
-5. **Run `--train-mode lodo`** — ~5× training data with no leakage.
-6. Flip `alert_pipeline.py` to `fusion="mean"` once the re-run confirms max is
-   worse (it was, at 150k: 0.8385 vs 0.9397).
-7. Weeks 4–6 (see `Knowledge/roadmap_weeks4-6_after_pillar3_integration.md`):
-   fork the AE into a **host-syscall autoencoder** for Pillar 3, run an AE-vs-HMM
-   ablation, and extend the ensembler to fuse three scores.
+Outstanding:
+
+1. **Flip `alert_pipeline.py` defaults** to the RC-26 recipe (pure rank_mean,
+   no M5a) — needs Avinash's sign-off first; his dashboard consumes this seam.
+2. **Multi-seed the external datasets** — IDS2018 + CTU-13 currently single
+   seed; 4-seed runs launched 2026-08-21 night (`run_externals_multiseed.cmd`).
+3. **Weeks 4–12 roadmap** (`Knowledge/`): Pillar 3 host-syscall autoencoder via
+   eBPF, AE-vs-HMM ablation, three-way score fusion. Team work — B supports.
+4. **Paper packaging** when results freeze: name method + protocol, one-command
+   public artifact, protocol paper outline (see docs/PROJECT_GUIDE.md §6).
 
 ## Setup on a new machine
 
