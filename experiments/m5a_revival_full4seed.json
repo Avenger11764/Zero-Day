@@ -1,0 +1,410 @@
+{
+  "per_seed": {
+    "0": {
+      "per_family": {
+        "PortScan": {
+          "m5a_shipped": 0.9104,
+          "m5a_revived": 0.9698,
+          "v2b_alone": 0.9793,
+          "fuse_ship_rm": 0.9636,
+          "fuse_rev_rm": 0.9813,
+          "fuse_rev_rmax": 0.9835,
+          "agree_rev": 0.9813,
+          "n": 12041,
+          "bad": 28
+        },
+        "DDoS": {
+          "m5a_shipped": 0.8916,
+          "m5a_revived": 0.9688,
+          "v2b_alone": 0.9554,
+          "fuse_ship_rm": 0.9469,
+          "fuse_rev_rm": 0.9726,
+          "fuse_rev_rmax": 0.9645,
+          "agree_rev": 0.9726,
+          "n": 5900,
+          "bad": 147
+        },
+        "Botnet": {
+          "m5a_shipped": 0.8468,
+          "m5a_revived": 0.9118,
+          "v2b_alone": 0.9079,
+          "fuse_ship_rm": 0.9166,
+          "fuse_rev_rm": 0.936,
+          "fuse_rev_rmax": 0.9146,
+          "agree_rev": 0.9356,
+          "n": 17372,
+          "bad": 1605
+        },
+        "Infiltration": {
+          "m5a_shipped": 0.8952,
+          "m5a_revived": 0.9155,
+          "v2b_alone": 0.9187,
+          "fuse_ship_rm": 0.9323,
+          "fuse_rev_rm": 0.9338,
+          "fuse_rev_rmax": 0.9164,
+          "agree_rev": 0.9341,
+          "n": 20595,
+          "bad": 221
+        },
+        "WebAttacks": {
+          "m5a_shipped": 0.9229,
+          "m5a_revived": 0.9682,
+          "v2b_alone": 0.9768,
+          "fuse_ship_rm": 0.9765,
+          "fuse_rev_rm": 0.9828,
+          "fuse_rev_rmax": 0.9867,
+          "agree_rev": 0.9828,
+          "n": 16195,
+          "bad": 75
+        },
+        "Patator (FTP/SSH)": {
+          "m5a_shipped": 0.804,
+          "m5a_revived": 0.9551,
+          "v2b_alone": 0.9539,
+          "fuse_ship_rm": 0.9204,
+          "fuse_rev_rm": 0.9695,
+          "fuse_rev_rmax": 0.9863,
+          "agree_rev": 0.9675,
+          "n": 19047,
+          "bad": 75
+        },
+        "DoS / Heartbleed": {
+          "m5a_shipped": 0.8692,
+          "m5a_revived": 0.9874,
+          "v2b_alone": 0.8588,
+          "fuse_ship_rm": 0.904,
+          "fuse_rev_rm": 0.9416,
+          "fuse_rev_rmax": 0.9793,
+          "agree_rev": 0.9413,
+          "n": 20550,
+          "bad": 79
+        }
+      },
+      "means": {
+        "m5a_shipped": 0.8772,
+        "m5a_revived": 0.9538,
+        "v2b_alone": 0.9358,
+        "fuse_ship_rm": 0.9372,
+        "fuse_rev_rm": 0.9597,
+        "fuse_rev_rmax": 0.9616,
+        "agree_rev": 0.9593
+      },
+      "wins": {
+        "m5a_shipped": 1,
+        "m5a_revived": 4,
+        "fuse_ship_rm": 3,
+        "fuse_rev_rm": 7,
+        "fuse_rev_rmax": 6,
+        "agree_rev": 7
+      }
+    },
+    "1": {
+      "per_family": {
+        "PortScan": {
+          "m5a_shipped": 0.9104,
+          "m5a_revived": 0.9541,
+          "v2b_alone": 0.9752,
+          "fuse_ship_rm": 0.9634,
+          "fuse_rev_rm": 0.9777,
+          "fuse_rev_rmax": 0.9736,
+          "agree_rev": 0.9777,
+          "n": 12041,
+          "bad": 28
+        },
+        "DDoS": {
+          "m5a_shipped": 0.8916,
+          "m5a_revived": 0.936,
+          "v2b_alone": 0.9382,
+          "fuse_ship_rm": 0.9415,
+          "fuse_rev_rm": 0.9538,
+          "fuse_rev_rmax": 0.9327,
+          "agree_rev": 0.9539,
+          "n": 5900,
+          "bad": 147
+        },
+        "Botnet": {
+          "m5a_shipped": 0.8468,
+          "m5a_revived": 0.9165,
+          "v2b_alone": 0.874,
+          "fuse_ship_rm": 0.904,
+          "fuse_rev_rm": 0.9263,
+          "fuse_rev_rmax": 0.9137,
+          "agree_rev": 0.9255,
+          "n": 17372,
+          "bad": 1605
+        },
+        "Infiltration": {
+          "m5a_shipped": 0.8952,
+          "m5a_revived": 0.9309,
+          "v2b_alone": 0.8927,
+          "fuse_ship_rm": 0.9234,
+          "fuse_rev_rm": 0.9316,
+          "fuse_rev_rmax": 0.9231,
+          "agree_rev": 0.9316,
+          "n": 20595,
+          "bad": 221
+        },
+        "WebAttacks": {
+          "m5a_shipped": 0.9229,
+          "m5a_revived": 0.9444,
+          "v2b_alone": 0.9686,
+          "fuse_ship_rm": 0.9749,
+          "fuse_rev_rm": 0.9755,
+          "fuse_rev_rmax": 0.9723,
+          "agree_rev": 0.9755,
+          "n": 16195,
+          "bad": 75
+        },
+        "Patator (FTP/SSH)": {
+          "m5a_shipped": 0.804,
+          "m5a_revived": 0.927,
+          "v2b_alone": 0.9577,
+          "fuse_ship_rm": 0.9241,
+          "fuse_rev_rm": 0.9605,
+          "fuse_rev_rmax": 0.9809,
+          "agree_rev": 0.9605,
+          "n": 19047,
+          "bad": 75
+        },
+        "DoS / Heartbleed": {
+          "m5a_shipped": 0.8692,
+          "m5a_revived": 0.9556,
+          "v2b_alone": 0.8384,
+          "fuse_ship_rm": 0.8994,
+          "fuse_rev_rm": 0.9179,
+          "fuse_rev_rmax": 0.9265,
+          "agree_rev": 0.9177,
+          "n": 20550,
+          "bad": 79
+        }
+      },
+      "means": {
+        "m5a_shipped": 0.8772,
+        "m5a_revived": 0.9378,
+        "v2b_alone": 0.9207,
+        "fuse_ship_rm": 0.933,
+        "fuse_rev_rm": 0.949,
+        "fuse_rev_rmax": 0.9461,
+        "agree_rev": 0.9489
+      },
+      "wins": {
+        "m5a_shipped": 2,
+        "m5a_revived": 3,
+        "fuse_ship_rm": 5,
+        "fuse_rev_rm": 7,
+        "fuse_rev_rmax": 5,
+        "agree_rev": 7
+      }
+    },
+    "2": {
+      "per_family": {
+        "PortScan": {
+          "m5a_shipped": 0.9104,
+          "m5a_revived": 0.9683,
+          "v2b_alone": 0.9877,
+          "fuse_ship_rm": 0.9673,
+          "fuse_rev_rm": 0.987,
+          "fuse_rev_rmax": 0.9894,
+          "agree_rev": 0.987,
+          "n": 12041,
+          "bad": 28
+        },
+        "DDoS": {
+          "m5a_shipped": 0.8916,
+          "m5a_revived": 0.9533,
+          "v2b_alone": 0.9491,
+          "fuse_ship_rm": 0.9432,
+          "fuse_rev_rm": 0.9648,
+          "fuse_rev_rmax": 0.9533,
+          "agree_rev": 0.9649,
+          "n": 5900,
+          "bad": 147
+        },
+        "Botnet": {
+          "m5a_shipped": 0.8468,
+          "m5a_revived": 0.9092,
+          "v2b_alone": 0.8874,
+          "fuse_ship_rm": 0.9057,
+          "fuse_rev_rm": 0.9278,
+          "fuse_rev_rmax": 0.9044,
+          "agree_rev": 0.9274,
+          "n": 17372,
+          "bad": 1605
+        },
+        "Infiltration": {
+          "m5a_shipped": 0.8952,
+          "m5a_revived": 0.9224,
+          "v2b_alone": 0.9042,
+          "fuse_ship_rm": 0.925,
+          "fuse_rev_rm": 0.9323,
+          "fuse_rev_rmax": 0.917,
+          "agree_rev": 0.9322,
+          "n": 20595,
+          "bad": 221
+        },
+        "WebAttacks": {
+          "m5a_shipped": 0.9229,
+          "m5a_revived": 0.9735,
+          "v2b_alone": 0.9813,
+          "fuse_ship_rm": 0.9785,
+          "fuse_rev_rm": 0.9865,
+          "fuse_rev_rmax": 0.9884,
+          "agree_rev": 0.9865,
+          "n": 16195,
+          "bad": 75
+        },
+        "Patator (FTP/SSH)": {
+          "m5a_shipped": 0.804,
+          "m5a_revived": 0.964,
+          "v2b_alone": 0.9587,
+          "fuse_ship_rm": 0.9209,
+          "fuse_rev_rm": 0.9763,
+          "fuse_rev_rmax": 0.9912,
+          "agree_rev": 0.9745,
+          "n": 19047,
+          "bad": 75
+        },
+        "DoS / Heartbleed": {
+          "m5a_shipped": 0.8692,
+          "m5a_revived": 0.9805,
+          "v2b_alone": 0.8554,
+          "fuse_ship_rm": 0.9004,
+          "fuse_rev_rm": 0.9387,
+          "fuse_rev_rmax": 0.9684,
+          "agree_rev": 0.9381,
+          "n": 20550,
+          "bad": 79
+        }
+      },
+      "means": {
+        "m5a_shipped": 0.8772,
+        "m5a_revived": 0.953,
+        "v2b_alone": 0.932,
+        "fuse_ship_rm": 0.9344,
+        "fuse_rev_rm": 0.9591,
+        "fuse_rev_rmax": 0.9589,
+        "agree_rev": 0.9587
+      },
+      "wins": {
+        "m5a_shipped": 1,
+        "m5a_revived": 5,
+        "fuse_ship_rm": 3,
+        "fuse_rev_rm": 6,
+        "fuse_rev_rmax": 7,
+        "agree_rev": 6
+      }
+    },
+    "3": {
+      "per_family": {
+        "PortScan": {
+          "m5a_shipped": 0.9104,
+          "m5a_revived": 0.9676,
+          "v2b_alone": 0.974,
+          "fuse_ship_rm": 0.9595,
+          "fuse_rev_rm": 0.9815,
+          "fuse_rev_rmax": 0.9794,
+          "agree_rev": 0.9815,
+          "n": 12041,
+          "bad": 28
+        },
+        "DDoS": {
+          "m5a_shipped": 0.8916,
+          "m5a_revived": 0.9464,
+          "v2b_alone": 0.9354,
+          "fuse_ship_rm": 0.9355,
+          "fuse_rev_rm": 0.9539,
+          "fuse_rev_rmax": 0.9399,
+          "agree_rev": 0.954,
+          "n": 5900,
+          "bad": 147
+        },
+        "Botnet": {
+          "m5a_shipped": 0.8468,
+          "m5a_revived": 0.9113,
+          "v2b_alone": 0.9165,
+          "fuse_ship_rm": 0.9168,
+          "fuse_rev_rm": 0.9398,
+          "fuse_rev_rmax": 0.9206,
+          "agree_rev": 0.9395,
+          "n": 17372,
+          "bad": 1605
+        },
+        "Infiltration": {
+          "m5a_shipped": 0.8952,
+          "m5a_revived": 0.9324,
+          "v2b_alone": 0.925,
+          "fuse_ship_rm": 0.9333,
+          "fuse_rev_rm": 0.9438,
+          "fuse_rev_rmax": 0.9334,
+          "agree_rev": 0.9436,
+          "n": 20595,
+          "bad": 221
+        },
+        "WebAttacks": {
+          "m5a_shipped": 0.9229,
+          "m5a_revived": 0.9578,
+          "v2b_alone": 0.9773,
+          "fuse_ship_rm": 0.9755,
+          "fuse_rev_rm": 0.9818,
+          "fuse_rev_rmax": 0.971,
+          "agree_rev": 0.9818,
+          "n": 16195,
+          "bad": 75
+        },
+        "Patator (FTP/SSH)": {
+          "m5a_shipped": 0.804,
+          "m5a_revived": 0.9272,
+          "v2b_alone": 0.9601,
+          "fuse_ship_rm": 0.921,
+          "fuse_rev_rm": 0.9621,
+          "fuse_rev_rmax": 0.9768,
+          "agree_rev": 0.9613,
+          "n": 19047,
+          "bad": 75
+        },
+        "DoS / Heartbleed": {
+          "m5a_shipped": 0.8692,
+          "m5a_revived": 0.9735,
+          "v2b_alone": 0.8688,
+          "fuse_ship_rm": 0.9051,
+          "fuse_rev_rm": 0.9385,
+          "fuse_rev_rmax": 0.9574,
+          "agree_rev": 0.9375,
+          "n": 20550,
+          "bad": 79
+        }
+      },
+      "means": {
+        "m5a_shipped": 0.8772,
+        "m5a_revived": 0.9452,
+        "v2b_alone": 0.9367,
+        "fuse_ship_rm": 0.9352,
+        "fuse_rev_rm": 0.9573,
+        "fuse_rev_rmax": 0.9541,
+        "agree_rev": 0.957
+      },
+      "wins": {
+        "m5a_shipped": 1,
+        "m5a_revived": 3,
+        "fuse_ship_rm": 4,
+        "fuse_rev_rm": 7,
+        "fuse_rev_rmax": 6,
+        "agree_rev": 7
+      }
+    }
+  },
+  "config": {
+    "seeds": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "epochs_ae": 60,
+    "epochs_gnn": 60,
+    "limit": 0,
+    "window": 60,
+    "out": "experiments\\m5a_revival_full4seed.json"
+  },
+  "device": "cuda"
+}

@@ -1,0 +1,102 @@
+{
+  "per_seed": {
+    "0": {
+      "per_family": {
+        "PortScan": {
+          "m5a_shipped": 0.9004,
+          "m5a_revived": 0.8456,
+          "v2b_alone": 0.9537,
+          "fuse_ship_rm": 0.9495,
+          "fuse_rev_rm": 0.9372,
+          "fuse_rev_rmax": 0.9384,
+          "agree_rev": 0.9372,
+          "n": 8626,
+          "bad": 18
+        },
+        "DDoS": {
+          "m5a_shipped": 0.9602,
+          "m5a_revived": 0.9724,
+          "v2b_alone": 0.9483,
+          "fuse_ship_rm": 0.9674,
+          "fuse_rev_rm": 0.9766,
+          "fuse_rev_rmax": 0.9663,
+          "agree_rev": 0.9764,
+          "n": 3388,
+          "bad": 71
+        },
+        "Botnet": {
+          "m5a_shipped": 0.8218,
+          "m5a_revived": 0.7826,
+          "v2b_alone": 0.8863,
+          "fuse_ship_rm": 0.9007,
+          "fuse_rev_rm": 0.8857,
+          "fuse_rev_rmax": 0.843,
+          "agree_rev": 0.8849,
+          "n": 17372,
+          "bad": 1605
+        },
+        "Infiltration": {
+          "m5a_shipped": 0.8918,
+          "m5a_revived": 0.8929,
+          "v2b_alone": 0.9097,
+          "fuse_ship_rm": 0.9282,
+          "fuse_rev_rm": 0.93,
+          "fuse_rev_rmax": 0.9085,
+          "agree_rev": 0.9299,
+          "n": 13343,
+          "bad": 142
+        },
+        "WebAttacks": {
+          "m5a_shipped": 0.8839,
+          "m5a_revived": 0.8825,
+          "v2b_alone": 0.975,
+          "fuse_ship_rm": 0.9564,
+          "fuse_rev_rm": 0.9591,
+          "fuse_rev_rmax": 0.9602,
+          "agree_rev": 0.9591,
+          "n": 16195,
+          "bad": 75
+        },
+        "Patator (FTP/SSH)": {
+          "m5a_shipped": 0.7487,
+          "m5a_revived": 0.9504,
+          "v2b_alone": 0.9894,
+          "fuse_ship_rm": 0.9112,
+          "fuse_rev_rm": 0.9828,
+          "fuse_rev_rmax": 0.9892,
+          "agree_rev": 0.9812,
+          "n": 5635,
+          "bad": 26
+        }
+      },
+      "means": {
+        "m5a_shipped": 0.8678,
+        "m5a_revived": 0.8877,
+        "v2b_alone": 0.9437,
+        "fuse_ship_rm": 0.9356,
+        "fuse_rev_rm": 0.9452,
+        "fuse_rev_rmax": 0.9343,
+        "agree_rev": 0.9448
+      },
+      "wins": {
+        "m5a_shipped": 1,
+        "m5a_revived": 1,
+        "fuse_ship_rm": 3,
+        "fuse_rev_rm": 2,
+        "fuse_rev_rmax": 1,
+        "agree_rev": 2
+      }
+    }
+  },
+  "config": {
+    "seeds": [
+      0
+    ],
+    "epochs_ae": 30,
+    "epochs_gnn": 40,
+    "limit": 200000,
+    "window": 60,
+    "out": "experiments\\m5a_revival_smoke.json"
+  },
+  "device": "cuda"
+}
