@@ -2,6 +2,37 @@
 
 Append-only log of what changed and why. **Pull, then read the top of this file.**
 
+## 2026-08-25f — Repo restructure for week 4: legacy M5a quarantined to `legacy/`, silent fallback removed, v2 becomes production feature_set, paper outline frozen
+**Author:** Deep (Person B — Detection Modeling) · assisted by opencode
+**Commit:** 621f7e1 / ea75f8b
+
+### What changed
+* `legacy/` (new): `stub_detector.py` (full impl), `autoencoder.py`,
+  `autoencoder_def.py`, `autoencoder_v2-256.pt`. `detection/stub_detector.py`
+  is now a 20-line re-export shim — Checkpoint-1/dashboard/harness/ensembler
+  imports keep working unchanged.
+* `alert_pipeline.score_window()`: missing revived checkpoint → **RuntimeError**
+  with train command; input lacking canonical columns → **ValueError** naming
+  them. Silent fallback removed — every emitted alert is guaranteed fused
+  (`model_source` always contains "revived").
+* `feature_set="v2"` is the production default (checkpoint
+  `gnn_autoencoder_v1_logscale_v2.pt` shipped 2026-08-25; dimension guard active).
+* `docs/PAPER_OUTLINE.md`: name HOSTFUSE, protocol HELD-OUT, one-command
+  artifact, claims table (all bands), section plan. Supersedes paper_packaging notes.
+
+### Why
+Teammates should never encounter stale files in the work path, and a stale
+model_source in production alerts was still possible via two silent paths.
+
+### Caveats
+* Synthetic/demo graphs without flow feature columns must pass
+  `use_revived=False` explicitly — by design, real data never does.
+* v2-default band: the 0.9997±0.0001 v2 number was measured pre-flip; no
+  re-run needed (same checkpoint, same eval), but note noisyor+v2 combo itself
+  is untested until next eval cycle.
+
+---
+
 ## 2026-08-25e — BAND CONFIRMS: pure_noisyor_rev 0.9996 ± 0.0001 beats RC-26 headline in all 4 seeds; revived-M5a promotion to production STANDS
 **Author:** Deep (Person B — Detection Modeling) · assisted by opencode
 **Commit:** 80e8699 (production flip) · log `experiments/decisive_mw_rev_4seed.log`
