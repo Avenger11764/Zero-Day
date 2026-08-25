@@ -1,0 +1,62 @@
+{
+  "per_dataset": {
+    "ctu13_s13": {
+      "hosts": 276041,
+      "bad": 24,
+      "m5a": {
+        "best_rank": 83,
+        "median_rank": 5543,
+        "pct": 0.000301,
+        "recall100": 0.01
+      },
+      "v2b": {
+        "best_rank": 1,
+        "median_rank": 7335,
+        "pct": 4e-06,
+        "recall100": 0.03
+      },
+      "rmax": {
+        "best_rank": 32,
+        "median_rank": 3870,
+        "pct": 0.000116,
+        "recall100": 0.02
+      },
+      "noisyor": {
+        "best_rank": 7,
+        "median_rank": 1705,
+        "pct": 2.5e-05,
+        "recall100": 0.02
+      }
+    },
+    "ctu13_s3": {
+      "hosts": 359784,
+      "bad": 114,
+      "m5a": {
+        "best_rank": 107,
+        "median_rank": 84666,
+        "pct": 0.000297,
+        "recall100": 0.0
+      },
+      "v2b": {
+        "best_rank": 2,
+        "median_rank": 11222,
+        "pct": 6e-06,
+        "recall100": 0.03
+      },
+      "rmax": {
+        "best_rank": 12,
+        "median_rank": 47566,
+        "pct": 3.3e-05,
+        "recall100": 0.02
+      },
+      "noisyor": {
+        "best_rank": 14,
+        "median_rank": 34397,
+        "pct": 3.9e-05,
+        "recall100": 0.03
+      }
+    }
+  },
+  "seed": 0,
+  "device": "cuda"
+}

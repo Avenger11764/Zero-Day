@@ -295,12 +295,42 @@ def main():
                 "fuse_ship_rm": roc_auc((rank01(s_ship) + rank01(s_v2b)) / 2, y),
                 "fuse_rev_rm": roc_auc((rank01(s_rev) + rank01(s_v2b)) / 2, y),
                 "fuse_rev_rmax": roc_auc(np.maximum(rank01(s_rev), rank01(s_v2b)), y),
+                "fuse_rev_noisyor": roc_auc(1 - (1 - rank01(s_rev)) * (1 - rank01(s_v2b)), y),
+                "fuse_rev_w37": roc_auc(0.3 * rank01(s_rev) + 0.7 * rank01(s_v2b), y),
                 "agree_rev": roc_auc(((s_rev > np.median(s_rev)) & (s_v2b > np.median(s_v2b))).astype(float)
                                      * 0.5 + (rank01(s_rev) + rank01(s_v2b)) / 2 * 0.5, y),
             }
+
+            # ---- EDGE-level replication of the fusion (src-rule projection) ----
+            r_rev, r_v2b = rank01(s_rev), rank01(s_v2b)
+            hmap_rev = {k: v for k, v in zip(keys, r_rev)}
+            hmap_v2b = {k: v for k, v in zip(keys, r_v2b)}
+            e_rev, e_v2b, e_y = [], [], []
+            with torch.no_grad():
+                for wi, g in enumerate(gaug):
+                    ei = g.edge_index.cpu().numpy()
+                    for e in range(g.num_edges):
+                        src = g.hosts[int(ei[0, e])]
+                        k = (wi, src)
+                        if k not in hmap_rev or k not in hmap_v2b:
+                            continue
+                        e_rev.append(hmap_rev[k]); e_v2b.append(hmap_v2b[k])
+                        e_y.append(1 if src in bad else 0)
+            if e_y and 0 < sum(e_y) < len(e_y):
+                e_y = np.array(e_y); ea = np.array(e_rev); eb = np.array(e_v2b)
+                arms["EDGE_m5a_rev"] = roc_auc(ea, e_y)
+                arms["EDGE_v2b"] = roc_auc(eb, e_y)
+                arms["EDGE_rm"] = roc_auc((ea + eb) / 2, e_y)
+                arms["EDGE_rmax"] = roc_auc(np.maximum(ea, eb), e_y)
+                arms["EDGE_noisyor"] = roc_auc(1 - (1 - ea) * (1 - eb), e_y)
+
             fam_res[fam] = {k: round(float(v), 4) for k, v in arms.items()}
             fam_res[fam]["n"] = int(len(y)); fam_res[fam]["bad"] = int(y.sum())
-            print(f"  {fam}: " + " ".join(f"{k.split('_')[0]}{k[-2:] if k[-1:].isdigit() else ''}={arms[k]:.4f}" for k in arms))
+            print(f"  {fam}: rm={arms['fuse_rev_rm']:.4f} rmax={arms['fuse_rev_rmax']:.4f} "
+                  f"nor={arms['fuse_rev_noisyor']:.4f} w37={arms['fuse_rev_w37']:.4f} | "
+                  f"EDGE v2b={arms.get('EDGE_v2b', float('nan')):.4f} "
+                  f"rmax={arms.get('EDGE_rmax', float('nan')):.4f} "
+                  f"nor={arms.get('EDGE_noisyor', float('nan')):.4f}")
         means = {k: round(float(np.mean([v[k] for v in fam_res.values()])), 4)
                  for k in next(iter(fam_res.values())) if k != "n" and k != "bad"}
         print(f"\n  MEANS: {means}")

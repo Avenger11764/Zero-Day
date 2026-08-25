@@ -10,12 +10,17 @@ Architecture (final prod stack — three pillars, one fixed rule):
     percentile-calibrated vs Monday benign pool. Shipped-AE 0.877 -> revived 0.948.
   - Pillar 2+3 (relational+temporal): multi-K temporal-aug ensemble (base + K=2,4,8,
     LogScaler v2, SAGEConv).
-  - Fusion: rank_MAX of the two calibrated host-window scores.
-    Full files 60s 60ep 4-seed (exp_m5a_revival_full4seed.json):
-      vs v2b-alone: 7/7 families, every seed, mean +0.0239 (no regressions)
-      worst dilution vs a pillar's own peak: DoS -0.016 (was -0.040 under rank_mean)
-      revived-M5a alone beats shipped-AE by +0.07 mean.
-  - rank_mean kept as ablation arm (+0.0250 mean, same 7/7, deeper DoS dilution).
+  - Fusion: NOISY-OR of the two calibrated host-window scores,
+    1-(1-r_a)(1-r_v) on rank01 -- soft-max that recovers pillar peaks without
+    hard-max FP propagation.
+    Full files 60s 60ep 4-seed (exp_m5a_revival_v2_full4seed.json):
+      vs v2b-alone: 7/7 families on EVERY seed, mean +0.028
+      (noisyor .9638/.9543/.9561/.9616 beats rm .9595/.9514/.9496/.9605)
+      DoS dilution vs m5a-solo peak: -0.013 (was -0.040 under rank_mean).
+    External (exp_m5a_fusion_external.json, seed 0): IDS2018 LOIC-HTTP --
+      attacker best rank 5->2, median 10->8 vs v2b-alone (fusion replicates);
+      CTU-13 s13/s3 -- v2b-alone already lands #1/#2 so no headroom; fusion
+      keeps recall@100, trades s3 median (honest neutral).
 
 This is the file Avinash's dashboard imports via `from gnn_temporal_fused import GraphTemporalAutoencoder` --
 we keep that class name but it now fronts the ensemble.
