@@ -1,0 +1,340 @@
+{
+  "stages": {
+    "S0_plain_v1_T5_joint": {
+      "0": {
+        "per_family": {
+          "PortScan": {
+            "graph_auc": 0.1837,
+            "fused_auc": 0.5829,
+            "delta": 0.3992,
+            "covered": 3748,
+            "total": 23216,
+            "coverage": 0.161
+          },
+          "DDoS": {
+            "graph_auc": 0.577,
+            "fused_auc": 0.537,
+            "delta": -0.04,
+            "covered": 1216,
+            "total": 10993,
+            "coverage": 0.111
+          },
+          "Botnet": {
+            "graph_auc": 0.8196,
+            "fused_auc": 0.84,
+            "delta": 0.0203,
+            "covered": 5687,
+            "total": 34538,
+            "coverage": 0.165
+          },
+          "Infiltration": {
+            "graph_auc": 0.5885,
+            "fused_auc": 0.6476,
+            "delta": 0.0591,
+            "covered": 5953,
+            "total": 40158,
+            "coverage": 0.148
+          },
+          "WebAttacks": {
+            "graph_auc": 0.4567,
+            "fused_auc": 0.2601,
+            "delta": -0.1966,
+            "covered": 5082,
+            "total": 32604,
+            "coverage": 0.156
+          },
+          "Patator (FTP/SSH)": {
+            "graph_auc": 0.8177,
+            "fused_auc": 0.3571,
+            "delta": -0.4606,
+            "covered": 12575,
+            "total": 75691,
+            "coverage": 0.166
+          },
+          "DoS / Heartbleed": {
+            "graph_auc": 0.6655,
+            "fused_auc": 0.7058,
+            "delta": 0.0404,
+            "covered": 12245,
+            "total": 76330,
+            "coverage": 0.16
+          }
+        },
+        "mean_graph": 0.587,
+        "mean_fused": 0.5615,
+        "delta": -0.0255
+      }
+    },
+    "S1_log_v1_T5_joint": {
+      "0": {
+        "per_family": {
+          "PortScan": {
+            "graph_auc": 0.7197,
+            "fused_auc": 0.2318,
+            "delta": -0.4879,
+            "covered": 3748,
+            "total": 23216,
+            "coverage": 0.161
+          },
+          "DDoS": {
+            "graph_auc": 0.8162,
+            "fused_auc": 0.5852,
+            "delta": -0.231,
+            "covered": 1216,
+            "total": 10993,
+            "coverage": 0.111
+          },
+          "Botnet": {
+            "graph_auc": 0.7758,
+            "fused_auc": 0.8008,
+            "delta": 0.0249,
+            "covered": 5687,
+            "total": 34538,
+            "coverage": 0.165
+          },
+          "Infiltration": {
+            "graph_auc": 0.657,
+            "fused_auc": 0.7068,
+            "delta": 0.0497,
+            "covered": 5953,
+            "total": 40158,
+            "coverage": 0.148
+          },
+          "WebAttacks": {
+            "graph_auc": 1.0,
+            "fused_auc": 0.3427,
+            "delta": -0.6573,
+            "covered": 5082,
+            "total": 32604,
+            "coverage": 0.156
+          },
+          "Patator (FTP/SSH)": {
+            "graph_auc": 0.8981,
+            "fused_auc": 0.3569,
+            "delta": -0.5412,
+            "covered": 12575,
+            "total": 75691,
+            "coverage": 0.166
+          },
+          "DoS / Heartbleed": {
+            "graph_auc": 0.8916,
+            "fused_auc": 0.5398,
+            "delta": -0.3518,
+            "covered": 12245,
+            "total": 76330,
+            "coverage": 0.16
+          }
+        },
+        "mean_graph": 0.8226,
+        "mean_fused": 0.5091,
+        "delta": -0.3135
+      }
+    },
+    "S2_log_v2_T5_joint": {
+      "0": {
+        "per_family": {
+          "PortScan": {
+            "graph_auc": 0.955,
+            "fused_auc": 0.2122,
+            "delta": -0.7428,
+            "covered": 3748,
+            "total": 23216,
+            "coverage": 0.161
+          },
+          "DDoS": {
+            "graph_auc": 0.9059,
+            "fused_auc": 0.5571,
+            "delta": -0.3489,
+            "covered": 1216,
+            "total": 10993,
+            "coverage": 0.111
+          },
+          "Botnet": {
+            "graph_auc": 0.6525,
+            "fused_auc": 0.762,
+            "delta": 0.1095,
+            "covered": 5687,
+            "total": 34538,
+            "coverage": 0.165
+          },
+          "Infiltration": {
+            "graph_auc": 0.4967,
+            "fused_auc": 0.7332,
+            "delta": 0.2365,
+            "covered": 5953,
+            "total": 40158,
+            "coverage": 0.148
+          },
+          "WebAttacks": {
+            "graph_auc": 1.0,
+            "fused_auc": 0.412,
+            "delta": -0.588,
+            "covered": 5082,
+            "total": 32604,
+            "coverage": 0.156
+          },
+          "Patator (FTP/SSH)": {
+            "graph_auc": 0.868,
+            "fused_auc": 0.402,
+            "delta": -0.466,
+            "covered": 12575,
+            "total": 75691,
+            "coverage": 0.166
+          },
+          "DoS / Heartbleed": {
+            "graph_auc": 0.8071,
+            "fused_auc": 0.5184,
+            "delta": -0.2887,
+            "covered": 12245,
+            "total": 76330,
+            "coverage": 0.16
+          }
+        },
+        "mean_graph": 0.8122,
+        "mean_fused": 0.5138,
+        "delta": -0.2983
+      }
+    },
+    "S3_log_v2_T3_joint": {
+      "0": {
+        "per_family": {
+          "PortScan": {
+            "graph_auc": 0.9952,
+            "fused_auc": 0.303,
+            "delta": -0.6922,
+            "covered": 6920,
+            "total": 23216,
+            "coverage": 0.298
+          },
+          "DDoS": {
+            "graph_auc": 0.9126,
+            "fused_auc": 0.5695,
+            "delta": -0.3431,
+            "covered": 3117,
+            "total": 10993,
+            "coverage": 0.284
+          },
+          "Botnet": {
+            "graph_auc": 0.7057,
+            "fused_auc": 0.844,
+            "delta": 0.1384,
+            "covered": 9660,
+            "total": 34538,
+            "coverage": 0.28
+          },
+          "Infiltration": {
+            "graph_auc": 0.7163,
+            "fused_auc": 0.7868,
+            "delta": 0.0705,
+            "covered": 11479,
+            "total": 40158,
+            "coverage": 0.286
+          },
+          "WebAttacks": {
+            "graph_auc": 0.9713,
+            "fused_auc": 0.3432,
+            "delta": -0.6281,
+            "covered": 9495,
+            "total": 32604,
+            "coverage": 0.291
+          },
+          "Patator (FTP/SSH)": {
+            "graph_auc": 0.8136,
+            "fused_auc": 0.3653,
+            "delta": -0.4484,
+            "covered": 23055,
+            "total": 75691,
+            "coverage": 0.305
+          },
+          "DoS / Heartbleed": {
+            "graph_auc": 0.804,
+            "fused_auc": 0.5059,
+            "delta": -0.2982,
+            "covered": 22430,
+            "total": 76330,
+            "coverage": 0.294
+          }
+        },
+        "mean_graph": 0.8455,
+        "mean_fused": 0.5311,
+        "delta": -0.3144
+      }
+    },
+    "S4_log_v2_T3_twostage": {
+      "0": {
+        "per_family": {
+          "PortScan": {
+            "graph_auc": 0.996,
+            "fused_auc": 0.303,
+            "delta": -0.6931,
+            "covered": 6920,
+            "total": 23216,
+            "coverage": 0.298
+          },
+          "DDoS": {
+            "graph_auc": 0.9168,
+            "fused_auc": 0.5695,
+            "delta": -0.3473,
+            "covered": 3117,
+            "total": 10993,
+            "coverage": 0.284
+          },
+          "Botnet": {
+            "graph_auc": 0.6972,
+            "fused_auc": 0.844,
+            "delta": 0.1469,
+            "covered": 9660,
+            "total": 34538,
+            "coverage": 0.28
+          },
+          "Infiltration": {
+            "graph_auc": 0.7106,
+            "fused_auc": 0.7868,
+            "delta": 0.0762,
+            "covered": 11479,
+            "total": 40158,
+            "coverage": 0.286
+          },
+          "WebAttacks": {
+            "graph_auc": 0.9642,
+            "fused_auc": 0.3432,
+            "delta": -0.6209,
+            "covered": 9495,
+            "total": 32604,
+            "coverage": 0.291
+          },
+          "Patator (FTP/SSH)": {
+            "graph_auc": 0.8117,
+            "fused_auc": 0.3653,
+            "delta": -0.4464,
+            "covered": 23055,
+            "total": 75691,
+            "coverage": 0.305
+          },
+          "DoS / Heartbleed": {
+            "graph_auc": 0.8179,
+            "fused_auc": 0.5059,
+            "delta": -0.3121,
+            "covered": 22430,
+            "total": 76330,
+            "coverage": 0.294
+          }
+        },
+        "mean_graph": 0.8449,
+        "mean_fused": 0.5311,
+        "delta": -0.3138
+      }
+    }
+  },
+  "config": {
+    "seeds": [
+      0
+    ],
+    "epochs": 40,
+    "window": 300,
+    "limit": null,
+    "out": "experiments\\exp_edge_full40.json"
+  },
+  "device": "cuda",
+  "torch": "2.11.0+cu128"
+}

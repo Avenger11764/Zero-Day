@@ -1,0 +1,125 @@
+{
+  "per_family": {
+    "0": {
+      "PortScan": {
+        "graph": 1.0,
+        "fused": 0.9983,
+        "rank_mean": 1.0,
+        "rank_max": 0.9983,
+        "mean_val": 1.0,
+        "max_val": 1.0,
+        "gated_union_auc": 0.9957,
+        "graph_hosts": 4404,
+        "fused_hosts": 574,
+        "intersection": 574,
+        "union": 4404,
+        "coverage_fused": 0.13,
+        "winner": "graph"
+      },
+      "DDoS": {
+        "graph": 1.0,
+        "fused": 0.992,
+        "rank_mean": 1.0,
+        "rank_max": 0.996,
+        "mean_val": 1.0,
+        "max_val": 1.0,
+        "gated_union_auc": 0.9938,
+        "graph_hosts": 2567,
+        "fused_hosts": 252,
+        "intersection": 252,
+        "union": 2567,
+        "coverage_fused": 0.098,
+        "winner": "graph"
+      },
+      "Botnet": {
+        "graph": 0.9838,
+        "fused": 0.9833,
+        "rank_mean": 0.9921,
+        "rank_max": 0.981,
+        "mean_val": 0.9909,
+        "max_val": 0.9817,
+        "gated_union_auc": 0.966,
+        "graph_hosts": 5350,
+        "fused_hosts": 862,
+        "intersection": 862,
+        "union": 5350,
+        "coverage_fused": 0.161,
+        "winner": "rank_mean"
+      },
+      "Infiltration": {
+        "graph": 0.998,
+        "fused": 0.992,
+        "rank_mean": 0.997,
+        "rank_max": 0.996,
+        "mean_val": 0.996,
+        "max_val": 0.998,
+        "gated_union_auc": 0.9741,
+        "graph_hosts": 6060,
+        "fused_hosts": 1001,
+        "intersection": 1001,
+        "union": 6060,
+        "coverage_fused": 0.165,
+        "winner": "graph"
+      },
+      "WebAttacks": {
+        "graph": 1.0,
+        "fused": 0.9974,
+        "rank_mean": 1.0,
+        "rank_max": 0.9987,
+        "mean_val": 1.0,
+        "max_val": 1.0,
+        "gated_union_auc": 0.9921,
+        "graph_hosts": 5217,
+        "fused_hosts": 776,
+        "intersection": 776,
+        "union": 5217,
+        "coverage_fused": 0.149,
+        "winner": "graph"
+      },
+      "Patator (FTP/SSH)": {
+        "graph": 1.0,
+        "fused": 0.9989,
+        "rank_mean": 1.0,
+        "rank_max": 0.9995,
+        "mean_val": 1.0,
+        "max_val": 1.0,
+        "gated_union_auc": 0.9815,
+        "graph_hosts": 8494,
+        "fused_hosts": 1862,
+        "intersection": 1862,
+        "union": 8494,
+        "coverage_fused": 0.219,
+        "winner": "graph"
+      },
+      "DoS / Heartbleed": {
+        "graph": 1.0,
+        "fused": 0.9983,
+        "rank_mean": 1.0,
+        "rank_max": 0.9994,
+        "mean_val": 1.0,
+        "max_val": 0.9994,
+        "gated_union_auc": 0.9925,
+        "graph_hosts": 9015,
+        "fused_hosts": 1785,
+        "intersection": 1785,
+        "union": 9015,
+        "coverage_fused": 0.198,
+        "winner": "graph"
+      }
+    }
+  },
+  "config": {
+    "seeds": [
+      0
+    ],
+    "epochs": 60,
+    "epochs_fused": 60,
+    "limit": null,
+    "window": 300,
+    "seq_len": 5,
+    "feature_set": "v1",
+    "out": "experiments\\exp1_300s_smoke.json"
+  },
+  "device": "cuda",
+  "torch": "2.11.0+cu128"
+}
