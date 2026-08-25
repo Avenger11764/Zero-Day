@@ -175,7 +175,8 @@ def host_mean_scores(graphs, model, scaler, device):
 
 
 def train_model(graphs, scaler, device, epochs):
-    model = GraphAutoencoder().to(device)
+    in_dim = graphs[0].x.shape[1]
+    model = GraphAutoencoder(in_dim=in_dim).to(device)
     opt = torch.optim.Adam(model.parameters(), lr=0.01)
     loss_fn = torch.nn.MSELoss()
     pre = [(scaler.transform(g.x).to(device), g.edge_index.to(device)) for g in graphs]
@@ -195,6 +196,7 @@ def main():
     ap.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2, 3])
     ap.add_argument("--epochs", type=int, default=200)
     ap.add_argument("--epochs-ae", type=int, default=60)
+    ap.add_argument("--feature-set", choices=["v1", "v2"], default="v1")
     ap.add_argument("--limit", type=int, default=None, help="row limit for smoke tests")
     ap.add_argument("--out", default="experiments/mw_ablation_4seed.json")
     args = ap.parse_args()
@@ -204,8 +206,8 @@ def main():
 
     tr = load_benign(limit=args.limit)
     print(f"Monday benign flows: {len(tr):,}")
-    bg60 = build_graphs(tr, window_seconds=60, k=0)
-    bg300 = build_graphs(tr, window_seconds=300, k=0)
+    bg60 = build_graphs(tr, window_seconds=60, k=0, feature_set=args.feature_set)
+    bg300 = build_graphs(tr, window_seconds=300, k=0, feature_set=args.feature_set)
     print(f"Benign graphs: 60s={len(bg60)}, 300s={len(bg300)}")
 
     scaler60 = LogScaler().fit(bg60)
@@ -238,8 +240,8 @@ def main():
         bad = malicious_hosts(df)
         if not bad:
             continue
-        g60 = build_graphs(df, window_seconds=60, k=0)
-        g300 = build_graphs(df, window_seconds=300, k=0)
+        g60 = build_graphs(df, window_seconds=60, k=0, feature_set=args.feature_set)
+        g300 = build_graphs(df, window_seconds=300, k=0, feature_set=args.feature_set)
         if not g60 or not g300:
             continue
         a_map, _ = m5a_host_scores(df, canonical, m5a)
