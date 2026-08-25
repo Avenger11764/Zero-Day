@@ -108,22 +108,19 @@ def _load_m5b(feature_set: str = "v1"):
 def _load_revived():
     """Load the REVIVED 87-dim per-flow AE (m5a_revived_ctx.pt) once.
 
-    Returns (model, canonical, flow_lo, flow_hi, ctx_scaler) or (None,)*5 when
-    the checkpoint is absent — caller then falls back to RC-26 pure relational.
+    Returns (model, canonical, flow_lo, flow_hi, ctx_scaler).
+    Raises RuntimeError if the checkpoint is absent — production REQUIRES the
+    revived pillar; silent fallback is how stale model_source slips into alerts.
     Train it with: python detection/train_m5a_revived.py --seed 0
     """
     global _revived, _revived_meta
     if _revived is None and _revived_meta is None:
         if not REVIVED_PATH.exists():
-            import warnings
-            warnings.warn(
-                f"REVIVED M5a checkpoint missing ({REVIVED_PATH.name}) — "
-                "falling back to RC-26 pure relational. Train it: "
-                "`python detection/train_m5a_revived.py --seed 0`",
-                RuntimeWarning,
+            raise RuntimeError(
+                f"REVIVED M5a checkpoint missing: {REVIVED_PATH.name}. "
+                "Production fusion requires it. Train it now: "
+                "`python detection/train_m5a_revived.py --seed 0`"
             )
-            _revived_meta = {"missing": True}
-            return None, None, None, None, None
         blob = torch.load(REVIVED_PATH, map_location="cpu", weights_only=False)
         model = RevivedAE(blob["input_dim"])
         model.load_state_dict(blob["state_dict"])
@@ -166,18 +163,23 @@ def init_drift_monitors(baseline_rel_scores: list[float], baseline_flow_scores: 
 
 def score_window(df: pd.DataFrame, feature_columns: list[str] | None = None,
                  threshold: float | None = None, window_seconds: int = 60, k: int = 0,
-                 feature_set: str = "v1", drift: DetectorDriftMonitors | None = None) -> list[dict]:
+                 feature_set: str = "v2", drift: DetectorDriftMonitors | None = None,
+                 use_revived: bool = True) -> list[dict]:
     """Score a window of flows with both detectors and emit ScoredAlerts.
+
+    Production recipe (2026-08-25e): GNN-logscale + REVIVED 87-dim per-flow AE,
+    fused by within-window rank noisyor. feature_set="v2" (19 host feats).
+
+    Hard requirements — this function FAILS rather than silently degrading:
+      * revived checkpoint missing            -> RuntimeError
+      * input lacks the 76 canonical columns  -> ValueError
+    Pass use_revived=False ONLY for synthetic/demo graphs without flow features.
 
     One alert per graph EDGE (a src -> dst conversation), because the frozen
     ScoredAlert schema requires src_ip and dst_ip -- an edge maps onto that
     cleanly, a node does not.
-
-    If k > 0, builds graphs with k nearest-neighbour auxiliary edges per host.
     """
     df = normalize_columns(df)
-    # Production since 2026-08-25d (CHANGELOG): M5b relational + REVIVED 87-dim
-    # per-flow AE, fused by within-window rank noisyor (the 7/7x4 rule).
     # feature_columns forces the LEGACY shipped-M5a path instead (ablation only — it hurts, -5pts RC-26).
     graphs = build_graphs(df, window_seconds=window_seconds, k=k, feature_set=feature_set)
     if not graphs:
@@ -186,9 +188,19 @@ def score_window(df: pd.DataFrame, feature_columns: list[str] | None = None,
     model, scaler = _load_m5b(feature_set)
 
     # ---- REVIVED per-flow pillar: host scores via max over flows ----------
-    rev, r_canonical, r_lo, r_hi, csc = _load_revived()
+    rev, r_canonical, r_lo, r_hi, csc = (None, None, None, None, None)
+    if use_revived:
+        rev, r_canonical, r_lo, r_hi, csc = _load_revived()
+        missing_cols = [c for c in r_canonical if c not in df.columns]
+        if missing_cols:
+            raise ValueError(
+                f"Input lacks {len(missing_cols)} canonical columns the revived "
+                f"M5a needs (e.g. {missing_cols[:3]}). Production fusion cannot "
+                "run on this data — feed CICIDS-style flows or pass "
+                "use_revived=False for synthetic demos."
+            )
     revived_host_score: dict[str, float] = {}
-    use_rev = rev is not None and all(c in df.columns for c in r_canonical)
+    use_rev = rev is not None
     if use_rev:
         feats = df[r_canonical].apply(pd.to_numeric, errors="coerce")
         feats = feats.replace([np.inf, -np.inf], np.nan).fillna(0.0)
