@@ -86,6 +86,42 @@ Per-seed pure_rank_mean worst case 0.9980 — fusion benefit is variance (worst 
 
 ---
 
+## 2026-08-25d — Decisive comparison RUNS: revived-M5a arms added to multi-window protocol; seed 0 = strict non-regression, band pending
+**Author:** Deep (Person B — Detection Modeling) · assisted by opencode
+**Commit:** 2925813 (arms) · log `experiments/decisive_mw_rev_4seed.log`
+
+### What ran
+`eval_mw_ablation_4seed.py --seeds 0 1 2 3 --epochs 60 --epochs-ae 60` on full files,
+with four new configs: `rev_multi`, `three_way_rev_rm`, `pure_noisyor_rev`,
+`pure_rmax_rev` — revived 87-dim ctx AE (`exp_m5a_revival.py` recipe, retrained
+per seed) fused with the RC-26 multi-window scores. This is the comparison whose
+absence blocked the revived-M5a promotion claim (2026-08-21 commits).
+
+### Results — SEED 0 (full file, 60ep; seeds 1–3 running)
+| Config | mean AUC |
+|---|---|
+| pure_rank_mean (headline) | 0.9992 |
+| **rev_multi / three_way_rev_rm / pure_noisyor_rev** | **0.9996** |
+| pure_rmax_rev | 0.9994 |
+| m5a_multi (shipped M5a control) | 0.9504 (WebAttacks 0.69 — unchanged negative) |
+
+Rev-arms fix DDoS (0.9975 → 1.0000) and lose nowhere (worst −0.0006 Patator).
+
+### Provisional interpretation
+1. The other session's core instinct SURVIVES: revived ctx-M5a is a strict
+   non-regression atop RC-26 (shipped M5a never was).
+2. Mean delta +0.04pt = ceiling tie; by gotcha #11 no production flip until the
+   4-seed band lands (tonight).
+3. Corrects their commit message: rank_MAX was never 7/7×4 (seed 3 = 5/7);
+   noisyor is the defensible fusion rule.
+
+### Caveats
+* Single-seed numbers above — do not quote as a band yet.
+* If band confirms, promotion path = add revived-AE scoring to
+  `alert_pipeline` behind a flag, Avinash sign-off, then default flip.
+
+---
+
 ## 2026-08-25c — Externals multi-seeded: IDS2018 + CTU-13 confirmed at 4 seeds, CTU Virut/Rbot C&C ranked #1 every-or-most seeds
 **Author:** Deep (Person B — Detection Modeling) · assisted by opencode
 **Commit:** (this entry) · logs `experiments/overnight_ids2018_4seed.log`, `overnight_ctu13_4seed.log`
