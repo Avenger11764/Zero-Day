@@ -86,6 +86,34 @@ Per-seed pure_rank_mean worst case 0.9980 — fusion benefit is variance (worst 
 
 ---
 
+## 2026-08-25c — Externals multi-seeded: IDS2018 + CTU-13 confirmed at 4 seeds, CTU Virut/Rbot C&C ranked #1 every-or-most seeds
+**Author:** Deep (Person B — Detection Modeling) · assisted by opencode
+**Commit:** (this entry) · logs `experiments/overnight_ids2018_4seed.log`, `overnight_ctu13_4seed.log`
+
+### What ran
+Full files, GPU, `set_seed` deterministic, 60 epochs:
+* `detection/eval_external_ids2018.py --seeds 0 1 2 3` → `experiments/external_ids2018_multiseed.json`
+* `detection/eval_external_ctu13.py --seeds 0 1 2 3` → `experiments/external_ctu13_multiseed.json`
+
+### Results
+| Dataset | Published (single seed) | 4-seed now |
+|---|---|---|
+| IDS2018 LOIC-HTTP | attackers rank 13–24 / 32,935 | seeds 0-2: **ranks [1–10], [1–10], [2–11]**; seed 3: [23–34]; best-rank pct **0.0002 ± 0.0003** |
+| CTU s1 Neris | rank 257 / 522,167 (top 0.05%) | best ranks 72/112/18/15 → pct **0.0001 ± 0.0001** (worst seed top 0.02%, better than published) |
+| CTU s13 Virut | rank 179 / 314,177 (top 0.06%) | best rank **#1 in all 4 seeds**, pct 3e-06 |
+| CTU s3 Rbot | rank 55 / 434,730 (top 0.013%) | best ranks 2/18/**1**/**1** — C&C ranked #1 in 3 of 4 seeds |
+
+### Interpretation
+* The "top 24/32,935" operational claim is now a **band**: IDS2018 attackers land top-11 in 3 of 4 seeds, top-35 worst.
+* CTU-13 infected-host percentile claim strengthens: worst-case top 0.02% (Neris), Virut's infected host is the **#1-ranked host every seed**.
+* Single-seed caution (gotcha on externals) is resolved — no seed flips any conclusion.
+
+### Caveats
+* recall@100 stays low on CTU (label inflation — every destination malware touched is labelled malicious); quote **best-rank percentile**, not recall, per RC-32 guidance.
+* hw_p100 variance large on small families (std up to 0.48) — expected with tiny malicious counts; do not quote it.
+
+---
+
 ## 2026-08-21b — Non-relational baselines re-run under identical conditions; third dataset family (CTU-13) replicates the claim
 **Author:** Deep (Person B — Detection Modeling) · assisted by opencode
 
