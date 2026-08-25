@@ -225,11 +225,15 @@ def train_v2(graphs, epochs_gnn=80, epochs_temp=80, device=None, seed=0, feature
     hists=hists.to(device); curs=curs.to(device)
     # small validation split not needed, just train
     opt2=torch.optim.Adam(filter(lambda p: p.requires_grad, gnn.parameters()), lr=0.005)
-    # also train edge autoencoder on same graphs' edge_attr
-    # collect edge attrs
-    all_edges=torch.cat([g.edge_attr for g in graphs], dim=0).to(device)
-    # edge scaler: simple log1p + minmax? Use raw for now, model learns
-    # We'll train edge AE jointly in same loop (mix batches)
+    # edge scaler: log1p + minmax fitted on benign edges
+    all_edges=torch.cat([g.edge_attr for g in graphs], dim=0).clamp(min=0).to(device)
+    all_edges_log=torch.log1p(all_edges)
+    e_lo=all_edges_log.min(dim=0).values
+    e_hi=all_edges_log.max(dim=0).values
+    e_span=torch.where((e_hi - e_lo) > 0, e_hi - e_lo, torch.ones_like(e_hi))
+    def scale_edges(e):
+        return torch.clamp((torch.log1p(e.clamp(min=0).to(device)) - e_lo) / e_span, 0, 1)
+    # also train edge autoencoder on same graphs' edge_attr (scaled)
     edge_losses=[]
     for ep in range(epochs_temp):
         # temporal batch
@@ -243,22 +247,22 @@ def train_v2(graphs, epochs_gnn=80, epochs_temp=80, device=None, seed=0, feature
             opt2.zero_grad(); loss.backward(); opt2.step()
             tloss+=loss.item()*len(idx)
         tloss/=len(hists)
-        # edge batch (one epoch)
-        # shuffle edges
-        eperm=torch.randperm(len(all_edges))
+        # edge batch (one epoch) — on scaled edges
+        scaled_all=scale_edges(all_edges)
+        eperm=torch.randperm(len(scaled_all))
         eloss=0
-        for i in range(0, len(all_edges), 512):
-            eb=all_edges[eperm[i:i+512]]
-            # simple edge AE: encode -> decode
-            # Use gnn edge_enc/dec
+        for i in range(0, len(scaled_all), 512):
+            eb=scaled_all[eperm[i:i+512]]
             latent=gnn.edge_enc(eb)
             recon=gnn.edge_dec(latent)
             loss=loss_fn(recon, eb)
             opt2.zero_grad(); loss.backward(); opt2.step()
             eloss+=loss.item()*len(eb)
-        eloss/=len(all_edges)
+        eloss/=len(scaled_all)
         if ep%20==0:
             print(f"  TEMP stage {ep}/{epochs_temp} tloss {tloss:.6f} eloss {eloss:.6f}")
+    # attach edge scaler for inference
+    gnn._edge_scaler = (e_lo, e_hi, e_span)
     return gnn, scaler
 
 def _self_test():

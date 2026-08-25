@@ -1,0 +1,108 @@
+{
+  "per_seed": {
+    "0": {
+      "host_window": {
+        "PortScan": {
+          "graph": 1.0,
+          "v2": 0.9977,
+          "delta": -0.0023,
+          "n": 3477
+        },
+        "DDoS": {
+          "graph": 0.9996,
+          "v2": 0.9911,
+          "delta": -0.0085,
+          "n": 1352
+        },
+        "Botnet": {
+          "graph": 0.9968,
+          "v2": 0.402,
+          "delta": -0.5947,
+          "n": 4673
+        },
+        "Infiltration": {
+          "graph": 0.9988,
+          "v2": 0.7603,
+          "delta": -0.2385,
+          "n": 4115
+        },
+        "WebAttacks": {
+          "graph": 1.0,
+          "v2": 0.9975,
+          "delta": -0.0025,
+          "n": 4835
+        },
+        "Patator (FTP/SSH)": {
+          "graph": 1.0,
+          "v2": 0.9946,
+          "delta": -0.0054,
+          "n": 5896
+        },
+        "DoS / Heartbleed": {
+          "graph": 1.0,
+          "v2": 0.9987,
+          "delta": -0.0013,
+          "n": 3958
+        }
+      },
+      "edge": {
+        "PortScan": {
+          "graph": 0.9888,
+          "v2": 0.9695,
+          "delta": -0.0193,
+          "edges": 16445
+        },
+        "DDoS": {
+          "graph": 0.8841,
+          "v2": 0.5287,
+          "delta": -0.3555,
+          "edges": 4912
+        },
+        "Botnet": {
+          "graph": 0.838,
+          "v2": 0.3065,
+          "delta": -0.5315,
+          "edges": 26517
+        },
+        "Infiltration": {
+          "graph": 0.7293,
+          "v2": 0.5151,
+          "delta": -0.2142,
+          "edges": 22592
+        },
+        "WebAttacks": {
+          "graph": 0.9943,
+          "v2": 0.9797,
+          "delta": -0.0146,
+          "edges": 28442
+        },
+        "Patator (FTP/SSH)": {
+          "graph": 0.9947,
+          "v2": 0.9681,
+          "delta": -0.0265,
+          "edges": 34264
+        },
+        "DoS / Heartbleed": {
+          "graph": 0.9423,
+          "v2": 0.9745,
+          "delta": 0.0322,
+          "edges": 17136
+        }
+      },
+      "mean_host_graph": 0.9993,
+      "mean_host_v2": 0.8774,
+      "mean_edge_graph": 0.9102,
+      "mean_edge_v2": 0.7489
+    }
+  },
+  "config": {
+    "seeds": [
+      0
+    ],
+    "epochs": 30,
+    "limit": 150000,
+    "window": 300,
+    "out": "experiments\\exp_v2_smoke.json"
+  },
+  "device": "cuda"
+}
