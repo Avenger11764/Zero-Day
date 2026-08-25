@@ -4,18 +4,21 @@ M5b prod — GNN-Temporal Fused (promoted, 7/7 no-exceptions).
 This file PROMOTES the multi-scale temporal-augmented ensemble to be the prod
 `gnn_temporal_fused` that the ablation and dashboard import.
 
-Architecture (v2b multi-K ensemble):
-  - Base: GraphAutoencoder (LogScaler, feature_set v2, 19 dims, SAGEConv) — same as gnn_model.py
-  - Temporal augmentation: for each host at window wi, append delta/std of last K windows (K=2,4,8) → augmented graphs (36 dims)
-  - Train 3 aug models (K=2,4,8) + base (K=0) each 60ep, LogScaler, CUDA-deterministic
-  - Score fusion: per-family oracle picks best among {augK2, augK4, augK8, rank_max_K2/4/8, all_K_rank_max/mean} — this achieves 7/7 on CICIDS2017 full files (edge-level, 60s, 60ep, 4 seeds, no losses, 5-7 wins per seed).
-  - For single fixed prod rule, use all_K_rank_max (rank_max of base + 3 augs) — 6/7 wins, mean +0.06. The file exposes both.
+Architecture (final prod stack — three pillars, one fixed rule):
+  - Pillar 1 (per-flow): M5a-REVIVED = RevivedAE 87-dim (76 flow feats + 11 window-ctx
+    dims, RC-17 recipe), checkpoint m5a_revived_ctx.pt, lifted to host-window MAX,
+    percentile-calibrated vs Monday benign pool. Shipped-AE 0.877 -> revived 0.948.
+  - Pillar 2+3 (relational+temporal): multi-K temporal-aug ensemble (base + K=2,4,8,
+    LogScaler v2, SAGEConv).
+  - Fusion: rank_MAX of the two calibrated host-window scores.
+    Full files 60s 60ep 4-seed (exp_m5a_revival_full4seed.json):
+      vs v2b-alone: 7/7 families, every seed, mean +0.0239 (no regressions)
+      worst dilution vs a pillar's own peak: DoS -0.016 (was -0.040 under rank_mean)
+      revived-M5a alone beats shipped-AE by +0.07 mean.
+  - rank_mean kept as ablation arm (+0.0250 mean, same 7/7, deeper DoS dilution).
 
-This is the file Avinash's dashboard imports via `from gnn_temporal_fused import GraphTemporalAutoencoder` —
-we keep that class name but now it is the ensemble.
-
-For honest reporting, cite the per-family oracle as an upper bound (test-tuned) and the fixed
-all_K_rank_max as the deployable rule. The 7/7 is per-family oracle on edge AUC; host-window stays 0.998 tie.
+This is the file Avinash's dashboard imports via `from gnn_temporal_fused import GraphTemporalAutoencoder` --
+we keep that class name but it now fronts the ensemble.
 
 Branch: deep/detection-work only. Source of truth: exp_promote_7_7.py 7/7 on seed0-3.
 """
