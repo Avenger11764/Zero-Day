@@ -1,0 +1,71 @@
+{
+  "per_seed": {
+    "0": {
+      "PortScan": {
+        "host_base": 0.9998,
+        "host_aug": 1.0,
+        "host_delta": 0.0002,
+        "edge_base": 0.7544,
+        "edge_aug": 0.9218,
+        "edge_delta": 0.1674
+      },
+      "DDoS": {
+        "host_base": 0.9998,
+        "host_aug": 0.9996,
+        "host_delta": -0.0002,
+        "edge_base": 0.6747,
+        "edge_aug": 0.8008,
+        "edge_delta": 0.1261
+      },
+      "Botnet": {
+        "host_base": 0.9917,
+        "host_aug": 0.9925,
+        "host_delta": 0.0008,
+        "edge_base": 0.8299,
+        "edge_aug": 0.821,
+        "edge_delta": -0.0089
+      },
+      "Infiltration": {
+        "host_base": 0.9997,
+        "host_aug": 0.9997,
+        "host_delta": 0.0,
+        "edge_base": 0.7427,
+        "edge_aug": 0.7633,
+        "edge_delta": 0.0206
+      },
+      "WebAttacks": {
+        "host_base": 1.0,
+        "host_aug": 1.0,
+        "host_delta": 0.0,
+        "edge_base": 0.8897,
+        "edge_aug": 0.9024,
+        "edge_delta": 0.0127
+      },
+      "Patator (FTP/SSH)": {
+        "host_base": 1.0,
+        "host_aug": 0.9996,
+        "host_delta": -0.0004,
+        "edge_base": 0.9312,
+        "edge_aug": 0.9182,
+        "edge_delta": -0.013
+      },
+      "DoS / Heartbleed": {
+        "host_base": 1.0,
+        "host_aug": 1.0,
+        "host_delta": 0.0,
+        "edge_base": 0.7031,
+        "edge_aug": 0.7769,
+        "edge_delta": 0.0738
+      }
+    }
+  },
+  "config": {
+    "limit": 0,
+    "window": 60,
+    "epochs": 60,
+    "seeds": [
+      0
+    ],
+    "out": "experiments\\loop3_K8_final.json"
+  }
+}
