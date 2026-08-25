@@ -1,0 +1,31 @@
+Device: cuda
+Flows loaded: 7,948,748
+Attack labels: ['DDoS attacks-LOIC-HTTP']
+First attack flow: 2018-02-20 01:14:17
+Train: 165,120 | Eval: 7,783,628
+Graphs (built once): train=15, eval=706
+
+===== SEED 0 =====
+  loss=0.00012077 | ranks=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  r@100=0.1/0.1 | hw P@100=0.8 P@500=0.89 | best-rank pct=3e-05
+
+===== SEED 1 =====
+  loss=0.00013386 | ranks=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  r@100=0.1/0.1 | hw P@100=1.0 P@500=0.998 | best-rank pct=3e-05
+
+===== SEED 2 =====
+  loss=0.00022479 | ranks=[2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+  r@100=0.1/0.1 | hw P@100=0.87 P@500=0.974 | best-rank pct=6.1e-05
+
+===== SEED 3 =====
+  loss=8.427e-05 | ranks=[23, 25, 26, 27, 28, 29, 30, 31, 33, 34]
+  r@100=0.1/0.1 | hw P@100=0.07 P@500=0.292 | best-rank pct=0.000698
+
+=== SUMMARY (mean +/- std) ===
+  best_rank_percentile: 0.0002 +/- 0.0003
+  recall_at_100_meanagg: 0.1 +/- 0.0
+  recall_at_100_maxagg: 0.1 +/- 0.0
+  hw_p100: 0.685 +/- 0.4183
+  hw_p500: 0.7885 +/- 0.3342
+
+Saved: C:\Users\trex2\Potential-Gold\Zero-Day\experiments\external_ids2018_multiseed.json

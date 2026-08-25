@@ -1,0 +1,51 @@
+Device: cuda
+
+============================================================
+s1_neris
+============================================================
+Flows 2,824,636 | botnet 40,961 | train 675,537 | eval 2,149,099
+First botnet flow: 2011-08-10 11:04:24.863449
+Graphs (built once): train=78, eval=290
+--- seed 0 ---
+  loss=1.492e-05 best_rank=72 pct=0.000138 r@100=0.02/0.02 hw=0.04/0.106
+--- seed 1 ---
+  loss=3.87e-06 best_rank=112 pct=0.000214 r@100=0.0/0.03 hw=0.05/0.062
+--- seed 2 ---
+  loss=8.04e-06 best_rank=18 pct=3.4e-05 r@100=0.01/0.02 hw=0.5/0.18
+--- seed 3 ---
+  loss=5.79e-06 best_rank=15 pct=2.9e-05 r@100=0.01/0.02 hw=0.37/0.166
+SUMMARY s1_neris: {"best_rank_percentile": {"mean": 0.0001, "std": 0.0001}, "recall_at_100_meanagg": {"mean": 0.01, "std": 0.0082}, "recall_at_100_maxagg": {"mean": 0.0225, "std": 0.005}, "hw_p100": {"mean": 0.24, "std": 0.2314}, "hw_p500": {"mean": 0.1285, "std": 0.0547}}
+
+============================================================
+s13_virut
+============================================================
+Flows 1,925,149 | botnet 40,003 | train 14,915 | eval 1,910,234
+First botnet flow: 2011-08-15 17:16:48.558133
+Graphs (built once): train=4, eval=980
+--- seed 0 ---
+  loss=0.00028679 best_rank=1 pct=3e-06 r@100=0.03/0.04 hw=0.02/0.06
+--- seed 1 ---
+  loss=0.00030936 best_rank=1 pct=3e-06 r@100=0.03/0.03 hw=0.02/0.008
+--- seed 2 ---
+  loss=0.00035335 best_rank=1 pct=3e-06 r@100=0.03/0.03 hw=0.44/0.724
+--- seed 3 ---
+  loss=0.00029287 best_rank=1 pct=3e-06 r@100=0.04/0.04 hw=0.03/0.088
+SUMMARY s13_virut: {"best_rank_percentile": {"mean": 0.0, "std": 0.0}, "recall_at_100_meanagg": {"mean": 0.0325, "std": 0.005}, "recall_at_100_maxagg": {"mean": 0.035, "std": 0.0058}, "hw_p100": {"mean": 0.1275, "std": 0.2084}, "hw_p500": {"mean": 0.22, "std": 0.3376}}
+
+============================================================
+s3_rbot
+============================================================
+Flows 4,710,638 | botnet 26,822 | train 5,288 | eval 4,705,350
+First botnet flow: 2011-08-12 15:25:50.064002
+Graphs (built once): train=2, eval=4008
+--- seed 0 ---
+  loss=0.0007675 best_rank=2 pct=5e-06 r@100=0.02/0.01 hw=0.02/0.004
+--- seed 1 ---
+  loss=0.00090303 best_rank=18 pct=4.1e-05 r@100=0.12/0.02 hw=0.01/0.004
+--- seed 2 ---
+  loss=0.00137129 best_rank=1 pct=2e-06 r@100=0.02/0.03 hw=0.64/0.714
+--- seed 3 ---
+  loss=0.00105569 best_rank=1 pct=2e-06 r@100=0.03/0.03 hw=0.98/0.892
+SUMMARY s3_rbot: {"best_rank_percentile": {"mean": 0.0, "std": 0.0}, "recall_at_100_meanagg": {"mean": 0.0475, "std": 0.0486}, "recall_at_100_maxagg": {"mean": 0.0225, "std": 0.0096}, "hw_p100": {"mean": 0.4125, "std": 0.4795}, "hw_p500": {"mean": 0.4035, "std": 0.467}}
+
+Saved: C:\Users\trex2\Potential-Gold\Zero-Day\experiments\external_ctu13_multiseed.json
