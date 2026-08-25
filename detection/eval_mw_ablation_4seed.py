@@ -1,17 +1,20 @@
 """
 Multi-window ablation, 4-seeded: does fusion beat single windows, and does M5a help or hurt?
 
-Six configurations per family, identical host population (hosts present in both windows):
+Configurations per family, identical host population (hosts present in both windows):
   w60            60s calibrated score alone
   w300           300s calibrated score alone
   pure_rank_mean rank_mean([60s, 300s])          -- no M5a
   pure_rank_max  rank_max([60s, 300s])           -- no M5a
-  m5a_multi      max(rm([m5a,60s]), rm([m5a,300s])) -- reproduces eval_mw_4seed.py recipe
+  m5a_multi      max(rm([m5a,60s]), rm([m5a,300s])) -- shipped M5a inside MW
   three_way_rm   rank_mean([m5a, 60s, 300s])
+  rev_multi      max(rm([rev,60s]), rm([rev,300s])) -- revived 87-dim ctx M5a inside MW
+  three_way_rev_rm rank_mean([rev, 60s, 300s])
+  pure_noisyor_rev  noisyor(rank01(pure_rank_mean), rank01(rev))  -- the other session's 7/7 rule vs MW headline
+  pure_rmax_rev     maximum(rank01(pure_rank_mean), rank01(rev))
 
 Graphs, M5a scores and scalers are seed-independent and built ONCE; only the GNN
-training is repeated per seed. CUDA determinism flags set; residual cuBLAS/
-scatter nondeterminism means exact reproduction still requires same-device runs.
+training (+ revived AE) is repeated per seed. CUDA determinism flags set.
 """
 from __future__ import annotations
 
@@ -30,10 +33,13 @@ import torch
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from detection.graph_builder import build_graphs, normalize_columns, read_flows
+from detection.graph_builder import build_graphs, normalize_columns, read_flows, _window_key
 from detection.gnn_model import GraphAutoencoder
 from detection.evaluate_gnn import FLOWS, malicious_hosts, roc_auc
 from detection.stub_detector import _get_model
+from detection.exp_m5a_revival import (
+    RevivedAE, CtxScaler, build_ctx, train_ae, CTX_DIMS,
+)
 
 
 class LogScaler:
@@ -89,7 +95,9 @@ ATTACK_FILES = {
     "DoS / Heartbleed": "Wednesday-workingHours.pcap_ISCX.csv",
 }
 
-CONFIGS = ["w60", "w300", "pure_rank_mean", "pure_rank_max", "m5a_multi", "three_way_rm"]
+CONFIGS = ["w60", "w300", "pure_rank_mean", "pure_rank_max", "m5a_multi",
+           "three_way_rm", "rev_multi", "three_way_rev_rm",
+           "pure_noisyor_rev", "pure_rmax_rev"]
 
 
 def set_seed(seed):
@@ -120,9 +128,30 @@ def m5a_host_scores(df, canonical, m5a):
     arr = feats.to_numpy(dtype=np.float32)
     lo, hi = arr.min(axis=0), arr.max(axis=0)
     span = np.where(hi - lo > 0, hi - lo, 1.0)
-    x = np.clip((arr - lo) / span, 0.0, 1.0)
+    x = np.clip((arr - lo) / span, 0.0, 1.0).astype(np.float32)
     with torch.no_grad():
         scores = m5a.anomaly_score(torch.tensor(x, dtype=torch.float32)).numpy()
+    tmp = pd.DataFrame({"src_ip": df["src_ip"].values, "score": scores})
+    return tmp.groupby("src_ip")["score"].max().to_dict(), x
+
+
+def revived_host_scores(df, canonical, revived, ctx_scaler, ref_lo, ref_hi):
+    """87-dim revived-AE host scores, same per-host max convention as m5a_host_scores."""
+    feats = df[canonical].apply(pd.to_numeric, errors="coerce")
+    feats = feats.replace([np.inf, -np.inf], np.nan).fillna(0.0)
+    arr = feats.to_numpy(dtype=np.float32)
+    span = np.where(ref_hi - ref_lo > 0, ref_hi - ref_lo, 1.0)
+    xl = np.clip((arr - ref_lo) / span, 0.0, 1.0).astype(np.float32)
+    wkeys = _window_key(df, 60)
+    xc = ctx_scaler.transform(build_ctx(df, wkeys))
+    x87 = np.concatenate([xl, xc], axis=1)
+    outs = []
+    with torch.no_grad():
+        dev = next(revived.parameters()).device
+        for i in range(0, len(x87), 8192):
+            xb = torch.tensor(x87[i:i + 8192]).to(dev)
+            outs.append(revived.anomaly_score(xb).cpu().numpy())
+    scores = np.concatenate(outs)
     tmp = pd.DataFrame({"src_ip": df["src_ip"].values, "score": scores})
     return tmp.groupby("src_ip")["score"].max().to_dict()
 
@@ -165,6 +194,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2, 3])
     ap.add_argument("--epochs", type=int, default=200)
+    ap.add_argument("--epochs-ae", type=int, default=60)
     ap.add_argument("--limit", type=int, default=None, help="row limit for smoke tests")
     ap.add_argument("--out", default="experiments/mw_ablation_4seed.json")
     args = ap.parse_args()
@@ -183,7 +213,20 @@ def main():
 
     m5a = _get_model()
     canonical = pin_canonical(tr)
-    cal_a = PercentileCalibrator(np.array(list(m5a_host_scores(tr, canonical, m5a).values())))
+    cal_a = PercentileCalibrator(np.array(list(m5a_host_scores(tr, canonical, m5a)[0].values())))
+
+    # ---- Monday reference scaling for the revived 87-dim AE ----------------
+    def _scaled_matrix(df):
+        feats = df[canonical].apply(pd.to_numeric, errors="coerce")
+        feats = feats.replace([np.inf, -np.inf], np.nan).fillna(0.0)
+        return feats.to_numpy(dtype=np.float32)
+
+    ref_arr = _scaled_matrix(tr)
+    ref_lo, ref_hi = ref_arr.min(axis=0), ref_arr.max(axis=0)
+    span_ref = np.where(ref_hi - ref_lo > 0, ref_hi - ref_lo, 1.0)
+    tr_x = np.clip((ref_arr - ref_lo) / span_ref, 0.0, 1.0).astype(np.float32)
+    ctx_scaler = CtxScaler().fit(build_ctx(tr, _window_key(tr, 60)))
+    tr_x87 = np.concatenate([tr_x, ctx_scaler.transform(build_ctx(tr, _window_key(tr, 60)))], axis=1)
 
     print("Caching attack graphs + M5a scores (once, seed-independent)...")
     fams = {}
@@ -199,10 +242,11 @@ def main():
         g300 = build_graphs(df, window_seconds=300, k=0)
         if not g60 or not g300:
             continue
-        a_map = m5a_host_scores(df, canonical, m5a)
-        fams[family] = {"g60": g60, "g300": g300, "bad": bad, "a_map": a_map}
+        a_map, _ = m5a_host_scores(df, canonical, m5a)
+        rev_map = None  # computed per seed (revived AE retrains per seed)
+        fams[family] = {"g60": g60, "g300": g300, "bad": bad, "a_map": a_map,
+                        "df": df, "rev_map": rev_map}
         print(f"  {family}: {len(g60)}x60s {len(g300)}x300s {len(bad)} malicious hosts")
-    del df
 
     results = {str(s): {} for s in args.seeds}
     for seed in args.seeds:
@@ -218,7 +262,23 @@ def main():
         cal300 = PercentileCalibrator(
             np.concatenate([ns for _, ns in node_scores(bg300, m300, scaler300, device)]))
 
+        # ---- revived 87-dim AE, retrained per seed (same recipe as exp_m5a_revival)
+        revived = train_ae(tr_x87, args.epochs_ae, seed, device)
+        outs = []
+        with torch.no_grad():
+            for i in range(0, len(tr_x87), 8192):
+                xb = torch.tensor(tr_x87[i:i + 8192]).to(device)
+                outs.append(revived.anomaly_score(xb).cpu().numpy())
+        _s = np.concatenate(outs)
+        _t = pd.DataFrame({"src_ip": tr["src_ip"].values, "score": _s})
+        pool_rev = _t.groupby("src_ip")["score"].max()
+        cal_rev = PercentileCalibrator(pool_rev.values)
+        print(f"  revived AE trained ({tr_x87.shape[1]} dims), pool {len(pool_rev)}")
+
         for family, d in fams.items():
+            if d["rev_map"] is None:
+                d["rev_map"] = revived_host_scores(d["df"], canonical, revived,
+                                                   ctx_scaler, ref_lo, ref_hi)
             h60 = host_mean_scores(d["g60"], m60, scaler60, device)
             h300 = host_mean_scores(d["g300"], m300, scaler300, device)
             hosts = sorted(set(h60) & set(h300))
@@ -230,15 +290,22 @@ def main():
             w60 = cal60(np.array([h60[h] for h in hosts]))
             w300 = cal300(np.array([h300[h] for h in hosts]))
             pa = cal_a(np.array([d["a_map"].get(h, 0.0) for h in hosts]))
+            pr = cal_rev(np.array([d["rev_map"].get(h, 0.0) for h in hosts]))
 
+            pure_rm = fuse([w60, w300], "rank_mean")
             scored = {
                 "w60": w60,
                 "w300": w300,
-                "pure_rank_mean": fuse([w60, w300], "rank_mean"),
+                "pure_rank_mean": pure_rm,
                 "pure_rank_max": fuse([w60, w300], "rank_max"),
                 "m5a_multi": np.maximum(fuse([pa, w60], "rank_mean"),
                                         fuse([pa, w300], "rank_mean")),
                 "three_way_rm": fuse([pa, w60, w300], "rank_mean"),
+                "rev_multi": np.maximum(fuse([pr, w60], "rank_mean"),
+                                        fuse([pr, w300], "rank_mean")),
+                "three_way_rev_rm": fuse([pr, w60, w300], "rank_mean"),
+                "pure_noisyor_rev": 1 - (1 - _rank01(pure_rm)) * (1 - _rank01(pr)),
+                "pure_rmax_rev": np.maximum(_rank01(pure_rm), _rank01(pr)),
             }
             row = {}
             for name, sc in scored.items():
