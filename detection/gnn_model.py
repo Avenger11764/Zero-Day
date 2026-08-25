@@ -245,25 +245,34 @@ def main() -> None:
     ap.add_argument("--window", type=int, default=60)
     ap.add_argument("--epochs", type=int, default=200)
     ap.add_argument("--limit", type=int, default=None)
+    ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--feature-set", choices=["v1", "v2"], default="v1")
+    ap.add_argument("--out", default=None,
+                    help="checkpoint path (default: gnn_autoencoder_v1_logscale[_v2].pt)")
     args = ap.parse_args()
 
     if args.csv is None:
         _self_test()
         return
 
+    from graph_builder import read_flows, node_feature_names
     import pandas as pd
-    df = normalize_columns(pd.read_csv(args.csv, nrows=args.limit, low_memory=False))
+    df = normalize_columns(read_flows(args.csv, limit=args.limit))
     if "label" in df.columns:
         before = len(df)
         df = df[df["label"].astype(str).str.strip().str.upper() == "BENIGN"]
         print(f"Filtered to BENIGN: {len(df)}/{before} flows")
 
-    graphs = build_graphs(df, window_seconds=args.window)
-    print(f"Built {len(graphs)} graphs")
-    model, scaler, losses = train(graphs, epochs=args.epochs)
+    graphs = build_graphs(df, window_seconds=args.window, feature_set=args.feature_set)
+    print(f"Built {len(graphs)} graphs (feature_set={args.feature_set}, "
+          f"in_dim={len(node_feature_names(args.feature_set))})")
+    model, scaler, losses = train(graphs, epochs=args.epochs, seed=args.seed)
+    out = Path(args.out) if args.out else (
+        OUT_DIR / ("gnn_autoencoder_v1_logscale_v2.pt" if args.feature_set == "v2"
+                   else "gnn_autoencoder_v1_logscale.pt"))
     torch.save({"model": model.state_dict(), "scaler": scaler.state_dict()},
-               MODEL_PATH)
-    print(f"Saved -> {MODEL_PATH}  (final loss {losses[-1]:.6f})")
+               out)
+    print(f"Saved -> {out}  (final loss {losses[-1]:.6f})")
 
 
 if __name__ == "__main__":

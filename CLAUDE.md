@@ -196,12 +196,13 @@ push it.** It holds the full spec PDF and the weeks 4–6 roadmap.
 | --- | --- | --- |
 | `stub_detector.py` | M5a | per-flow scoring entry point. **Checkpoint-1 depends on it — don't break it.** |
 | `autoencoder.py` | M5a | trains the baseline AE → `autoencoder_v2-256.pt` |
-| `graph_builder.py` | M5b | flows → per-window host graphs; `graph_health()`, `read_flows()` |
-| `gnn_model.py` | M5b | GraphSAGE graph autoencoder (the graph half) |
-| `gnn_temporal.py` | M5b | the original LSTM autoencoder (the sequence half, standalone) |
-| `gnn_temporal_fused.py` | M5b | **the two halves fused — this is M5b proper** |
-| `ensembler.py` | M5c | fuses M5a + M5b, emits the ablation table |
-| `alert_pipeline.py` | seam | `score_window()` → ScoredAlerts with both sub-scores |
+| `train_m5a_revived.py` / `exp_m5a_revival.py` | M5a-R | revived per-flow AE with 11 ctx dims (87-dim) → `m5a_revived_ctx.pt`. **Not in production defaults — decision pending (see 2026-08-25c/d)** |
+| `graph_builder.py` | M5b | flows → per-window host graphs; `graph_health()`, `read_flows()`; v1 (8) + v2 (19) feature sets |
+| `gnn_model.py` | M5b | GraphSAGE graph autoencoder; `NodeScaler(log=True)` default, `set_seed()`, `--feature-set v1/v2` |
+| `gnn_temporal_fused.py` | M5b | GNN+LSTM fused (PDF's M5b proper); measured negative vs graph-only at edge level (RC-20), kept for ablation |
+| `ensembler.py` | M5c | fuses M5a + M5b, emits the ablation table; 80/20 Monday calibration holdout |
+| `alert_pipeline.py` | seam | `score_window(feature_columns=None, threshold=None)` → **RC-26 M5b-only by default**; v2 requests refuse loudly without a 19-dim checkpoint |
+| `drift_monitor.py` | M6 | score drift; `DetectorDriftMonitors` watches all three streams; wired via `alert_pipeline.init_drift_monitors()` |
 | `evaluate_gnn.py` / `run_evaluation_suite.py` | eval | held-out attack-family protocol |
 | `eval_mw_ablation_4seed.py` | eval | **reference implementation** — 6-config fusion ablation, 4-seeded, CUDA-deterministic (RC-26) |
 | `eval_feature_set_v2.py` | eval | feature set v1 vs v2 + latent capacity control (RC-30) |
@@ -211,8 +212,7 @@ push it.** It holds the full spec PDF and the weeks 4–6 roadmap.
 | `ablation.py` | eval | M5a vs M5b mechanism demo on constructed traffic |
 | `capture/schema_mapper.py` | data | content-based column identification |
 | `capture/pcap_to_flows.py` | data | pcap → flows without CICFlowMeter |
-| `experiments/` | evidence | **dormant.** Every sweep behind the CHANGELOG numbers; nothing imports it |
-| `drift_monitor.py` | M6 | score drift; `DetectorDriftMonitors` watches all three streams |
+| `experiments/` + `exp_*.py` in detection/ | evidence | sweeps behind the CHANGELOG numbers; nothing in the prod path imports them |
 | `shap_explainer.py` | M7 | C's seam |
 | `harness/graph_techniques.py` | D's seam | 4 evasion attacks aimed at M5b's structure |
 | `harness/run_graph_harness.py` | D's seam | runs them; measures what evasion **costs** the attacker |
@@ -237,13 +237,14 @@ Everything has a `--help` and most have a self-test that needs no dataset
   flows. Ground truth is per-host; projecting a host score onto every flow
   would fabricate precision.
 
-## Current results (as of 2026-08-21) — GPU, CUDA-deterministic, 4 seeds
+## Current results (as of 2026-08-25) — GPU, CUDA-deterministic, 4 seeds
 
-**Headline: pure 60s+300s rank_mean fusion (NO M5a), feature set v2 (19 features):
-mean ROC-AUC 0.9987 ± 0.0008** across 7 held-out families
-(`eval_feature_set_v2.py`, RC-30). Without v2 features: 0.9987 ± 0.0008 also
-holds for the 8-feature variant at fusion level (RC-26) — v2's win is per-family
-(Botnet 0.9328 → 0.9987), not the mean.
+**Headline: pure 60s+300s rank_mean fusion (NO M5a), feature set v1 (8 features):
+mean ROC-AUC 0.9989 ± 0.0006** across 7 held-out families
+(`eval_mw_ablation_4seed.py`, re-verified on the fixed stack — LogScaler default,
+`set_seed`, calibration holdout). With v2 (19 feats): **0.9997 ± 0.0001**
+(`eval_feature_set_v2.py`) — v2's historic win was per-family
+(Botnet 0.9328 → 0.9987); the mean is saturated either way.
 
 | Family | v2 fused AUC | Attacker ranks |
 | --- | --- | --- |
@@ -253,24 +254,33 @@ holds for the 8-feature variant at fusion level (RC-26) — v2's win is per-fami
 | Botnet | 0.9987 | 5–34 |
 
 **Operational claim (quote this, not P@100):** every attacker ranks in the top
-~35 of thousands on CICIDS2017; top 24 of 32,935 on IDS2018 (RC-29); infected
-host in the top 0.06% of 300k–500k-host real botnet networks on all three CTU-13
-scenarios with genuine C&C infrastructure ranked #1–2 (RC-32). recall@100 = 1.0
-on both CIC datasets. Host-level P@100 is structurally capped at bad/100 — do
-not use it as a headline metric (RC-27).
+~35 of thousands on CICIDS2017; **top-11 of 32,935 on IDS2018 in 3 of 4 seeds**
+(top-35 worst; best-rank percentile 0.0002 ± 0.0003); infected host **#1-ranked
+on CTU-13 Virut in all 4 seeds**, Rbot C&C #1 in 3/4 seeds, Neris worst seed
+112/522k (top 0.02%). recall@100 = 1.0 on both CIC datasets. Host-level P@100 is
+structurally capped at bad/100 — do not use it as a headline metric (RC-27).
 
-**Baselines beaten under identical conditions** (RC-31): PCA 0.9417 · Isolation
-Forest 0.9357 · plain MLP-AE 0.9517 vs ours 0.9987 — same features, same units,
-+4.7 pts over the best, concentrated in topology families.
+**Baselines beaten under identical conditions** (RC-31, exact-matched 2026-08-25):
+PCA 0.9417 · Isolation Forest 0.9357 · plain MLP-AE 0.9517 vs ours 0.9989 — same
+features, same units, +4.7 pts over the best, concentrated in topology families.
 
-**Closed negatives (do not revisit):** temporal/LSTM half adds nothing (RC-20);
-LODO 5× training data hurts (gotcha #10); k=5 sim edges hurt on production
-architecture; M5a in multi-window fusion is actively harmful (−5 pts, RC-26);
-small-window filtering changes nothing (queue noise is drift, RC-28).
+**Closed negatives (do not revisit):** temporal/LSTM half adds nothing at edge
+level (RC-20); LODO 5× training data hurts (gotcha #10); k=5 sim edges hurt on
+production architecture; plain shipped M5a in multi-window fusion is actively
+harmful (0.9482, RC-26 — reproduced exactly); small-window filtering changes
+nothing (queue noise is drift, RC-28).
+
+**Open decision (not closed):** a revived per-flow AE with window-context dims
+(`exp_m5a_revival.py`, `m5a_revived_ctx.pt`) fused with a v2b temporal-aug GNN
+claims 7/7 no-regressions vs *its own single-window v2b baseline* (~0.93) —
+verified internally, but never compared against the multi-window headline
+(0.9989) and its `rank_MAX` rule failed 7/7 on one seed (noisyor is the actual
+7/7×4 rule). RC-26 pure remains production until that comparison exists.
 
 **Known weaknesses:** alert-queue precision at host-window level (drift-driven,
-M6's job); calibration optimism (Monday-fitted); device-sensitive arithmetic
-(gotcha #24) — every number above is GPU + determinism flags.
+M6's job); calibration optimism (now held out 20% Monday, still quote it);
+device-sensitive arithmetic (gotcha #24) — every number above is GPU +
+determinism flags.
 
 ## Conventions
 
@@ -295,10 +305,11 @@ multi-seed everything (every headline has a band), feature set v2 evaluated
 
 Outstanding:
 
-1. **Flip `alert_pipeline.py` defaults** to the RC-26 recipe (pure rank_mean,
-   no M5a) — needs Avinash's sign-off first; his dashboard consumes this seam.
-2. **Multi-seed the external datasets** — IDS2018 + CTU-13 currently single
-   seed; 4-seed runs launched 2026-08-21 night (`run_externals_multiseed.cmd`).
+1. **Production rule decision** — RC-26 pure (shipped, default in
+   `alert_pipeline.py`) vs revived-M5a+v2b fusion claim; the decisive comparison
+   (revived M5a inside the multi-window protocol vs 0.9989 band) has never run.
+2. **v2 default flip** — `gnn_autoencoder_v1_logscale_v2.pt` training added to
+   pipeline; flip `feature_set="v2"` default after it lands + team sign-off.
 3. **Weeks 4–12 roadmap** (`Knowledge/`): Pillar 3 host-syscall autoencoder via
    eBPF, AE-vs-HMM ablation, three-way score fusion. Team work — B supports.
 4. **Paper packaging** when results freeze: name method + protocol, one-command
