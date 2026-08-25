@@ -53,6 +53,8 @@ from torch_geometric.data import Data
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 # Canonical name -> the aliases we accept from either CSV convention.
+# Covers CICIDS2017 (MachineLearningCSV + GeneratedLabelledFlows) and
+# CSE-CIC-IDS2018 "Tot Fwd Pkts" naming (gotcha #13).
 _COLUMN_ALIASES = {
     "src_ip": ["src_ip", "Source IP", "Src IP"],
     "dst_ip": ["dst_ip", "Destination IP", "Dst IP"],
@@ -63,10 +65,10 @@ _COLUMN_ALIASES = {
     "label": ["label", "Label"],
     # Volume/duration columns used to build node + edge features.
     "flow_duration": ["flow_duration", "Flow Duration"],
-    "fwd_bytes": ["totlen_fwd_pkts", "Total Length of Fwd Packets"],
-    "bwd_bytes": ["totlen_bwd_pkts", "Total Length of Bwd Packets"],
-    "fwd_pkts": ["tot_fwd_pkts", "Total Fwd Packets"],
-    "bwd_pkts": ["tot_bwd_pkts", "Total Backward Packets"],
+    "fwd_bytes": ["totlen_fwd_pkts", "Total Length of Fwd Packets", "TotLen Fwd Pkts", "Tot Len Fwd Pkts"],
+    "bwd_bytes": ["totlen_bwd_pkts", "Total Length of Bwd Packets", "TotLen Bwd Pkts", "Tot Len Bwd Pkts"],
+    "fwd_pkts": ["tot_fwd_pkts", "Total Fwd Packets", "Tot Fwd Pkts"],
+    "bwd_pkts": ["tot_bwd_pkts", "Total Backward Packets", "Tot Bwd Pkts"],
 }
 
 # The per-host features each node carries. Order is fixed -- SHAP and the
@@ -329,6 +331,8 @@ def build_graphs(df: pd.DataFrame, window_seconds: int = 60, k: int = 0,
     """Full pipeline: raw flow dataframe -> list of per-window graphs.
 
     If k > 0, adds k nearest-neighbour auxiliary edges per host per window.
+    feature_set="v2" (19 feats) is available; v1 is default for backward compat
+    (E3: flip to v2 after team sign-off; indices 0-7 identical).
     """
     df = normalize_columns(df)
     assert_graphable(df)

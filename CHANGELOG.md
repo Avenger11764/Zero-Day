@@ -24,6 +24,38 @@ Template:
 
 ---
 
+## 2026-08-25 — Fix all ASAP/E1-E4 issues (LogScaler default, deterministic seeding, IDS2018 aliases, drift wiring, positional unpack, calibration holdout) + smoke reproduction
+**Author:** Deep (Person B — Detection Modeling) · assisted by opencode
+**Commit:** (pending — 6 files modified, see git diff)
+
+### What changed
+* **A4 gotcha #23:** `detection/alert_pipeline.py:143` `a,b,c = node.tolist()` → index `node[0]`/`node[6]`; safe on `feature_set="v2"` (19 feats). `experiments/gnn_temporal.py` archived (standalone LSTM half).
+* **A2 log1p default:** `detection/gnn_model.py:111` `NodeScaler(log=True)` default (gotcha #14), `_prep()` log1p before min-max, `state_dict` carries `log`, old `.pt` loaded as `log=False`. `detection/gnn_temporal_fused.py:144` mirrors `log_scale` + `seed`.
+* **A3 determinism:** `detection/gnn_model.py:144` new `set_seed()` ( `CUBLAS_WORKSPACE_CONFIG=:4096:8`, `cuda.manual_seed_all`, `cudnn.deterministic=True/benchmark=False` ); `train(..., seed)` / `train_fused(..., seed)`; `detection/ensembler.py:174` now `set_seed` not just `manual_seed`.
+* **A1 RC-26 defaults:** `detection/alert_pipeline.py:65` `score_window(..., feature_columns=None, threshold=None, feature_set="v1")` → M5b-only `fused=relational` (0.8322 edge AUC best, pure rank_mean); with `feature_columns` → `max`. Prefers `gnn_autoencoder_v1_logscale.pt` if present, `model_source` reflects it; `threshold=None` fixes gotcha #7 uncalibrated `0.5`.
+* **A5 IDS2018 aliases:** `detection/graph_builder.py:55` added `Tot Fwd Pkts`/`TotLen Fwd Pkts` variants (gotcha #13) → `fwd_bytes` no longer 0 on IDS2018.
+* **A6 drift:** `detection/drift_monitor.py:1` new `DetectorDriftMonitors` (relational/per_flow/fused), `detection/alert_pipeline.py:37` `init_drift_monitors()` + `score_window(..., drift=)` feeds each edge (RC-27/28).
+* **E1 holdout:** `detection/ensembler.py:196` 80/20 split `tr_graphs`/`cal_graphs` for `PercentileCalibrator` (Monday optimism).
+* **E2 metrics:** `detection/ensembler.py:311` P@100 header → diagnostic only, notes `rank/recall@100`.
+* **E3 v2 docs:** `detection/graph_builder.py:329` `feature_set="v2"` noted; v1 default until sign-off.
+
+### Why
+Gotchas #7/#14/#23/#24 + operational P@100 cap + silent IDS2018 volume loss were still live despite being documented. RC-26 pure `rank_mean no M5a` recipe (0.9987±0.0008) was measured but not served; `alert_pipeline` fused raw scores that `max` always picked M5b, and `NodeScaler` plain min-max squashed non-huge hosts (Patator/WebAttacks 0). Device variance >6pts without deterministic flags.
+
+### Results (smoke, --limit 150k --epochs 20 cuda, not full 60-epoch band)
+* `detection/ensembler.py --limit 150k --seed 0` → M5a 0.8139 / M5b 0.9388 / fused_rank_max 0.9643 (vs 2026-08-11 0.9425 within holdout+log delta); WebAttacks M5b 0.9701, Patator 0.9997.
+* `detection/eval_mw_ablation_4seed.py --limit 150k --seeds 0 1` → pure_rank_mean 0.9993±0.0001 (RC-26 0.9987 reproduced, log helps).
+* `Thuesday-20-02-2018` `fwd_bytes` mean 96 (was 0); `eval_external_ids2018.py --limit 50k` → r@100 0.625.
+* Self-tests: `graph_builder.py` 60 graphs PASS, `gnn_temporal_fused.py` scanner #1 PASS, `score_window(..., feature_set='v2')` 576 alerts no unpack crash, drift `576 scores stable`.
+
+### Caveats / notes for the team
+* Full band needs `eval_mw_ablation_4seed.py --seeds 0 1 2 3 --epochs 60 --limit 0` (~2h RTX 3090) + `eval_feature_set_v2.py` 4-seed; smoke used 20 epochs/150k.
+* New `gnn_autoencoder_v1.pt` saved by smoke is logscale; next production train should be `python detection/gnn_model.py Monday.csv --seed 0` to produce `gnn_autoencoder_v1_logscale.pt` formally.
+* `alert_pipeline` default flip needs Avinash sign-off (dashboard seam); `feature_set="v2"` still opt-in until sign-off.
+* Old checkpoints load as `log=False` correctly; new checkpoints carry `log=True`.
+
+---
+
 ## 2026-08-21b — Non-relational baselines re-run under identical conditions; third dataset family (CTU-13) replicates the claim
 **Author:** Deep (Person B — Detection Modeling) · assisted by opencode
 

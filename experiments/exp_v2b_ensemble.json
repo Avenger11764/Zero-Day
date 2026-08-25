@@ -1,0 +1,262 @@
+{
+  "0": {
+    "PortScan": {
+      "base": 0.7628,
+      "aug": 0.9476,
+      "rank_mean": 0.8538,
+      "rank_max": 0.9373,
+      "rank_min": 0.7836,
+      "raw_max": 0.9476,
+      "base_raw": 0.7628
+    },
+    "DDoS": {
+      "base": 0.8854,
+      "aug": 0.7593,
+      "rank_mean": 0.8415,
+      "rank_max": 0.8629,
+      "rank_min": 0.8097,
+      "raw_max": 0.7593,
+      "base_raw": 0.8854
+    },
+    "Botnet": {
+      "base": 0.7706,
+      "aug": 0.7999,
+      "rank_mean": 0.7934,
+      "rank_max": 0.7759,
+      "rank_min": 0.8037,
+      "raw_max": 0.7999,
+      "base_raw": 0.7706
+    },
+    "Infiltration": {
+      "base": 0.7528,
+      "aug": 0.7658,
+      "rank_mean": 0.769,
+      "rank_max": 0.7755,
+      "rank_min": 0.7601,
+      "raw_max": 0.7656,
+      "base_raw": 0.7528
+    },
+    "WebAttacks": {
+      "base": 0.9071,
+      "aug": 0.9004,
+      "rank_mean": 0.9054,
+      "rank_max": 0.9133,
+      "rank_min": 0.8958,
+      "raw_max": 0.9047,
+      "base_raw": 0.9071
+    },
+    "Patator (FTP/SSH)": {
+      "base": 0.9317,
+      "aug": 0.9261,
+      "rank_mean": 0.932,
+      "rank_max": 0.9391,
+      "rank_min": 0.9278,
+      "raw_max": 0.9263,
+      "base_raw": 0.9317
+    },
+    "DoS / Heartbleed": {
+      "base": 0.7218,
+      "aug": 0.7743,
+      "rank_mean": 0.7407,
+      "rank_max": 0.7652,
+      "rank_min": 0.7276,
+      "raw_max": 0.7749,
+      "base_raw": 0.7218
+    }
+  },
+  "1": {
+    "PortScan": {
+      "base": 0.7132,
+      "aug": 0.9307,
+      "rank_mean": 0.816,
+      "rank_max": 0.9026,
+      "rank_min": 0.7473,
+      "raw_max": 0.9307,
+      "base_raw": 0.7132
+    },
+    "DDoS": {
+      "base": 0.791,
+      "aug": 0.8356,
+      "rank_mean": 0.8289,
+      "rank_max": 0.8584,
+      "rank_min": 0.7903,
+      "raw_max": 0.8358,
+      "base_raw": 0.791
+    },
+    "Botnet": {
+      "base": 0.8373,
+      "aug": 0.7871,
+      "rank_mean": 0.8222,
+      "rank_max": 0.8135,
+      "rank_min": 0.8224,
+      "raw_max": 0.7871,
+      "base_raw": 0.8373
+    },
+    "Infiltration": {
+      "base": 0.7752,
+      "aug": 0.7413,
+      "rank_mean": 0.7598,
+      "rank_max": 0.772,
+      "rank_min": 0.7511,
+      "raw_max": 0.7413,
+      "base_raw": 0.7752
+    },
+    "WebAttacks": {
+      "base": 0.8621,
+      "aug": 0.9247,
+      "rank_mean": 0.8979,
+      "rank_max": 0.9099,
+      "rank_min": 0.8848,
+      "raw_max": 0.9246,
+      "base_raw": 0.8621
+    },
+    "Patator (FTP/SSH)": {
+      "base": 0.8394,
+      "aug": 0.9389,
+      "rank_mean": 0.9086,
+      "rank_max": 0.9294,
+      "rank_min": 0.8899,
+      "raw_max": 0.9389,
+      "base_raw": 0.8394
+    },
+    "DoS / Heartbleed": {
+      "base": 0.6167,
+      "aug": 0.8075,
+      "rank_mean": 0.7051,
+      "rank_max": 0.7665,
+      "rank_min": 0.6443,
+      "raw_max": 0.8075,
+      "base_raw": 0.6167
+    }
+  },
+  "2": {
+    "PortScan": {
+      "base": 0.7719,
+      "aug": 0.9244,
+      "rank_mean": 0.8497,
+      "rank_max": 0.9227,
+      "rank_min": 0.7891,
+      "raw_max": 0.9244,
+      "base_raw": 0.7719
+    },
+    "DDoS": {
+      "base": 0.7913,
+      "aug": 0.8694,
+      "rank_mean": 0.8409,
+      "rank_max": 0.8424,
+      "rank_min": 0.8268,
+      "raw_max": 0.8694,
+      "base_raw": 0.7913
+    },
+    "Botnet": {
+      "base": 0.8122,
+      "aug": 0.7891,
+      "rank_mean": 0.8107,
+      "rank_max": 0.805,
+      "rank_min": 0.8092,
+      "raw_max": 0.7891,
+      "base_raw": 0.8122
+    },
+    "Infiltration": {
+      "base": 0.7819,
+      "aug": 0.7416,
+      "rank_mean": 0.7615,
+      "rank_max": 0.7622,
+      "rank_min": 0.7666,
+      "raw_max": 0.7416,
+      "base_raw": 0.7819
+    },
+    "WebAttacks": {
+      "base": 0.8718,
+      "aug": 0.9169,
+      "rank_mean": 0.8929,
+      "rank_max": 0.9027,
+      "rank_min": 0.8816,
+      "raw_max": 0.9169,
+      "base_raw": 0.8718
+    },
+    "Patator (FTP/SSH)": {
+      "base": 0.8992,
+      "aug": 0.9358,
+      "rank_mean": 0.9218,
+      "rank_max": 0.9289,
+      "rank_min": 0.9105,
+      "raw_max": 0.9358,
+      "base_raw": 0.8992
+    },
+    "DoS / Heartbleed": {
+      "base": 0.6245,
+      "aug": 0.8053,
+      "rank_mean": 0.7119,
+      "rank_max": 0.7704,
+      "rank_min": 0.6649,
+      "raw_max": 0.8052,
+      "base_raw": 0.6245
+    }
+  },
+  "3": {
+    "PortScan": {
+      "base": 0.6786,
+      "aug": 0.9479,
+      "rank_mean": 0.8121,
+      "rank_max": 0.9348,
+      "rank_min": 0.7103,
+      "raw_max": 0.9478,
+      "base_raw": 0.6786
+    },
+    "DDoS": {
+      "base": 0.8155,
+      "aug": 0.8453,
+      "rank_mean": 0.8433,
+      "rank_max": 0.8572,
+      "rank_min": 0.8227,
+      "raw_max": 0.8453,
+      "base_raw": 0.8155
+    },
+    "Botnet": {
+      "base": 0.8107,
+      "aug": 0.782,
+      "rank_mean": 0.8052,
+      "rank_max": 0.7895,
+      "rank_min": 0.8146,
+      "raw_max": 0.782,
+      "base_raw": 0.8107
+    },
+    "Infiltration": {
+      "base": 0.7736,
+      "aug": 0.7292,
+      "rank_mean": 0.7505,
+      "rank_max": 0.7618,
+      "rank_min": 0.7418,
+      "raw_max": 0.7291,
+      "base_raw": 0.7736
+    },
+    "WebAttacks": {
+      "base": 0.8683,
+      "aug": 0.9249,
+      "rank_mean": 0.8981,
+      "rank_max": 0.921,
+      "rank_min": 0.8758,
+      "raw_max": 0.9278,
+      "base_raw": 0.8683
+    },
+    "Patator (FTP/SSH)": {
+      "base": 0.9085,
+      "aug": 0.918,
+      "rank_mean": 0.919,
+      "rank_max": 0.9257,
+      "rank_min": 0.9112,
+      "raw_max": 0.918,
+      "base_raw": 0.9085
+    },
+    "DoS / Heartbleed": {
+      "base": 0.6548,
+      "aug": 0.7401,
+      "rank_mean": 0.697,
+      "rank_max": 0.7361,
+      "rank_min": 0.6622,
+      "raw_max": 0.7401,
+      "base_raw": 0.6548
+    }
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "attack_labels": [
+    "DDoS attacks-LOIC-HTTP"
+  ],
+  "attack_start": "2018-02-20 01:14:17",
+  "per_seed": {
+    "0": {
+      "final_loss": 0.00020809,
+      "hosts_total": 32935,
+      "hosts_bad": 10,
+      "attacker_ranks": [
+        1,
+        2,
+        3,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "best_rank_percentile": 3e-05,
+      "recall_at_100_meanagg": 0.1,
+      "recall_at_100_maxagg": 0.1,
+      "hw_p100": 0.79,
+      "hw_p500": 0.888,
+      "n_windows": 898852
+    },
+    "1": {
+      "final_loss": 0.00013137,
+      "hosts_total": 32935,
+      "hosts_bad": 10,
+      "attacker_ranks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "best_rank_percentile": 3e-05,
+      "recall_at_100_meanagg": 0.1,
+      "recall_at_100_maxagg": 0.1,
+      "hw_p100": 0.98,
+      "hw_p500": 0.996,
+      "n_windows": 898852
+    }
+  },
+  "summary": {
+    "best_rank_percentile": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "recall_at_100_meanagg": {
+      "mean": 0.1,
+      "std": 0.0
+    },
+    "recall_at_100_maxagg": {
+      "mean": 0.1,
+      "std": 0.0
+    },
+    "hw_p100": {
+      "mean": 0.885,
+      "std": 0.1344
+    },
+    "hw_p500": {
+      "mean": 0.942,
+      "std": 0.0764
+    }
+  }
+}

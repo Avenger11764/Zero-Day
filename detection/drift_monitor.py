@@ -3,6 +3,37 @@ from collections import deque
 import json
 from datetime import datetime, UTC
 
+
+class DetectorDriftMonitors:
+    """Watches all three streams (per_flow, relational, fused) — M6 seam."""
+
+    def __init__(self, window_size=1000, drift_threshold=0.05):
+        self.relational = DriftMonitor(window_size=window_size, drift_threshold=drift_threshold)
+        self.per_flow = DriftMonitor(window_size=window_size, drift_threshold=drift_threshold)
+        self.fused = DriftMonitor(window_size=window_size, drift_threshold=drift_threshold)
+
+    def set_baselines(self, rel_scores, flow_scores=None, fused_scores=None):
+        self.relational.set_baseline(rel_scores)
+        if flow_scores is not None:
+            self.per_flow.set_baseline(flow_scores)
+        if fused_scores is not None:
+            self.fused.set_baseline(fused_scores)
+
+    def add(self, rel: float, flow: float | None = None, fused: float | None = None):
+        self.relational.add_score(rel)
+        if flow is not None:
+            self.per_flow.add_score(flow)
+        if fused is not None:
+            self.fused.add_score(fused)
+
+    def check_all(self) -> dict:
+        return {
+            "relational": self.relational.check_drift(),
+            "per_flow": self.per_flow.check_drift(),
+            "fused": self.fused.check_drift(),
+        }
+
+
 class DriftMonitor:
     """
     Watches anomaly scores over time.

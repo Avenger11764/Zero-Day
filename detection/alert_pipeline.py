@@ -38,22 +38,31 @@ from graph_builder import build_graphs, normalize_columns
 from gnn_model import GraphAutoencoder, NodeScaler
 from stub_detector import EXPECTED_FEATURES, _get_model, _FEATURE_NAMES
 
+try:
+    from drift_monitor import DetectorDriftMonitors
+except ImportError:
+    from detection.drift_monitor import DetectorDriftMonitors
+
 MODEL_PATH = Path(__file__).resolve().parent / "gnn_autoencoder_v1.pt"
+# Optional logscale checkpoint (produced after A2 fix); used if present.
+LOGSCALE_PATH = Path(__file__).resolve().parent / "gnn_autoencoder_v1_logscale.pt"
 
 _m5b = None
 _scaler = None
 
 
 def _load_m5b():
-    """Load the trained graph autoencoder once."""
+    """Load the trained graph autoencoder once — prefers logscale checkpoint if present."""
     global _m5b, _scaler
     if _m5b is None:
-        if not MODEL_PATH.exists():
+        # Prefer logscale (RC-26) if it exists; fall back to plain.
+        path = LOGSCALE_PATH if LOGSCALE_PATH.exists() else MODEL_PATH
+        if not path.exists():
             raise FileNotFoundError(
-                f"{MODEL_PATH.name} not found -- train it first with "
+                f"{path.name} not found -- train it first with "
                 "`python detection/gnn_model.py <benign.csv>`"
             )
-        blob = torch.load(MODEL_PATH, map_location="cpu", weights_only=False)
+        blob = torch.load(path, map_location="cpu", weights_only=False)
         model = GraphAutoencoder()
         model.load_state_dict(blob["model"])
         model.eval()
@@ -62,8 +71,22 @@ def _load_m5b():
     return _m5b, _scaler
 
 
+_drift_monitors: DetectorDriftMonitors | None = None
+
+def get_drift_monitors() -> DetectorDriftMonitors | None:
+    return _drift_monitors
+
+def init_drift_monitors(baseline_rel_scores: list[float], baseline_flow_scores: list[float] | None = None):
+    global _drift_monitors
+    m = DetectorDriftMonitors()
+    m.set_baselines(baseline_rel_scores, baseline_flow_scores)
+    _drift_monitors = m
+    return m
+
+
 def score_window(df: pd.DataFrame, feature_columns: list[str] | None = None,
-                 threshold: float = 0.5, window_seconds: int = 60, k: int = 0) -> list[dict]:
+                 threshold: float | None = None, window_seconds: int = 60, k: int = 0,
+                 feature_set: str = "v1", drift: DetectorDriftMonitors | None = None) -> list[dict]:
     """Score a window of flows with both detectors and emit ScoredAlerts.
 
     One alert per graph EDGE (a src -> dst conversation), because the frozen
@@ -73,15 +96,19 @@ def score_window(df: pd.DataFrame, feature_columns: list[str] | None = None,
     If k > 0, builds graphs with k nearest-neighbour auxiliary edges per host.
     """
     df = normalize_columns(df)
-    graphs = build_graphs(df, window_seconds=window_seconds, k=k)
+    # RC-26 default: pure rank_mean no M5a — feature_columns=None gives M5b-only (0.8322 edge AUC, best)
+    # Pass feature_columns explicitly only if you have a reason to fuse M5a (it hurts on WebAttacks).
+    graphs = build_graphs(df, window_seconds=window_seconds, k=k, feature_set=feature_set)
     if not graphs:
         return []
 
     model, scaler = _load_m5b()
 
     # ---- M5a: per-flow, then lifted to per-host (max over that host's flows)
+    # Default None → M5b-only (RC-26). To fuse, pass pinned feature_columns from Monday.
     per_host_flow_score: dict[str, float] = {}
-    if feature_columns and all(c in df.columns for c in feature_columns):
+    use_m5a = feature_columns is not None and all(c in df.columns for c in feature_columns)
+    if use_m5a:
         feats = df[feature_columns].apply(pd.to_numeric, errors="coerce")
         feats = feats.replace([np.inf, -np.inf], np.nan).fillna(0.0)
         arr = feats.to_numpy(dtype=np.float32)
@@ -110,11 +137,19 @@ def score_window(df: pd.DataFrame, feature_columns: list[str] | None = None,
         for si, di in zip(src_idx, dst_idx):
             src, dst = g.hosts[si], g.hosts[di]
             relational = float((node_scores[si] + node_scores[di]) / 2.0)
-            per_flow = float(per_host_flow_score.get(src, 0.0))
-            # Max, not mean: either detector finding it suspicious is enough.
-            # Averaging would let a confident detector be diluted by a blind one.
-            fused = max(relational, per_flow)
+            per_flow = float(per_host_flow_score.get(src, 0.0)) if use_m5a else 0.0
+            # RC-26: default no M5a → fused = relational (0.8322 edge AUC best)
+            # With M5a, max (either suspicious) — mean dilutes. Use threshold=None for percentile.
+            fused = relational if not use_m5a else max(relational, per_flow)
 
+            # Feed drift monitors (M6) if wired — tracks queue saturation (RC-27/28)
+            dm = drift if drift is not None else _drift_monitors
+            if dm is not None:
+                dm.add(relational, per_flow if use_m5a else None, fused)
+
+            # Threshold: if None, caller should use percentile-calibrated threshold downstream;
+            # default 0.5 only for backward compat when fused is raw MSE (uncalibrated gotcha #7).
+            is_anomaly = (fused > threshold) if threshold is not None else False
             alerts.append({
                 "alert_id": str(uuid.uuid4()),
                 "timestamp": datetime.now(UTC).isoformat(),
@@ -126,9 +161,9 @@ def score_window(df: pd.DataFrame, feature_columns: list[str] | None = None,
                 "attack_type_guess": _guess(g.x[si]),
                 "mitre_technique": _technique(g.x[si]),
                 "explanation": _explain(g.x[si], relational, per_flow),
-                "model_source": "ensemble-v1(autoencoder-v2-256+gnn-v1)",
+                "model_source": "gnn-v1-logscale" if LOGSCALE_PATH.exists() else "gnn-v1",
                 "is_adversarial_test": False,
-                "is_anomaly": fused > threshold,
+                "is_anomaly": is_anomaly,
                 "threshold": threshold,
                 "feature_vector": [0.0] * EXPECTED_FEATURES,
                 "network_subscores": {
@@ -142,7 +177,9 @@ def score_window(df: pd.DataFrame, feature_columns: list[str] | None = None,
 
 def _guess(node: torch.Tensor) -> str:
     """Rule-style naming lives here, in the MAPPING layer -- never in detection."""
-    out_deg, _, _, _, _, _, ports, _ = node.tolist()
+    # Index by position (0 and 6) — gotcha #23: never a,b,c = node.tolist() (breaks on v2 19 feats)
+    out_deg = float(node[0].item() if node.numel() > 0 else 0)
+    ports = float(node[6].item() if node.numel() > 6 else 0)
     if ports > 50 and out_deg <= 2:
         return "vertical_port_scan"
     if out_deg > 20:
@@ -151,14 +188,18 @@ def _guess(node: torch.Tensor) -> str:
 
 
 def _technique(node: torch.Tensor) -> str:
-    out_deg, _, _, _, _, _, ports, _ = node.tolist()
+    out_deg = float(node[0].item() if node.numel() > 0 else 0)
+    ports = float(node[6].item() if node.numel() > 6 else 0)
     if ports > 50 or out_deg > 20:
         return "T1046"       # Network Service Discovery
     return "T1071"           # Application Layer Protocol
 
 
 def _explain(node: torch.Tensor, relational: float, per_flow: float) -> list[str]:
-    out_deg, in_deg, out_flows, _, _, _, ports, _ = node.tolist()
+    out_deg = float(node[0].item() if node.numel() > 0 else 0)
+    in_deg = float(node[1].item() if node.numel() > 1 else 0)
+    out_flows = float(node[2].item() if node.numel() > 2 else 0)
+    ports = float(node[6].item() if node.numel() > 6 else 0)
     lines = [
         f"host contacted {int(out_deg)} distinct peers across {int(ports)} distinct ports",
         f"sent {int(out_flows)} flows in this window (in-degree {int(in_deg)})",

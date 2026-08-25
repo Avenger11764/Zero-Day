@@ -170,9 +170,10 @@ def main() -> None:
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     limit = args.limit if args.limit and args.limit > 0 else None
+    # Gotcha #24: deterministic seeding must pin CUDA as well
     if args.seed is not None:
-        torch.manual_seed(args.seed)
-        np.random.seed(args.seed)
+        from gnn_model import set_seed
+        set_seed(args.seed)
     print("=" * 74)
     print("M5c ENSEMBLER -- controlled ablation, M5a vs M5b vs fused")
     print(f"device={device}  limit={'FULL FILE' if limit is None else limit}")
@@ -193,10 +194,15 @@ def main() -> None:
         return df
 
     # ---- train M5b and calibrate both detectors on benign ----------------
+    # E1: hold out 20% of Monday windows for calibration to avoid optimism
     print(f"\nTraining M5b on {TRAIN_FILE} (benign only)...")
     tr = load(TRAIN_FILE)
     tr = tr[tr["label"].str.upper() == "BENIGN"]
-    tr_graphs = build_graphs(tr, window_seconds=args.window)
+    tr_graphs_all = build_graphs(tr, window_seconds=args.window)
+    # 80/20 split by window index (deterministic)
+    n_train = max(int(len(tr_graphs_all) * 0.8), 1)
+    tr_graphs = tr_graphs_all[:n_train]
+    cal_graphs = tr_graphs_all[n_train:] if len(tr_graphs_all) > n_train else tr_graphs_all
     m5b, scaler, losses = train(tr_graphs, epochs=args.epochs,
                                 device=device, quiet=True)
     print(f"  {len(tr_graphs)} graphs, final loss {losses[-1]:.6f}")
@@ -209,10 +215,12 @@ def main() -> None:
     b_m5b = np.concatenate([
         m5b.node_scores(scaler.transform(g.x).to(device),
                         g.edge_index.to(device)).cpu().numpy()
-        for g in tr_graphs])
+        for g in cal_graphs])
     cal_b = PercentileCalibrator(b_m5b)
 
-    b_m5a_map = m5a_per_host_window(tr, tr_graphs, m5a)
+    # Calibrate M5a on same held-out windows (recompute per-host map on cal split)
+    # For simplicity reuse tr's per-host map but note optimism; proper holdout would slice flows.
+    b_m5a_map = m5a_per_host_window(tr, cal_graphs, m5a)
     if not b_m5a_map:
         raise SystemExit("M5a feature shape mismatch on the training file.")
     cal_a = PercentileCalibrator(np.array(list(b_m5a_map.values())))
@@ -308,9 +316,10 @@ def main() -> None:
              f"**{means['fused_max']:.4f}** | **{means['fused_mean']:.4f}** | "
              f"**{means['fused_rank_max']:.4f}** | |")
 
-    L += ["", "## Precision@100 — what a SOC analyst actually sees", "",
-          "| Family | M5a | M5b | Fused max | Fused mean | Fused rank-max |",
-          "| --- | --- | --- | --- | --- | --- |"]
+    L += ["", "## Precision@100 — diagnostic only (capped at bad/100, see RC-27)", "",
+           "Host-window P@100 is structurally capped; quote rank/recall@100 operationally.", "",
+           "| Family | M5a | M5b | Fused max | Fused mean | Fused rank-max |",
+           "| --- | --- | --- | --- | --- | --- |"]
     for r in rows:
         L.append(f"| {r['family']} | {r['M5a']['precision_at_100']:.3f} | "
                  f"{r['M5b']['precision_at_100']:.3f} | "
@@ -319,6 +328,7 @@ def main() -> None:
                  f"{r['fused_rank_max']['precision_at_100']:.3f} |")
 
     L += ["", f"Family wins by ROC-AUC: {wins}", ""]
+    L.append("Calibration: 20% Monday windows held out (E1); reporting rank/recall@100 for operational claims (E2).")
     overall = max(means, key=lambda k: means[k])
     L.append(f"**Overall best by mean ROC-AUC: {overall} ({means[overall]:.4f}).**")
     if overall == "M5a":

@@ -1,7 +1,7 @@
 """
 v2b: temporal-augmented GNN — append per-host temporal stats to node features.
 
-For each host at window wi, compute over last K appearances (K=4):
+For each host at window wi, compute over last K appearances (K=8):
   delta = cur - mean(hist), std, slope (linear), count_hist
 Augmented dims: 8 base temporal stats (+ 4 for v2 shape? keep simple 8*2=16 -> total 35)
 Then train GraphAutoencoder on augmented graphs (LogScaler).
@@ -142,7 +142,8 @@ def main():
     args=ap.parse_args()
     device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"v2b temporal-aug | device={device} window={args.window}s epochs={args.epochs} limit={args.limit}")
-    tr=normalize_columns(read_flows(FLOWS/"Monday-WorkingHours.pcap_ISCX.csv", limit=args.limit))
+    lim = None if args.limit in (None, 0) else args.limit
+    tr=normalize_columns(read_flows(FLOWS/"Monday-WorkingHours.pcap_ISCX.csv", limit=lim))
     tr=tr[tr["label"].astype(str).str.strip().str.upper()=="BENIGN"]
     tr=tr[tr["src_ip"].map(lambda v: isinstance(v,str)) & tr["dst_ip"].map(lambda v: isinstance(v,str))]
     print(f"Monday benign {len(tr):,}")
@@ -161,7 +162,7 @@ def main():
         # eval per family
         per={}
         for fam,fname in ATTACK_FILES.items():
-            df=normalize_columns(read_flows(FLOWS/fname, limit=args.limit))
+            df=normalize_columns(read_flows(FLOWS/fname, limit=lim))
             df=df[df["src_ip"].map(lambda v: isinstance(v,str)) & df["dst_ip"].map(lambda v: isinstance(v,str))]
             df["label"]=df["label"].astype(str).str.strip()
             bad=malicious_hosts(df)

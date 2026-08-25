@@ -109,42 +109,67 @@ class GraphAutoencoder(nn.Module):
 
 
 class NodeScaler:
-    """Min-max scaler fitted across all training graphs.
+    """Log1p + min-max scaler fitted across all training graphs (gotcha #14).
 
     Node features are raw counts on wildly different scales (out_degree ~200,
-    bytes_sent ~5,000,000). Without scaling, MSE is dominated by whichever
-    feature happens to have the largest units and the degree signal is lost.
-    Mirrors the MinMaxScaler the baseline AE already uses, so the two models
-    stay comparable.
+    bytes_sent ~5,000,000). Plain min-max maps the busiest host to 1.0 and
+    squashes every other host near 0. Log1p compresses the tail before scaling:
+    mean P@100 0.250 -> 0.413. This is the default since 2026-08-12.
+    Old checkpoints carry no `log` key and are loaded as log=False.
     """
 
-    def __init__(self):
+    def __init__(self, log: bool = True):
+        self.log = log
         self.lo = None
         self.hi = None
 
+    def _prep(self, x: torch.Tensor) -> torch.Tensor:
+        if self.log:
+            return torch.log1p(torch.clamp(x, min=0))
+        return x
+
     def fit(self, graphs):
-        allx = torch.cat([g.x for g in graphs], dim=0)
+        allx = torch.cat([self._prep(g.x) for g in graphs], dim=0)
         self.lo = allx.min(dim=0).values
         self.hi = allx.max(dim=0).values
         return self
 
     def transform(self, x):
+        x = self._prep(x)
         span = torch.where((self.hi - self.lo) > 0, self.hi - self.lo,
                            torch.ones_like(self.hi))
         return torch.clamp((x - self.lo) / span, 0.0, 1.0)
 
     def state_dict(self):
-        return {"lo": self.lo, "hi": self.hi}
+        return {"lo": self.lo, "hi": self.hi, "log": self.log}
 
     def load_state_dict(self, d):
         self.lo, self.hi = d["lo"], d["hi"]
+        self.log = bool(d.get("log", False))
         return self
 
 
-def train(graphs, epochs: int = 200, lr: float = 0.01, device=None, quiet=False):
+def set_seed(seed: int = 0):
+    """Deterministic seeding for GPU reproducibility (gotcha #24)."""
+    import os
+    import random
+    import numpy as np
+    os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+
+
+def train(graphs, epochs: int = 200, lr: float = 0.01, device=None, quiet=False, log_scale: bool = True, seed: int | None = None):
     """Train on BENIGN graphs only -- that is what makes it a zero-day detector."""
+    if seed is not None:
+        set_seed(seed)
     device = device or torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    scaler = NodeScaler().fit(graphs)
+    scaler = NodeScaler(log=log_scale).fit(graphs)
 
     model = GraphAutoencoder().to(device)
     opt = torch.optim.Adam(model.parameters(), lr=lr)
