@@ -2,6 +2,33 @@
 
 Append-only log of what changed and why. **Pull, then read the top of this file.**
 
+## 2026-08-25e — BAND CONFIRMS: pure_noisyor_rev 0.9996 ± 0.0001 beats RC-26 headline in all 4 seeds; revived-M5a promotion to production STANDS
+**Author:** Deep (Person B — Detection Modeling) · assisted by opencode
+**Commit:** 80e8699 (production flip) · log `experiments/decisive_mw_rev_4seed.log`
+
+### Results — full 4-seed band, full files, GPU deterministic
+| Config | mean ± std | per seed |
+|---|---|---|
+| **pure_noisyor_rev** (NEW production recipe) | **0.9996 ± 0.0001** | [0.9996, 0.9994, 0.9996, 0.9996] |
+| rev_multi / three_way_rev_rm | 0.9996 ± 0.0000/0.0001 | ties noisyor at ceiling |
+| pure_rank_mean (old headline) | 0.9990 ± 0.0003 | beaten in all 4 seeds |
+| m5a_multi (shipped M5a control) | 0.9499 ± 0.0021 | negative re-confirmed |
+
+### Decision
+* Promotion stands: `alert_pipeline.score_window()` default = GNN-logscale +
+  revived-87-dim-ctx AE, within-window rank noisyor (`80e8699`).
+* Old shipped M5a marked STALE (kept for Checkpoint-1 contract + ablations).
+* New headline number for paper/CLAUDE.md: **0.9996 ± 0.0001**.
+
+### Caveats
+* Noisyor is batch-only (gotcha #17) — needs a window population; not for single-edge scoring.
+* Both checkpoints must ship together: `gnn_autoencoder_v1_logscale.pt` + `m5a_revived_ctx.pt`.
+  Missing either now raises a RuntimeWarning and falls back to pure relational —
+  check `model_source` on alerts.
+* v2-feature variant of this recipe untested — next candidate, not a blocker.
+
+---
+
 Rules:
 - Newest entry goes at the **top**, directly under this header.
 - **Never edit or delete a past entry.** If something was wrong, add a new entry

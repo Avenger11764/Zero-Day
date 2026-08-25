@@ -1,0 +1,95 @@
+Device: cuda
+Monday benign flows: 529,918
+Benign graphs: 60s=487, 300s=98
+Caching attack graphs + M5a scores (once, seed-independent)...
+  PortScan: 150x60s 30x300s 1 malicious hosts
+  DDoS: 93x60s 19x300s 2 malicious hosts
+  Botnet: 241x60s 49x300s 8 malicious hosts
+  Infiltration: 245x60s 49x300s 1 malicious hosts
+  WebAttacks: 241x60s 49x300s 1 malicious hosts
+  Patator (FTP/SSH): 488x60s 99x300s 1 malicious hosts
+  DoS / Heartbleed: 509x60s 103x300s 1 malicious hosts
+
+============================================================
+SEED 0
+============================================================
+  60s final loss: 0.000045
+  300s final loss: 0.000030
+    AE ep0 loss 0.040349
+    AE ep20 loss 0.000491
+    AE ep40 loss 0.000130
+  revived AE trained (87 dims), pool 8239
+  PortScan: w60=0.9998 w300=1.0000 pure_rank_mean=1.0000 pure_rank_max=0.9998 m5a_multi=0.9995 three_way_rm=1.0000 rev_multi=1.0000 three_way_rev_rm=1.0000 pure_noisyor_rev=1.0000 pure_rmax_rev=1.0000
+  DDoS: w60=0.9986 w300=0.9928 pure_rank_mean=0.9975 pure_rank_max=0.9975 m5a_multi=1.0000 three_way_rm=0.9992 rev_multi=1.0000 three_way_rev_rm=0.9986 pure_noisyor_rev=1.0000 pure_rmax_rev=1.0000
+  Botnet: w60=0.9952 w300=0.9970 pure_rank_mean=0.9981 pure_rank_max=0.9951 m5a_multi=0.9743 three_way_rm=0.9931 rev_multi=0.9991 three_way_rev_rm=0.9993 pure_noisyor_rev=0.9986 pure_rmax_rev=0.9978
+  Infiltration: w60=0.9969 w300=0.9883 pure_rank_mean=0.9995 pure_rank_max=0.9937 m5a_multi=1.0000 three_way_rm=1.0000 rev_multi=0.9997 three_way_rev_rm=0.9995 pure_noisyor_rev=1.0000 pure_rmax_rev=0.9998
+  WebAttacks: w60=0.9979 w300=0.9987 pure_rank_mean=0.9994 pure_rank_max=0.9973 m5a_multi=0.6927 three_way_rm=0.9093 rev_multi=0.9990 three_way_rev_rm=1.0000 pure_noisyor_rev=0.9990 pure_rmax_rev=0.9988
+  Patator (FTP/SSH): w60=0.9998 w300=0.9998 pure_rank_mean=1.0000 pure_rank_max=0.9995 m5a_multi=0.9865 three_way_rm=0.9960 rev_multi=0.9994 three_way_rev_rm=1.0000 pure_noisyor_rev=0.9999 pure_rmax_rev=1.0000
+  DoS / Heartbleed: w60=0.9998 w300=0.9981 pure_rank_mean=0.9998 pure_rank_max=0.9996 m5a_multi=0.9998 three_way_rm=1.0000 rev_multi=1.0000 three_way_rev_rm=1.0000 pure_noisyor_rev=0.9998 pure_rmax_rev=0.9996
+
+============================================================
+SEED 1
+============================================================
+  60s final loss: 0.000084
+  300s final loss: 0.000039
+    AE ep0 loss 0.042164
+    AE ep20 loss 0.000613
+    AE ep40 loss 0.000256
+  revived AE trained (87 dims), pool 8239
+  PortScan: w60=0.9995 w300=1.0000 pure_rank_mean=1.0000 pure_rank_max=0.9998 m5a_multi=1.0000 three_way_rm=1.0000 rev_multi=1.0000 three_way_rev_rm=1.0000 pure_noisyor_rev=1.0000 pure_rmax_rev=1.0000
+  DDoS: w60=0.9959 w300=0.9996 pure_rank_mean=0.9994 pure_rank_max=0.9994 m5a_multi=1.0000 three_way_rm=1.0000 rev_multi=1.0000 three_way_rev_rm=1.0000 pure_noisyor_rev=1.0000 pure_rmax_rev=1.0000
+  Botnet: w60=0.9833 w300=0.9905 pure_rank_mean=0.9934 pure_rank_max=0.9839 m5a_multi=0.9740 three_way_rm=0.9913 rev_multi=0.9979 three_way_rev_rm=0.9977 pure_noisyor_rev=0.9975 pure_rmax_rev=0.9944
+  Infiltration: w60=0.9942 w300=0.9998 pure_rank_mean=0.9990 pure_rank_max=0.9993 m5a_multi=1.0000 three_way_rm=1.0000 rev_multi=1.0000 three_way_rev_rm=0.9998 pure_noisyor_rev=0.9998 pure_rmax_rev=1.0000
+  WebAttacks: w60=0.9939 w300=0.9998 pure_rank_mean=0.9988 pure_rank_max=0.9994 m5a_multi=0.7065 three_way_rm=0.9086 rev_multi=0.9996 three_way_rev_rm=1.0000 pure_noisyor_rev=0.9988 pure_rmax_rev=0.9977
+  Patator (FTP/SSH): w60=0.9999 w300=0.9998 pure_rank_mean=1.0000 pure_rank_max=0.9996 m5a_multi=0.9881 three_way_rm=0.9967 rev_multi=1.0000 three_way_rev_rm=1.0000 pure_noisyor_rev=0.9999 pure_rmax_rev=0.9999
+  DoS / Heartbleed: w60=0.9994 w300=0.9990 pure_rank_mean=1.0000 pure_rank_max=0.9988 m5a_multi=1.0000 three_way_rm=1.0000 rev_multi=1.0000 three_way_rev_rm=1.0000 pure_noisyor_rev=1.0000 pure_rmax_rev=1.0000
+
+============================================================
+SEED 2
+============================================================
+  60s final loss: 0.000047
+  300s final loss: 0.000033
+    AE ep0 loss 0.040445
+    AE ep20 loss 0.000552
+    AE ep40 loss 0.000127
+  revived AE trained (87 dims), pool 8239
+  PortScan: w60=0.9991 w300=1.0000 pure_rank_mean=1.0000 pure_rank_max=0.9998 m5a_multi=0.9998 three_way_rm=1.0000 rev_multi=1.0000 three_way_rev_rm=1.0000 pure_noisyor_rev=1.0000 pure_rmax_rev=1.0000
+  DDoS: w60=0.9994 w300=0.9992 pure_rank_mean=1.0000 pure_rank_max=0.9994 m5a_multi=1.0000 three_way_rm=1.0000 rev_multi=1.0000 three_way_rev_rm=1.0000 pure_noisyor_rev=1.0000 pure_rmax_rev=1.0000
+  Botnet: w60=0.9937 w300=0.9868 pure_rank_mean=0.9951 pure_rank_max=0.9928 m5a_multi=0.9738 three_way_rm=0.9898 rev_multi=0.9984 three_way_rev_rm=0.9983 pure_noisyor_rev=0.9978 pure_rmax_rev=0.9948
+  Infiltration: w60=0.9975 w300=0.9998 pure_rank_mean=1.0000 pure_rank_max=0.9997 m5a_multi=1.0000 three_way_rm=1.0000 rev_multi=1.0000 three_way_rev_rm=1.0000 pure_noisyor_rev=1.0000 pure_rmax_rev=1.0000
+  WebAttacks: w60=0.9983 w300=1.0000 pure_rank_mean=0.9998 pure_rank_max=0.9998 m5a_multi=0.6938 three_way_rm=0.9110 rev_multi=0.9994 three_way_rev_rm=1.0000 pure_noisyor_rev=0.9994 pure_rmax_rev=0.9996
+  Patator (FTP/SSH): w60=1.0000 w300=0.9996 pure_rank_mean=1.0000 pure_rank_max=1.0000 m5a_multi=0.9747 three_way_rm=0.9959 rev_multi=1.0000 three_way_rev_rm=1.0000 pure_noisyor_rev=1.0000 pure_rmax_rev=0.9999
+  DoS / Heartbleed: w60=1.0000 w300=0.9998 pure_rank_mean=1.0000 pure_rank_max=1.0000 m5a_multi=0.9998 three_way_rm=1.0000 rev_multi=0.9999 three_way_rev_rm=1.0000 pure_noisyor_rev=0.9999 pure_rmax_rev=1.0000
+
+============================================================
+SEED 3
+============================================================
+  60s final loss: 0.000050
+  300s final loss: 0.000034
+    AE ep0 loss 0.042205
+    AE ep20 loss 0.000423
+    AE ep40 loss 0.000235
+  revived AE trained (87 dims), pool 8239
+  PortScan: w60=0.9993 w300=1.0000 pure_rank_mean=0.9998 pure_rank_max=0.9998 m5a_multi=0.9998 three_way_rm=1.0000 rev_multi=1.0000 three_way_rev_rm=1.0000 pure_noisyor_rev=0.9995 pure_rmax_rev=0.9995
+  DDoS: w60=0.9947 w300=0.9988 pure_rank_mean=0.9982 pure_rank_max=0.9984 m5a_multi=0.9998 three_way_rm=0.9992 rev_multi=1.0000 three_way_rev_rm=0.9990 pure_noisyor_rev=1.0000 pure_rmax_rev=1.0000
+  Botnet: w60=0.9925 w300=0.9936 pure_rank_mean=0.9976 pure_rank_max=0.9948 m5a_multi=0.9718 three_way_rm=0.9944 rev_multi=0.9990 three_way_rev_rm=0.9988 pure_noisyor_rev=0.9985 pure_rmax_rev=0.9970
+  Infiltration: w60=0.9898 w300=0.9969 pure_rank_mean=0.9967 pure_rank_max=0.9950 m5a_multi=0.9997 three_way_rm=0.9993 rev_multi=0.9992 three_way_rev_rm=0.9987 pure_noisyor_rev=0.9998 pure_rmax_rev=0.9998
+  WebAttacks: w60=1.0000 w300=1.0000 pure_rank_mean=1.0000 pure_rank_max=1.0000 m5a_multi=0.6833 three_way_rm=0.9340 rev_multi=0.9994 three_way_rev_rm=1.0000 pure_noisyor_rev=0.9998 pure_rmax_rev=1.0000
+  Patator (FTP/SSH): w60=1.0000 w300=1.0000 pure_rank_mean=1.0000 pure_rank_max=1.0000 m5a_multi=0.9802 three_way_rm=0.9954 rev_multi=0.9998 three_way_rev_rm=1.0000 pure_noisyor_rev=0.9999 pure_rmax_rev=0.9999
+  DoS / Heartbleed: w60=0.9993 w300=0.9999 pure_rank_mean=1.0000 pure_rank_max=0.9998 m5a_multi=0.9998 three_way_rm=1.0000 rev_multi=1.0000 three_way_rev_rm=1.0000 pure_noisyor_rev=1.0000 pure_rmax_rev=1.0000
+
+======================================================================
+MEAN AUC PER CONFIG (4 seeds)
+======================================================================
+  w60             0.9971 +/- 0.0015   [0.9983, 0.9952, 0.9983, 0.9965]
+  w300            0.9978 +/- 0.0010   [0.9964, 0.9984, 0.9979, 0.9985]
+  pure_rank_mean  0.9990 +/- 0.0003   [0.9992, 0.9987, 0.9993, 0.9989]
+  pure_rank_max   0.9979 +/- 0.0007   [0.9975, 0.9972, 0.9988, 0.9983]
+  m5a_multi       0.9499 +/- 0.0021   [0.9504, 0.9527, 0.9488, 0.9478]
+  three_way_rm    0.9862 +/- 0.0018   [0.9854, 0.9852, 0.9852, 0.9889]
+  rev_multi       0.9996 +/- 0.0000   [0.9996, 0.9996, 0.9997, 0.9996]
+  three_way_rev_rm 0.9996 +/- 0.0001   [0.9996, 0.9996, 0.9998, 0.9995]
+  pure_noisyor_rev 0.9996 +/- 0.0001   [0.9996, 0.9994, 0.9996, 0.9996]
+  pure_rmax_rev   0.9992 +/- 0.0003   [0.9994, 0.9989, 0.9992, 0.9995]
+
+Saved: C:\Users\trex2\Potential-Gold\Zero-Day\experiments\mw_ablation_4seed.json

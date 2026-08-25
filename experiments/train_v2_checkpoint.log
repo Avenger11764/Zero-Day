@@ -1,38 +1,8 @@
 Filtered to BENIGN: 529918/529918 flows
 Built 487 graphs (feature_set=v2, in_dim=19)
-Traceback (most recent call last):
-  File "C:\Users\trex2\Potential-Gold\Zero-Day\detection\gnn_model.py", line 279, in <module>
-    main()
-    ~~~~^^
-  File "C:\Users\trex2\Potential-Gold\Zero-Day\detection\gnn_model.py", line 269, in main
-    model, scaler, losses = train(graphs, epochs=args.epochs, seed=args.seed)
-                            ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\trex2\Potential-Gold\Zero-Day\detection\gnn_model.py", line 184, in train
-    recon = model(x, ei)
-  File "C:\Users\trex2\AppData\Roaming\Python\Python313\site-packages\torch\nn\modules\module.py", line 1779, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
-  File "C:\Users\trex2\AppData\Roaming\Python\Python313\site-packages\torch\nn\modules\module.py", line 1790, in _call_impl
-    return forward_call(*args, **kwargs)
-  File "C:\Users\trex2\Potential-Gold\Zero-Day\detection\gnn_model.py", line 93, in forward
-    return self.decoder(self.encode(x, edge_index))
-                        ~~~~~~~~~~~^^^^^^^^^^^^^^^
-  File "C:\Users\trex2\Potential-Gold\Zero-Day\detection\gnn_model.py", line 89, in encode
-    h = torch.relu(self.conv1(x, edge_index))
-                   ~~~~~~~~~~^^^^^^^^^^^^^^^
-  File "C:\Users\trex2\AppData\Roaming\Python\Python313\site-packages\torch\nn\modules\module.py", line 1779, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
-  File "C:\Users\trex2\AppData\Roaming\Python\Python313\site-packages\torch\nn\modules\module.py", line 1790, in _call_impl
-    return forward_call(*args, **kwargs)
-  File "C:\Users\trex2\AppData\Roaming\Python\Python313\site-packages\torch_geometric\nn\conv\sage_conv.py", line 135, in forward
-    out = self.lin_l(out)
-  File "C:\Users\trex2\AppData\Roaming\Python\Python313\site-packages\torch\nn\modules\module.py", line 1779, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
-  File "C:\Users\trex2\AppData\Roaming\Python\Python313\site-packages\torch\nn\modules\module.py", line 1790, in _call_impl
-    return forward_call(*args, **kwargs)
-  File "C:\Users\trex2\AppData\Roaming\Python\Python313\site-packages\torch_geometric\nn\dense\linear.py", line 127, in forward
-    return F.linear(x, self.weight, self.bias)
-           ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
-RuntimeError: mat1 and mat2 shapes cannot be multiplied (58x19 and 8x32)
+  epoch   0 | loss 0.005277
+  epoch  40 | loss 0.000256
+  epoch  80 | loss 0.000204
+  epoch 120 | loss 0.000212
+  epoch 160 | loss 0.000199
+Saved -> detection\gnn_autoencoder_v1_logscale_v2.pt  (final loss 0.000171)

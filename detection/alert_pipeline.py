@@ -115,6 +115,13 @@ def _load_revived():
     global _revived, _revived_meta
     if _revived is None and _revived_meta is None:
         if not REVIVED_PATH.exists():
+            import warnings
+            warnings.warn(
+                f"REVIVED M5a checkpoint missing ({REVIVED_PATH.name}) — "
+                "falling back to RC-26 pure relational. Train it: "
+                "`python detection/train_m5a_revived.py --seed 0`",
+                RuntimeWarning,
+            )
             _revived_meta = {"missing": True}
             return None, None, None, None, None
         blob = torch.load(REVIVED_PATH, map_location="cpu", weights_only=False)

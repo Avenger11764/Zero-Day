@@ -237,14 +237,13 @@ Everything has a `--help` and most have a self-test that needs no dataset
   flows. Ground truth is per-host; projecting a host score onto every flow
   would fabricate precision.
 
-## Current results (as of 2026-08-25) — GPU, CUDA-deterministic, 4 seeds
+## Current results (as of 2026-08-25, week-4 freeze) — GPU, CUDA-deterministic, 4 seeds
 
-**Headline: pure 60s+300s rank_mean fusion (NO M5a), feature set v1 (8 features):
-mean ROC-AUC 0.9989 ± 0.0006** across 7 held-out families
-(`eval_mw_ablation_4seed.py`, re-verified on the fixed stack — LogScaler default,
-`set_seed`, calibration holdout). With v2 (19 feats): **0.9997 ± 0.0001**
-(`eval_feature_set_v2.py`) — v2's historic win was per-family
-(Botnet 0.9328 → 0.9987); the mean is saturated either way.
+**Headline (production recipe): GNN-logscale 60s+300s + revived 87-dim ctx M5a,
+within-window rank noisyor → mean ROC-AUC 0.9996 ± 0.0001** across 7 held-out
+families (`eval_mw_ablation_4seed.py --seeds 0 1 2 3`, beats pure rank_mean
+0.9990 ± 0.0003 in all seeds). With v2 features (19): **0.9997 ± 0.0001**
+(`eval_feature_set_v2.py`). Served live in `alert_pipeline.score_window()`.
 
 | Family | v2 fused AUC | Attacker ranks |
 | --- | --- | --- |
@@ -261,26 +260,20 @@ on CTU-13 Virut in all 4 seeds**, Rbot C&C #1 in 3/4 seeds, Neris worst seed
 structurally capped at bad/100 — do not use it as a headline metric (RC-27).
 
 **Baselines beaten under identical conditions** (RC-31, exact-matched 2026-08-25):
-PCA 0.9417 · Isolation Forest 0.9357 · plain MLP-AE 0.9517 vs ours 0.9989 — same
-features, same units, +4.7 pts over the best, concentrated in topology families.
+PCA 0.9417 · Isolation Forest 0.9357 · plain MLP-AE 0.9517 vs ours 0.9996 — same
+features, same units, +4.8 pts over the best, concentrated in topology families.
 
-**Closed negatives (do not revisit):** temporal/LSTM half adds nothing at edge
-level (RC-20); LODO 5× training data hurts (gotcha #10); k=5 sim edges hurt on
-production architecture; plain shipped M5a in multi-window fusion is actively
-harmful (0.9482, RC-26 — reproduced exactly); small-window filtering changes
-nothing (queue noise is drift, RC-28).
+**Closed negatives (do not revisit):** plain shipped M5a hurts everywhere
+(0.9499±0.0021 in MW fusion — the REVIVED ctx variant is a different model and
+is production); temporal/LSTM half alone adds nothing at edge level (RC-20);
+LODO 5× training data hurts (gotcha #10); k=5 sim edges hurt on production
+architecture; small-window filtering changes nothing (queue noise is drift, RC-28).
 
-**Open decision (not closed):** a revived per-flow AE with window-context dims
-(`exp_m5a_revival.py`, `m5a_revived_ctx.pt`) fused with a v2b temporal-aug GNN
-claims 7/7 no-regressions vs *its own single-window v2b baseline* (~0.93) —
-verified internally, but never compared against the multi-window headline
-(0.9989) and its `rank_MAX` rule failed 7/7 on one seed (noisyor is the actual
-7/7×4 rule). RC-26 pure remains production until that comparison exists.
-
-**Known weaknesses:** alert-queue precision at host-window level (drift-driven,
-M6's job); calibration optimism (now held out 20% Monday, still quote it);
-device-sensitive arithmetic (gotcha #24) — every number above is GPU +
-determinism flags.
+**Known weaknesses:** noisyor is batch-only (gotcha #17 — needs window population);
+both checkpoints must ship together (`gnn_autoencoder_v1_logscale.pt` +
+`m5a_revived_ctx.pt`, missing one falls back with RuntimeWarning); calibration
+optimism (20% Monday holdout, still quote it); device-sensitive arithmetic
+(gotcha #24) — every number above is GPU + determinism flags.
 
 ## Conventions
 
@@ -305,14 +298,11 @@ multi-seed everything (every headline has a band), feature set v2 evaluated
 
 Outstanding:
 
-1. **Production rule decision** — RC-26 pure (shipped, default in
-   `alert_pipeline.py`) vs revived-M5a+v2b fusion claim; the decisive comparison
-   (revived M5a inside the multi-window protocol vs 0.9989 band) has never run.
-2. **v2 default flip** — `gnn_autoencoder_v1_logscale_v2.pt` training added to
-   pipeline; flip `feature_set="v2"` default after it lands + team sign-off.
-3. **Weeks 4–12 roadmap** (`Knowledge/`): Pillar 3 host-syscall autoencoder via
+1. **v2 default flip** — `gnn_autoencoder_v1_logscale_v2.pt` shipped; flip
+   `feature_set="v2"` default after team sign-off (dimension guard already in).
+2. **Weeks 4–12 roadmap** (`Knowledge/`): Pillar 3 host-syscall autoencoder via
    eBPF, AE-vs-HMM ablation, three-way score fusion. Team work — B supports.
-4. **Paper packaging** when results freeze: name method + protocol, one-command
+3. **Paper packaging** when results freeze: name method + protocol, one-command
    public artifact, protocol paper outline (see docs/PROJECT_GUIDE.md §6).
 
 ## Setup on a new machine
