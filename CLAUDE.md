@@ -194,8 +194,8 @@ push it.** It holds the full spec PDF and the weeks 4–6 roadmap.
 
 | File | Module | What it is |
 | --- | --- | --- |
-| `stub_detector.py` | M5a | per-flow scoring entry point. **Checkpoint-1 depends on it — don't break it.** |
-| `autoencoder.py` | M5a | trains the baseline AE → `autoencoder_v2-256.pt` |
+| `stub_detector.py` | M5a-L | **deprecated shim** → real code in `legacy/`. Checkpoint-1/dashboard import path kept alive; never extend |
+| `autoencoder.py` | M5a-L | *(moved to `legacy/`)* trained the stale baseline AE |
 | `train_m5a_revived.py` / `exp_m5a_revival.py` | M5a-R | revived per-flow AE with 11 ctx dims (87-dim) → `m5a_revived_ctx.pt`. **Not in production defaults — decision pending (see 2026-08-25c/d)** |
 | `graph_builder.py` | M5b | flows → per-window host graphs; `graph_health()`, `read_flows()`; v1 (8) + v2 (19) feature sets |
 | `gnn_model.py` | M5b | GraphSAGE graph autoencoder; `NodeScaler(log=True)` default, `set_seed()`, `--feature-set v1/v2` |
