@@ -56,6 +56,36 @@ Gotchas #7/#14/#23/#24 + operational P@100 cap + silent IDS2018 volume loss were
 
 ---
 
+## 2026-08-25b — Full 4-seed × 60-epoch band reproduced on the fixed stack (LogScaler default + set_seed + holdout calibration)
+**Author:** Deep (Person B — Detection Modeling) · assisted by opencode
+**Commit:** 7220d474 stack; this entry records the overnight rerun
+
+### What ran
+Full files, GPU, CUDA-deterministic (`set_seed`), LogScaler default, 20% Monday calibration holdout:
+1. `detection/eval_mw_ablation_4seed.py --seeds 0 1 2 3 --epochs 60` → `experiments/mw_ablation_4seed.json`
+2. `detection/eval_feature_set_v2.py --seeds 0 1 2 3 --epochs 60` → `experiments/feature_set_v2_results.json`
+
+### Results — headline CONFIRMED on the fixed stack
+| Config | Published (2026-08-21) | Reproduced now |
+|---|---|---|
+| pure_rank_mean | 0.9987 ± 0.0008 | **0.9989 ± 0.0006** [0.9994, 0.9990, 0.9992, 0.9980] |
+| w60 / w300 singles | 0.9962 / 0.9961 | 0.9957 ± 0.0033 / 0.9977 ± 0.0014 |
+| m5a_multi (worst) | 0.9482 ± 0.0031 | 0.9482 ± 0.0022 — exact match, M5a-in-fusion negative re-confirmed |
+| three_way_rm | ~0.975 | 0.9874 ± 0.0015 |
+| **v2 fused mean** | 0.9998 ± 0.0000 | **0.9997 ± 0.0001** — Botnet 0.9986, all others ≥ 0.9996 |
+
+Per-seed pure_rank_mean worst case 0.9980 — fusion benefit is variance (worst seed beats singles' best band), consistent with RC-26.
+
+### Interpretation
+* The A2/A3 fixes did not perturb the headline: LogScaler-default + deterministic seeding + holdout calibration reproduce the published band within noise.
+* m5a_multi landing exactly on the published 0.9482 is strong evidence determinism works.
+
+### Caveats
+* Externals (IDS2018 / CTU-13) still single-seed pending their 4-seed runs — chain after GPU frees.
+* v2 remains opt-in (checkpoint in_dim=19); production checkpoint stays in_dim=8 until sign-off + formal retrain.
+
+---
+
 ## 2026-08-21b — Non-relational baselines re-run under identical conditions; third dataset family (CTU-13) replicates the claim
 **Author:** Deep (Person B — Detection Modeling) · assisted by opencode
 
