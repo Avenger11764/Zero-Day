@@ -34,7 +34,7 @@ import numpy as np
 import pandas as pd
 import torch
 
-from graph_builder import build_graphs, normalize_columns
+from graph_builder import build_graphs, normalize_columns, NODE_FEATURE_NAMES, V2_FEATURE_NAMES
 from gnn_model import GraphAutoencoder, NodeScaler
 from stub_detector import EXPECTED_FEATURES, _get_model, _FEATURE_NAMES
 
@@ -46,27 +46,52 @@ except ImportError:
 MODEL_PATH = Path(__file__).resolve().parent / "gnn_autoencoder_v1.pt"
 # Optional logscale checkpoint (produced after A2 fix); used if present.
 LOGSCALE_PATH = Path(__file__).resolve().parent / "gnn_autoencoder_v1_logscale.pt"
+# v2 checkpoint (19 feats) — only produced after explicit retrain; E3 opt-in.
+V2_LOGSCALE_PATH = Path(__file__).resolve().parent / "gnn_autoencoder_v1_logscale_v2.pt"
+V2_PATH = Path(__file__).resolve().parent / "gnn_autoencoder_v1_v2.pt"
 
 _m5b = None
 _scaler = None
 
 
-def _load_m5b():
-    """Load the trained graph autoencoder once — prefers logscale checkpoint if present."""
+def _load_m5b(feature_set: str = "v1"):
+    """Load the trained graph autoencoder once — prefers logscale checkpoint if present.
+
+    feature_set="v2" requires a 19-dim checkpoint (gnn_autoencoder_v1[_logscale]_v2.pt);
+    scoring v2 graphs with the 8-dim production checkpoint would crash or silently
+    misalign, so we refuse loudly instead (gotcha #23 dimension guard).
+    """
     global _m5b, _scaler
+    want_v2 = feature_set == "v2"
+    in_dim = len(V2_FEATURE_NAMES) if want_v2 else len(NODE_FEATURE_NAMES)
+    if _m5b is not None and getattr(_scaler, "lo", None) is not None and _scaler.lo.shape[0] != in_dim:
+        _m5b, _scaler = None, None  # cached checkpoint mismatches requested feature set
     if _m5b is None:
-        # Prefer logscale (RC-26) if it exists; fall back to plain.
-        path = LOGSCALE_PATH if LOGSCALE_PATH.exists() else MODEL_PATH
+        if want_v2:
+            path = V2_LOGSCALE_PATH if V2_LOGSCALE_PATH.exists() else V2_PATH
+        else:
+            path = LOGSCALE_PATH if LOGSCALE_PATH.exists() else MODEL_PATH
         if not path.exists():
+            if want_v2:
+                raise FileNotFoundError(
+                    f"No v2 (19-feat) checkpoint found ({path.name}). Train one first: "
+                    "`python detection/gnn_model.py <benign.csv> --feature-set v2 --seed 0` "
+                    "-- until then use feature_set='v1' (production default)."
+                )
             raise FileNotFoundError(
                 f"{path.name} not found -- train it first with "
                 "`python detection/gnn_model.py <benign.csv>`"
             )
         blob = torch.load(path, map_location="cpu", weights_only=False)
-        model = GraphAutoencoder()
+        model = GraphAutoencoder(in_dim=in_dim)
         model.load_state_dict(blob["model"])
         model.eval()
         scaler = NodeScaler().load_state_dict(blob["scaler"])
+        if scaler.lo.shape[0] != in_dim:
+            raise RuntimeError(
+                f"Checkpoint {path.name} has {scaler.lo.shape[0]} features but "
+                f"feature_set='{feature_set}' builds {in_dim}. Checkpoint/feature_set mismatch."
+            )
         _m5b, _scaler = model, scaler
     return _m5b, _scaler
 
@@ -102,7 +127,7 @@ def score_window(df: pd.DataFrame, feature_columns: list[str] | None = None,
     if not graphs:
         return []
 
-    model, scaler = _load_m5b()
+    model, scaler = _load_m5b(feature_set)
 
     # ---- M5a: per-flow, then lifted to per-host (max over that host's flows)
     # Default None → M5b-only (RC-26). To fuse, pass pinned feature_columns from Monday.
