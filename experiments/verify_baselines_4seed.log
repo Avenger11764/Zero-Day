@@ -1,0 +1,52 @@
+Device: cuda
+Monday benign flows: 529,918
+Benign host-windows: (83185, 19)
+  PortScan: 20553 windows, 29 attackers
+  DDoS: 10192 windows, 149 attackers
+  Botnet: 32009 windows, 1724 attackers
+  Infiltration: 34940 windows, 222 attackers
+  WebAttacks: 30483 windows, 75 attackers
+  Patator (FTP/SSH): 67896 windows, 139 attackers
+  DoS / Heartbleed: 69008 windows, 187 attackers
+
+===== SEED 0 =====
+  PortScan: pca=0.9520 if=0.8849 mlpae=0.9473
+  DDoS: pca=0.9333 if=0.9256 mlpae=0.9557
+  Botnet: pca=0.9077 if=0.9360 mlpae=0.9264
+  Infiltration: pca=0.9151 if=0.9569 mlpae=0.9350
+  WebAttacks: pca=0.9888 if=0.9565 mlpae=0.9879
+  Patator (FTP/SSH): pca=0.9859 if=0.9561 mlpae=0.9874
+  DoS / Heartbleed: pca=0.9090 if=0.9429 mlpae=0.9201
+
+===== SEED 1 =====
+  PortScan: pca=0.9520 if=0.8838 mlpae=0.9368
+  DDoS: pca=0.9333 if=0.9224 mlpae=0.9651
+  Botnet: pca=0.9077 if=0.9346 mlpae=0.9342
+  Infiltration: pca=0.9151 if=0.9556 mlpae=0.9406
+  WebAttacks: pca=0.9888 if=0.9514 mlpae=0.9894
+  Patator (FTP/SSH): pca=0.9859 if=0.9435 mlpae=0.9848
+  DoS / Heartbleed: pca=0.9090 if=0.9410 mlpae=0.9259
+
+===== SEED 2 =====
+  PortScan: pca=0.9520 if=0.8814 mlpae=0.9302
+  DDoS: pca=0.9333 if=0.9202 mlpae=0.9657
+  Botnet: pca=0.9077 if=0.9334 mlpae=0.9380
+  Infiltration: pca=0.9151 if=0.9545 mlpae=0.9432
+  WebAttacks: pca=0.9888 if=0.9544 mlpae=0.9812
+  Patator (FTP/SSH): pca=0.9859 if=0.9518 mlpae=0.9802
+  DoS / Heartbleed: pca=0.9090 if=0.9479 mlpae=0.9128
+
+===== SEED 3 =====
+  PortScan: pca=0.9520 if=0.8931 mlpae=0.9413
+  DDoS: pca=0.9333 if=0.9235 mlpae=0.9645
+  Botnet: pca=0.9077 if=0.9350 mlpae=0.9353
+  Infiltration: pca=0.9151 if=0.9558 mlpae=0.9462
+  WebAttacks: pca=0.9888 if=0.9548 mlpae=0.9892
+  Patator (FTP/SSH): pca=0.9859 if=0.9594 mlpae=0.9856
+  DoS / Heartbleed: pca=0.9090 if=0.9435 mlpae=0.8964
+
+=== BASELINE SUMMARY (mean AUC over seeds) ===
+  pca    0.9417 (per-seed [np.float64(0.9417), np.float64(0.9417), np.float64(0.9417), np.float64(0.9417)])
+  if     0.9357 (per-seed [np.float64(0.937), np.float64(0.9332), np.float64(0.9348), np.float64(0.9379)])
+  mlpae  0.9517 (per-seed [np.float64(0.9514), np.float64(0.9538), np.float64(0.9502), np.float64(0.9512)])
+Saved: C:\Users\trex2\Potential-Gold\Zero-Day\experiments\baselines_4seed.json
