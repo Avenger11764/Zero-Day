@@ -1,3 +1,15 @@
+"""
+LEGACY / STALE since 2026-08-25d — do NOT wire into new paths.
+================================================================
+The shipped plain M5a (autoencoder_v2-256.pt, this module's score_flow) measured
+actively harmful in multi-window fusion (0.9482, RC-26) and is superseded by the
+REVIVED 87-dim ctx AE (detection/m5a_revived_ctx.pt, served inside
+alert_pipeline.score_window by default).
+
+This file is KEPT because Checkpoint-1, the dashboard and the red-team harness
+call score_flow(), and ensembler/eval scripts load it as an ablation arm.
+Do not delete; do not extend; do not raise its threshold expectations.
+"""
 import logging
 import os
 import sys

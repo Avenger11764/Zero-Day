@@ -34,14 +34,19 @@ import numpy as np
 import pandas as pd
 import torch
 
-from graph_builder import build_graphs, normalize_columns, NODE_FEATURE_NAMES, V2_FEATURE_NAMES
+from graph_builder import build_graphs, normalize_columns, NODE_FEATURE_NAMES, V2_FEATURE_NAMES, _window_key
 from gnn_model import GraphAutoencoder, NodeScaler
-from stub_detector import EXPECTED_FEATURES, _get_model, _FEATURE_NAMES
+from stub_detector import EXPECTED_FEATURES, _FEATURE_NAMES
 
 try:
     from drift_monitor import DetectorDriftMonitors
 except ImportError:
     from detection.drift_monitor import DetectorDriftMonitors
+
+try:
+    from exp_m5a_revival import build_ctx, CtxScaler, RevivedAE
+except ImportError:
+    from detection.exp_m5a_revival import build_ctx, CtxScaler, RevivedAE
 
 MODEL_PATH = Path(__file__).resolve().parent / "gnn_autoencoder_v1.pt"
 # Optional logscale checkpoint (produced after A2 fix); used if present.
@@ -49,9 +54,13 @@ LOGSCALE_PATH = Path(__file__).resolve().parent / "gnn_autoencoder_v1_logscale.p
 # v2 checkpoint (19 feats) — only produced after explicit retrain; E3 opt-in.
 V2_LOGSCALE_PATH = Path(__file__).resolve().parent / "gnn_autoencoder_v1_logscale_v2.pt"
 V2_PATH = Path(__file__).resolve().parent / "gnn_autoencoder_v1_v2.pt"
+# REVIVED M5a (87-dim ctx AE) — production per-flow pillar since 2026-08-25d.
+REVIVED_PATH = Path(__file__).resolve().parent / "m5a_revived_ctx.pt"
 
 _m5b = None
 _scaler = None
+_revived = None
+_revived_meta = None
 
 
 def _load_m5b(feature_set: str = "v1"):
@@ -96,6 +105,45 @@ def _load_m5b(feature_set: str = "v1"):
     return _m5b, _scaler
 
 
+def _load_revived():
+    """Load the REVIVED 87-dim per-flow AE (m5a_revived_ctx.pt) once.
+
+    Returns (model, canonical, flow_lo, flow_hi, ctx_scaler) or (None,)*5 when
+    the checkpoint is absent — caller then falls back to RC-26 pure relational.
+    Train it with: python detection/train_m5a_revived.py --seed 0
+    """
+    global _revived, _revived_meta
+    if _revived is None and _revived_meta is None:
+        if not REVIVED_PATH.exists():
+            _revived_meta = {"missing": True}
+            return None, None, None, None, None
+        blob = torch.load(REVIVED_PATH, map_location="cpu", weights_only=False)
+        model = RevivedAE(blob["input_dim"])
+        model.load_state_dict(blob["state_dict"])
+        model.eval()
+        csc = CtxScaler()
+        csc.lo, csc.hi = blob["ctx_lo"], blob["ctx_hi"]
+        _revived = model
+        _revived_meta = {
+            "canonical": blob["canonical"],
+            "flow_lo": blob["flow_lo"], "flow_hi": blob["flow_hi"],
+            "ctx_scaler": csc,
+        }
+    if _revived is None:
+        return None, None, None, None, None
+    m = _revived_meta
+    return _revived, m["canonical"], m["flow_lo"], m["flow_hi"], m["ctx_scaler"]
+
+
+def _rank01(x):
+    order = np.argsort(np.argsort(x, kind="stable"), kind="stable")
+    return order / max(len(x) - 1, 1)
+
+
+def _noisyor(a, b):
+    return 1.0 - (1.0 - a) * (1.0 - b)
+
+
 _drift_monitors: DetectorDriftMonitors | None = None
 
 def get_drift_monitors() -> DetectorDriftMonitors | None:
@@ -121,19 +169,43 @@ def score_window(df: pd.DataFrame, feature_columns: list[str] | None = None,
     If k > 0, builds graphs with k nearest-neighbour auxiliary edges per host.
     """
     df = normalize_columns(df)
-    # RC-26 default: pure rank_mean no M5a — feature_columns=None gives M5b-only (0.8322 edge AUC, best)
-    # Pass feature_columns explicitly only if you have a reason to fuse M5a (it hurts on WebAttacks).
+    # Production since 2026-08-25d (CHANGELOG): M5b relational + REVIVED 87-dim
+    # per-flow AE, fused by within-window rank noisyor (the 7/7x4 rule).
+    # feature_columns forces the LEGACY shipped-M5a path instead (ablation only — it hurts, -5pts RC-26).
     graphs = build_graphs(df, window_seconds=window_seconds, k=k, feature_set=feature_set)
     if not graphs:
         return []
 
     model, scaler = _load_m5b(feature_set)
 
-    # ---- M5a: per-flow, then lifted to per-host (max over that host's flows)
-    # Default None → M5b-only (RC-26). To fuse, pass pinned feature_columns from Monday.
+    # ---- REVIVED per-flow pillar: host scores via max over flows ----------
+    rev, r_canonical, r_lo, r_hi, csc = _load_revived()
+    revived_host_score: dict[str, float] = {}
+    use_rev = rev is not None and all(c in df.columns for c in r_canonical)
+    if use_rev:
+        feats = df[r_canonical].apply(pd.to_numeric, errors="coerce")
+        feats = feats.replace([np.inf, -np.inf], np.nan).fillna(0.0)
+        arr = feats.to_numpy(dtype=np.float32)
+        span = np.where(r_hi - r_lo > 0, r_hi - r_lo, 1.0)
+        xl = np.clip((arr - r_lo) / span, 0.0, 1.0).astype(np.float32)
+        xc = csc.transform(build_ctx(df, _window_key(df, 60)))
+        x87 = np.concatenate([xl, xc], axis=1)
+        outs = []
+        with torch.no_grad():
+            for i in range(0, len(x87), 8192):
+                xb = torch.tensor(x87[i:i + 8192])
+                outs.append(rev.anomaly_score(xb).numpy())
+        rs = np.concatenate(outs)
+        revived_host_score = (
+            pd.DataFrame({"h": df["src_ip"].values, "s": rs})
+            .groupby("h")["s"].max().to_dict()
+        )
+
+    # ---- LEGACY shipped M5a path (opt-in ablation only) -------------------
     per_host_flow_score: dict[str, float] = {}
     use_m5a = feature_columns is not None and all(c in df.columns for c in feature_columns)
     if use_m5a:
+        from stub_detector import _get_model
         feats = df[feature_columns].apply(pd.to_numeric, errors="coerce")
         feats = feats.replace([np.inf, -np.inf], np.nan).fillna(0.0)
         arr = feats.to_numpy(dtype=np.float32)
@@ -146,14 +218,13 @@ def score_window(df: pd.DataFrame, feature_columns: list[str] | None = None,
             .groupby("h")["s"].max().to_dict()
         )
 
-    alerts = []
+    # ---- pass 1: collect raw edge scores ----------------------------------
+    edges = []
     for g in graphs:
         with torch.no_grad():
             node_scores = model.node_scores(
                 scaler.transform(g.x), g.edge_index
             ).numpy()
-
-        # Filter to REAL edges only (aux edges have edge_attr[:,0] == 0)
         real_mask = g.edge_attr[:, 0] > 0
         if not real_mask.any():
             continue
@@ -161,42 +232,60 @@ def score_window(df: pd.DataFrame, feature_columns: list[str] | None = None,
         dst_idx = g.edge_index[1][real_mask].tolist()
         for si, di in zip(src_idx, dst_idx):
             src, dst = g.hosts[si], g.hosts[di]
-            relational = float((node_scores[si] + node_scores[di]) / 2.0)
-            per_flow = float(per_host_flow_score.get(src, 0.0)) if use_m5a else 0.0
-            # RC-26: default no M5a → fused = relational (0.8322 edge AUC best)
-            # With M5a, max (either suspicious) — mean dilutes. Use threshold=None for percentile.
-            fused = relational if not use_m5a else max(relational, per_flow)
-
-            # Feed drift monitors (M6) if wired — tracks queue saturation (RC-27/28)
-            dm = drift if drift is not None else _drift_monitors
-            if dm is not None:
-                dm.add(relational, per_flow if use_m5a else None, fused)
-
-            # Threshold: if None, caller should use percentile-calibrated threshold downstream;
-            # default 0.5 only for backward compat when fused is raw MSE (uncalibrated gotcha #7).
-            is_anomaly = (fused > threshold) if threshold is not None else False
-            alerts.append({
-                "alert_id": str(uuid.uuid4()),
-                "timestamp": datetime.now(UTC).isoformat(),
-                "src_ip": src,
-                "dst_ip": dst,
-                "anomaly_score": round(min(fused, 1.0), 6),
-                "confidence": round(max(0.0, 1.0 - fused), 6),
-                "risk_score": min(int(fused * 100), 100),
-                "attack_type_guess": _guess(g.x[si]),
-                "mitre_technique": _technique(g.x[si]),
-                "explanation": _explain(g.x[si], relational, per_flow),
-                "model_source": "gnn-v1-logscale" if LOGSCALE_PATH.exists() else "gnn-v1",
-                "is_adversarial_test": False,
-                "is_anomaly": is_anomaly,
-                "threshold": threshold,
-                "feature_vector": [0.0] * EXPECTED_FEATURES,
-                "network_subscores": {
-                    "per_flow": round(per_flow, 6),
-                    "relational": round(relational, 6),
-                    "fused": round(fused, 6),
-                },
+            edges.append({
+                "si": si, "src": src, "dst": dst,
+                "node": g.x[si],
+                "relational": float((node_scores[si] + node_scores[di]) / 2.0),
+                "revived_raw": float(revived_host_score.get(src, 0.0)) if use_rev else 0.0,
+                "per_flow": float(per_host_flow_score.get(src, 0.0)) if use_m5a else 0.0,
             })
+    if not edges:
+        return []
+    # ---- pass 2: within-window rank fusion (noisyor; gotcha #17 batch-only)
+    rel_r = _rank01(np.array([e["relational"] for e in edges]))
+    rev_r = _rank01(np.array([e["revived_raw"] for e in edges])) if use_rev else None
+    alerts = []
+    for i, e in enumerate(edges):
+        if use_rev:
+            fused = float(_noisyor(rel_r[i], rev_r[i]))
+            revived_pct = float(rev_r[i])
+        else:
+            fused = e["relational"]  # fallback: raw relational (no revived checkpoint)
+            revived_pct = 0.0
+
+        # Feed drift monitors (M6) if wired — tracks queue saturation (RC-27/28)
+        dm = drift if drift is not None else _drift_monitors
+        if dm is not None:
+            dm.add(e["relational"], e["revived_raw"] if use_rev else None, fused)
+
+        # Threshold: if None, caller should use percentile-calibrated threshold downstream;
+        # default 0.5 only for backward compat when fused is raw MSE (uncalibrated gotcha #7).
+        is_anomaly = (fused > threshold) if threshold is not None else False
+        node = e["node"]
+        alerts.append({
+            "alert_id": str(uuid.uuid4()),
+            "timestamp": datetime.now(UTC).isoformat(),
+            "src_ip": e["src"],
+            "dst_ip": e["dst"],
+            "anomaly_score": round(min(fused, 1.0), 6),
+            "confidence": round(max(0.0, 1.0 - fused), 6),
+            "risk_score": min(int(fused * 100), 100),
+            "attack_type_guess": _guess(node),
+            "mitre_technique": _technique(node),
+            "explanation": _explain(node, e["relational"], e["per_flow"]),
+            "model_source": ("revived-v1(gnn-logscale+m5a-ctx87,noisyor)" if use_rev
+                             else ("gnn-v1-logscale" if LOGSCALE_PATH.exists() else "gnn-v1")),
+            "is_adversarial_test": False,
+            "is_anomaly": is_anomaly,
+            "threshold": threshold,
+            "feature_vector": [0.0] * EXPECTED_FEATURES,
+            "network_subscores": {
+                "per_flow": round(e["per_flow"], 6),
+                "relational": round(rel_r[i], 6) if use_rev else round(e["relational"], 6),
+                "revived": round(revived_pct, 6),
+                "fused": round(fused, 6),
+            },
+        })
     return alerts
 
 
