@@ -171,7 +171,8 @@ def train(graphs, epochs: int = 200, lr: float = 0.01, device=None, quiet=False,
     device = device or torch.device("cuda" if torch.cuda.is_available() else "cpu")
     scaler = NodeScaler(log=log_scale).fit(graphs)
 
-    model = GraphAutoencoder().to(device)
+    in_dim = graphs[0].x.shape[1]
+    model = GraphAutoencoder(in_dim=in_dim).to(device)
     opt = torch.optim.Adam(model.parameters(), lr=lr)
     loss_fn = nn.MSELoss()
     losses = []
