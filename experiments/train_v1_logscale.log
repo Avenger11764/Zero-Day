@@ -1,0 +1,8 @@
+Filtered to BENIGN: 529918/529918 flows
+Built 487 graphs (feature_set=v1, in_dim=8)
+  epoch   0 | loss 0.002453
+  epoch  40 | loss 0.000018
+  epoch  80 | loss 0.000005
+  epoch 120 | loss 0.000046
+  epoch 160 | loss 0.000074
+Saved -> detection\gnn_autoencoder_v1_logscale.pt  (final loss 0.000035)
