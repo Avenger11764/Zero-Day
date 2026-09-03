@@ -2,6 +2,19 @@
 
 Append-only log of what changed and why. **Pull, then read the top of this file.**
 
+## 2026-09-03a — Initial Syscall Watcher and Practice Datasets (Week 1 Data Prep)
+**Author:** Saharsh (Person A — Gets the data)
+**Commit:** Pending
+
+### What changed
+* `capture/ebpf_syscall_watcher.py` (new): eBPF/BCC script to watch 8 crucial syscalls (`open`, `openat`, `execve`, `execveat`, `connect`, `setuid`, `setgid`, `setresuid`) and stream `SyscallRecord` JSON records to stdout.
+* `data/download_practice_datasets.py` (new): Script to download ADFA-LD and LID-DS practice datasets. Automatically converts ADFA-LD traces into `SyscallRecord` format JSONL files in `data/practice/`.
+* Network feature lists inside `legacy/` were left completely frozen.
+
+### Why
+Setting up this watcher is tricky (needs Linux version, special permissions) – better to find problems now, not in week 6. This gives Person B practice datasets to build the detector and C/D exact feature names.
+
+
 ## 2026-08-25f — Repo restructure for week 4: legacy M5a quarantined to `legacy/`, silent fallback removed, v2 becomes production feature_set, paper outline frozen
 **Author:** Deep (Person B — Detection Modeling) · assisted by opencode
 **Commit:** 621f7e1 / ea75f8b
