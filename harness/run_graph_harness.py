@@ -45,6 +45,7 @@ import torch
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 sys.path.insert(0, str(REPO_ROOT / "detection"))
+sys.path.insert(0, str(REPO_ROOT / "legacy"))
 
 # Windows consoles default to cp1252 and the results table contains em-dashes.
 if hasattr(sys.stdout, "reconfigure"):
@@ -53,7 +54,10 @@ if hasattr(sys.stdout, "reconfigure"):
 from graph_builder import build_graphs, normalize_columns, read_flows  # noqa: E402
 from gnn_model import train  # noqa: E402
 from ensembler import flow_features, pin_canonical  # noqa: E402
-from stub_detector import _get_model  # noqa: E402
+try:
+    from stub_detector import _get_model  # noqa: E402
+except ImportError:
+    from legacy.stub_detector import _get_model  # noqa: E402
 from harness.graph_techniques import ALL_TECHNIQUES, ATTACKER  # noqa: E402
 
 FLOWS = REPO_ROOT / "data" / "GeneratedLabelledFlows" / "TrafficLabelling"

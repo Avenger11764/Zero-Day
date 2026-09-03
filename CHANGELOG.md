@@ -2,6 +2,22 @@
 
 Append-only log of what changed and why. **Pull, then read the top of this file.**
 
+## 2026-09-03b — Host Attack Kill-Chain Scenario Spec & Replayable Syscall Trace Generator (Week 4 Role D)
+**Author:** Avinash (Person D — Adversarial Eval & Delivery)
+**Commit:** 8e3fdc8
+
+### What changed
+* `harness/host_attack_scenario.py` (new): Generator and replay harness for "Operation SilentWhisper" — a 5-stage stealth host kill-chain (`phishing email → dropper execve → process injection via ptrace → credential dumping → HTTPS C2 exfiltration`). Conforms strictly to the 8 tracepoints hooked by A's eBPF collector (`openat`, `execve`, `connect`, `setuid`, `clone`, `ptrace`, `init_module`, `mount`) and outputs replayable `SyscallRecord` streams.
+* `docs/HOST_ATTACK_SCENARIO.md` (new): Full design specification detailing stage-by-stage syscall transitions, MITRE ATT&CK technique IDs for Person C's mapper validation (`T1204.002`, `T1055.008`, `T1003.008`, `T1547.001`, `T1071.001`), and comprehensive technical rationale proving Network (Pillar 1) and Identity UEBA (Pillar 2) blindness.
+* `harness/results/host_attack_story_trace.jsonl` & `host_attack_story_summary.json` (new): Generated 166-record mock stream ready for consumption by Person B (`detection/host_ae.py`) and Person D's SOC Dashboard replay demo.
+* `harness/run_harness.py`, `harness/run_graph_harness.py`, `harness/diagnose_features.py`: Added fallback import support for `legacy/stub_detector` following Person B's week 4 restructure, preserving Checkpoint-1 baseline execution without regressing historical results.
+* `harness/README.md`: Refreshed documentation to cover the 3-pillar harness structure.
+
+### Why
+Pillar 3 (eBPF host syscalls) requires a reproducible adversarial story demonstrating why it exists. This stealth scenario proves how an attacker operating under a legitimate user session with minimal network footprint bypasses Pillars 1 and 2, but creates detectable kernel-level syscall anomalies caught only by Pillar 3.
+
+---
+
 ## 2026-09-03a — Initial Syscall Watcher and Practice Datasets (Week 1 Data Prep)
 **Author:** Saharsh (Person A — Gets the data)
 **Commit:** Pending

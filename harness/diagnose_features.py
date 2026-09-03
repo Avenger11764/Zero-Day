@@ -5,7 +5,10 @@ import pandas as pd
 
 # Path configurations
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from detection.stub_detector import score_flow
+try:
+    from detection.stub_detector import score_flow
+except ImportError:
+    from legacy.stub_detector import score_flow
 from harness.utils import load_benign_samples
 
 def diagnose():
