@@ -124,13 +124,11 @@ See `schemas/feature_vector.json` (v3.0).
 
 ---
 
-## B) Per-host graph vector — `8` (v1) / `19` (v2) dims, log1p+MinMax via `NodeScaler`
+## B) Per-host graph vector — `19` dims, log1p+MinMax via `NodeScaler`
 
-> Host nodes in `graph_builder.py`. `feature_set="v2"` is production.
+> Host nodes in `graph_builder.py`. `feature_set="v2"` is production (19).
 
-### B1. v1 — `8 dims`, indices `0–7` STABLE forever
-
-| # | Name | What it counts per 60-s window | Sweep signal |
+| # | Name | What it counts per 60-s window | Why it exists |
 |---|---|---|---|
 | 0 | out_degree | distinct peers you talked to | scanner 200 vs normal 2 |
 | 1 | in_degree | distinct peers that talked to you | DDoS victim |
@@ -140,11 +138,6 @@ See `schemas/feature_vector.json` (v3.0).
 | 5 | bytes_recv | `bwd_bytes` sum | download |
 | 6 | unique_dst_ports | distinct dst ports you hit | port-sweep |
 | 7 | mean_duration | avg flow duration | beacon vs bulk |
-
-### B2. v2 — `+11` shape dims → `19` total (`indices 0–7 identical`), same scaler
-
-| # | Name | What it counts | Why the raw counts need it |
-|---|---|---|---|
 | 8 | bytes_ratio | sent/(sent+recv+1) | exfil vs download asymmetry |
 | 9 | flows_per_out_peer | `out_flows / out_degree` | scanner ~1/flow:peer; flood victim many |
 | 10 | flows_per_in_peer | `in_flows / in_degree` | symmetric |
@@ -157,13 +150,13 @@ See `schemas/feature_vector.json` (v3.0).
 | 17 | udp_frac | fraction proto==17 | udp flood |
 | 18 | duration_std | std of duration | beacon regularity |
 
-Frozen order: `V2_FEATURE_NAMES = NODE_FEATURE_NAMES + [bytes_ratio, flows_per_out_peer, …, duration_std]` — `graph_builder.py:88`.
+Frozen order: `V2_FEATURE_NAMES` — `graph_builder.py:88` (`gnn_autoencoder_v1_logscale_v2.pt`).
 
-Consumers: `gnn_model.py` (produces `gnn_autoencoder_v1_logscale.pt` @ v1 and `_v2.pt` @ v2), `host_ae.py` (Pillar 3 reuses plumbing, no Checkpoint-1 touch).
+Consumers: `gnn_model.py`, `host_ae.py` (Pillar 3 reuses plumbing).
 
 ---
 
 ## C) Where to look
 
-* Flows (1–87): `detection/training_features/README.md` (this file) + `schemas/feature_vector.json:3.0` + `experiments/exp_m5a_revival.py:CTX_DIMS`
-* Hosts (0–7 / 0–18): `detection/graph_builder.py:NODE_FEATURE_NAMES`, `V2_FEATURE_NAMES`
+* Flows (1–87): `schemas/feature_vector.json:3.0` + `experiments/exp_m5a_revival.py:CTX_DIMS`
+* Hosts (0–18): `detection/graph_builder.py:V2_FEATURE_NAMES`
