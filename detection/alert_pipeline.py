@@ -36,7 +36,7 @@ import torch
 
 from graph_builder import build_graphs, normalize_columns, NODE_FEATURE_NAMES, V2_FEATURE_NAMES, _window_key
 from gnn_model import GraphAutoencoder, NodeScaler
-from stub_detector import EXPECTED_FEATURES, _FEATURE_NAMES
+from legacy.stub_detector import EXPECTED_FEATURES, _FEATURE_NAMES
 
 try:
     from drift_monitor import DetectorDriftMonitors
@@ -46,7 +46,10 @@ except ImportError:
 try:
     from exp_m5a_revival import build_ctx, CtxScaler, RevivedAE
 except ImportError:
-    from detection.exp_m5a_revival import build_ctx, CtxScaler, RevivedAE
+    try:
+        from detection.exp_m5a_revival import build_ctx, CtxScaler, RevivedAE
+    except ImportError:
+        from experiments.exp_m5a_revival import build_ctx, CtxScaler, RevivedAE
 
 MODEL_PATH = Path(__file__).resolve().parent / "gnn_autoencoder_v1.pt"
 # Optional logscale checkpoint (produced after A2 fix); used if present.
@@ -224,7 +227,7 @@ def score_window(df: pd.DataFrame, feature_columns: list[str] | None = None,
     per_host_flow_score: dict[str, float] = {}
     use_m5a = feature_columns is not None and all(c in df.columns for c in feature_columns)
     if use_m5a:
-        from stub_detector import _get_model
+        from legacy.stub_detector import _get_model
         feats = df[feature_columns].apply(pd.to_numeric, errors="coerce")
         feats = feats.replace([np.inf, -np.inf], np.nan).fillna(0.0)
         arr = feats.to_numpy(dtype=np.float32)

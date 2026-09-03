@@ -31,10 +31,17 @@ sys.path.insert(0, str(ROOT))
 from detection.graph_builder import (build_graphs, normalize_columns, read_flows,
                                      _window_key)
 from detection.evaluate_gnn import FLOWS, malicious_hosts, roc_auc
-from detection.stub_detector import Autoencoder as ShippedAE, EXPECTED_FEATURES, MODEL_PATH
+try:
+    from detection.stub_detector import Autoencoder as ShippedAE, EXPECTED_FEATURES, MODEL_PATH
+except ModuleNotFoundError:
+    from legacy.stub_detector import Autoencoder as ShippedAE, EXPECTED_FEATURES, MODEL_PATH
 from detection.gnn_model import GraphAutoencoder
-from detection.exp_v2b_temporal_aug import (augment_graphs_temporal, K,
-                                            LogScaler as V2BScaler)
+try:
+    from detection.exp_v2b_temporal_aug import (augment_graphs_temporal, K,
+                                                LogScaler as V2BScaler)
+except ModuleNotFoundError:
+    from experiments.exp_v2b_temporal_aug import (augment_graphs_temporal, K,
+                                                  LogScaler as V2BScaler)
 
 META = ["src_ip", "dst_ip", "src_port", "protocol", "timestamp",
         "label", "flow_id"]

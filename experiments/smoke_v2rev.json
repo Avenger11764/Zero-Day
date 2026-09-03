@@ -1,0 +1,288 @@
+{
+  "per_family": {
+    "0": {
+      "PortScan": {
+        "w60": {
+          "auc": 0.9557,
+          "p100": 0.01
+        },
+        "w300": {
+          "auc": 0.9968,
+          "p100": 0.01
+        },
+        "pure_rank_mean": {
+          "auc": 0.9823,
+          "p100": 0.01
+        },
+        "pure_rank_max": {
+          "auc": 0.9936,
+          "p100": 0.01
+        },
+        "m5a_multi": {
+          "auc": 0.6938,
+          "p100": 0.0
+        },
+        "three_way_rm": {
+          "auc": 0.8864,
+          "p100": 0.0
+        },
+        "rev_multi": {
+          "auc": 0.3795,
+          "p100": 0.0
+        },
+        "three_way_rev_rm": {
+          "auc": 0.7268,
+          "p100": 0.0
+        },
+        "pure_noisyor_rev": {
+          "auc": 0.8985,
+          "p100": 0.0
+        },
+        "pure_rmax_rev": {
+          "auc": 0.9678,
+          "p100": 0.01
+        }
+      },
+      "DDoS": {
+        "w60": {
+          "auc": 1.0,
+          "p100": 0.01
+        },
+        "w300": {
+          "auc": 0.9981,
+          "p100": 0.01
+        },
+        "pure_rank_mean": {
+          "auc": 1.0,
+          "p100": 0.01
+        },
+        "pure_rank_max": {
+          "auc": 1.0,
+          "p100": 0.01
+        },
+        "m5a_multi": {
+          "auc": 1.0,
+          "p100": 0.01
+        },
+        "three_way_rm": {
+          "auc": 1.0,
+          "p100": 0.01
+        },
+        "rev_multi": {
+          "auc": 0.999,
+          "p100": 0.01
+        },
+        "three_way_rev_rm": {
+          "auc": 0.999,
+          "p100": 0.01
+        },
+        "pure_noisyor_rev": {
+          "auc": 1.0,
+          "p100": 0.01
+        },
+        "pure_rmax_rev": {
+          "auc": 1.0,
+          "p100": 0.01
+        }
+      },
+      "WebAttacks": {
+        "w60": {
+          "auc": 0.9858,
+          "p100": 0.01
+        },
+        "w300": {
+          "auc": 0.9949,
+          "p100": 0.01
+        },
+        "pure_rank_mean": {
+          "auc": 0.9949,
+          "p100": 0.01
+        },
+        "pure_rank_max": {
+          "auc": 0.9909,
+          "p100": 0.01
+        },
+        "m5a_multi": {
+          "auc": 0.6988,
+          "p100": 0.0
+        },
+        "three_way_rm": {
+          "auc": 0.8915,
+          "p100": 0.0
+        },
+        "rev_multi": {
+          "auc": 0.569,
+          "p100": 0.0
+        },
+        "three_way_rev_rm": {
+          "auc": 0.8347,
+          "p100": 0.0
+        },
+        "pure_noisyor_rev": {
+          "auc": 0.9726,
+          "p100": 0.01
+        },
+        "pure_rmax_rev": {
+          "auc": 0.9919,
+          "p100": 0.01
+        }
+      },
+      "Patator (FTP/SSH)": {
+        "w60": {
+          "auc": 0.9989,
+          "p100": 0.01
+        },
+        "w300": {
+          "auc": 0.995,
+          "p100": 0.01
+        },
+        "pure_rank_mean": {
+          "auc": 0.9989,
+          "p100": 0.01
+        },
+        "pure_rank_max": {
+          "auc": 0.9983,
+          "p100": 0.01
+        },
+        "m5a_multi": {
+          "auc": 0.9961,
+          "p100": 0.01
+        },
+        "three_way_rm": {
+          "auc": 0.9994,
+          "p100": 0.01
+        },
+        "rev_multi": {
+          "auc": 0.7579,
+          "p100": 0.0
+        },
+        "three_way_rev_rm": {
+          "auc": 0.9293,
+          "p100": 0.0
+        },
+        "pure_noisyor_rev": {
+          "auc": 0.9917,
+          "p100": 0.01
+        },
+        "pure_rmax_rev": {
+          "auc": 0.9972,
+          "p100": 0.01
+        }
+      },
+      "DoS / Heartbleed": {
+        "w60": {
+          "auc": 0.9851,
+          "p100": 0.01
+        },
+        "w300": {
+          "auc": 0.9957,
+          "p100": 0.01
+        },
+        "pure_rank_mean": {
+          "auc": 0.9947,
+          "p100": 0.01
+        },
+        "pure_rank_max": {
+          "auc": 0.992,
+          "p100": 0.01
+        },
+        "m5a_multi": {
+          "auc": 0.8099,
+          "p100": 0.0
+        },
+        "three_way_rm": {
+          "auc": 0.9333,
+          "p100": 0.0
+        },
+        "rev_multi": {
+          "auc": 0.5147,
+          "p100": 0.0
+        },
+        "three_way_rev_rm": {
+          "auc": 0.6733,
+          "p100": 0.0
+        },
+        "pure_noisyor_rev": {
+          "auc": 0.96,
+          "p100": 0.01
+        },
+        "pure_rmax_rev": {
+          "auc": 0.9899,
+          "p100": 0.01
+        }
+      }
+    }
+  },
+  "summary": {
+    "w60": {
+      "mean": 0.9851,
+      "std": NaN,
+      "per_seed": [
+        0.9850999999999999
+      ]
+    },
+    "w300": {
+      "mean": 0.9961,
+      "std": NaN,
+      "per_seed": [
+        0.9961
+      ]
+    },
+    "pure_rank_mean": {
+      "mean": 0.9942,
+      "std": NaN,
+      "per_seed": [
+        0.9941599999999999
+      ]
+    },
+    "pure_rank_max": {
+      "mean": 0.995,
+      "std": NaN,
+      "per_seed": [
+        0.9949600000000001
+      ]
+    },
+    "m5a_multi": {
+      "mean": 0.8397,
+      "std": NaN,
+      "per_seed": [
+        0.83972
+      ]
+    },
+    "three_way_rm": {
+      "mean": 0.9421,
+      "std": NaN,
+      "per_seed": [
+        0.9421199999999998
+      ]
+    },
+    "rev_multi": {
+      "mean": 0.644,
+      "std": NaN,
+      "per_seed": [
+        0.64402
+      ]
+    },
+    "three_way_rev_rm": {
+      "mean": 0.8326,
+      "std": NaN,
+      "per_seed": [
+        0.83262
+      ]
+    },
+    "pure_noisyor_rev": {
+      "mean": 0.9646,
+      "std": NaN,
+      "per_seed": [
+        0.96456
+      ]
+    },
+    "pure_rmax_rev": {
+      "mean": 0.9894,
+      "std": NaN,
+      "per_seed": [
+        0.9893599999999999
+      ]
+    }
+  }
+}

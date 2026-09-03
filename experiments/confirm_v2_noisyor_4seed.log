@@ -1,0 +1,20 @@
+Device: cuda
+Monday benign flows: 529,918
+Benign graphs: 60s=487, 300s=98
+Caching attack graphs + M5a scores (once, seed-independent)...
+  PortScan: 150x60s 30x300s 1 malicious hosts
+  DDoS: 93x60s 19x300s 2 malicious hosts
+  Botnet: 241x60s 49x300s 8 malicious hosts
+  Infiltration: 245x60s 49x300s 1 malicious hosts
+  WebAttacks: 241x60s 49x300s 1 malicious hosts
+  Patator (FTP/SSH): 488x60s 99x300s 1 malicious hosts
+  DoS / Heartbleed: 509x60s 103x300s 1 malicious hosts
+
+============================================================
+SEED 0
+============================================================
+  60s final loss: 0.000212
+  300s final loss: 0.000125
+    AE ep0 loss 0.040349
+    AE ep20 loss 0.000491
+    AE ep40 loss 0.000130
