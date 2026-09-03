@@ -5,7 +5,7 @@ This framework implements and evaluates adversarial evasion techniques and multi
 ## Structure & Modules
 
 ### 1. Host Attack Kill-Chain Spec (Week 4 — Pillar 3)
-- [`host_attack_scenario.py`](host_attack_scenario.py): Implements "Operation SilentWhisper", a replayable 5-stage stealth attack scenario (`phishing email → dropper execve → process injection via ptrace → credential dumping → HTTPS C2 exfiltration`). Conforms to the 8 hooked eBPF tracepoints and outputs replayable `SyscallRecord` streams.
+- [`host_attack_scenario.py`](host_attack_scenario.py): Implements "Operation SilentWhisper", a replayable 5-stage stealth attack scenario (`phishing email → dropper execve → process injection via ptrace → credential dumping → HTTPS C2 exfiltration`). Generates provisional `SyscallRecord` streams on demand (trace outputs pending verification against Person A's updated collector per [`docs/SYSCALLRECORD_RECONCILIATION.md`](../docs/SYSCALLRECORD_RECONCILIATION.md)).
 - Complete design doc and blind-spot rationale: [`docs/HOST_ATTACK_SCENARIO.md`](../docs/HOST_ATTACK_SCENARIO.md).
 
 ### 2. Relational GNN Evasion Harness (M5b)
@@ -41,7 +41,6 @@ python harness/run_harness.py
 
 ## Results Logs (`harness/results/`)
 
-- [`host_attack_story_trace.jsonl`](results/host_attack_story_trace.jsonl): Replayable 166-event stream conforming to `SyscallRecord`.
-- [`host_attack_story_summary.json`](results/host_attack_story_summary.json): Stage metadata, ATT&CK mappings, and P1/P2 blindness rationales.
 - [`autoencoder_v2_baseline.csv`](results/autoencoder_v2_baseline.csv) & [`autoencoder_v2_baseline_v2.csv`](results/autoencoder_v2_baseline_v2.csv): Checkpoint-1 baseline evasion logs.
 - [`m5b_evasion.csv`](results/m5b_evasion.csv), [`m5b_evasion.json`](results/m5b_evasion.json), [`m5b_evasion.md`](results/m5b_evasion.md): M5b graph evasion benchmark results.
+- *(Note: Host attack trace outputs `host_attack_story_trace.jsonl` and `host_attack_story_summary.json` are generated dynamically via `host_attack_scenario.py` and are pending verification against Person A's updated eBPF collector before being committed).*

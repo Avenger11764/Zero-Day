@@ -46,18 +46,17 @@ KILL-CHAIN STORY:
    - P2 Blindness: Assigned workstation communicating over web protocols in office hours.
    - P3 Anomaly: Outbound connect() socket call from sssd daemon (which never speaks to public IPs).
 
-SCHEMA CONFORMANCE:
--------------------
-Generates SyscallRecord JSON objects strictly matching the 8 tracepoints hooked by
-Person A's eBPF collector (capture/ebpf_syscall_watcher.py):
-  1. execve
-  2. openat
-  3. connect
-  4. setuid
-  5. clone
-  6. ptrace
-  7. init_module
-  8. mount
+SCHEMA CONFORMANCE & VERIFICATION STATUS:
+------------------------------------------
+Generates SyscallRecord JSON objects intended to match Person A's eBPF collector
+(capture/ebpf_syscall_watcher.py).
+
+NOTE (PENDING VERIFICATION):
+As documented in docs/SYSCALLRECORD_RECONCILIATION.md, the argument shapes for
+ptrace, clone, init_module, and mount, along with socket address decoding for
+connect(), are PROVISIONAL and pending verification against Person A's corrected
+eBPF collector. Generated outputs from this script are provisional evaluation
+traces, not final checked-in repository artifacts.
 """
 
 from __future__ import annotations

@@ -2,9 +2,23 @@
 
 Append-only log of what changed and why. **Pull, then read the top of this file.**
 
+## 2026-09-03c — SyscallRecord Reconciliation Pass: Harness Spec vs. Live eBPF Collector (Week 4 Role D)
+**Author:** Avinash (Person D — Adversarial Eval & Delivery)
+**Commit:** 7bacfce
+
+### What changed
+* `docs/SYSCALLRECORD_RECONCILIATION.md` (new): Formal reconciliation report comparing Person D's mock `SyscallRecord` generator (`harness/host_attack_scenario.py`) against Person A's actual eBPF watcher (`capture/ebpf_syscall_watcher.py`).
+* Documented 3 key findings: (1) Coverage gap: `ptrace`, `clone`, `init_module`, `mount` present in D's spec but missing from A's 8 live tracepoints (breaking live signal for Stage 2 Process Injection `T1055.008`); (2) Arguments mismatch: A emits raw `uservaddr` hex pointer on `connect`, while D assumes decoded `ip`/`port`; (3) Telemetry vs. Evaluation separation: clarified that D's extra fields (`is_attack`, `stage_id`, `mitre_technique`) are harness-only metadata.
+* Proposed 2 remediation options: Recommended Option (a) where Person A extends BCC watcher from 8 to 12 tracepoints to preserve the core thesis justification for Pillar 3.
+
+### Why
+Ensures that Person B's host autoencoder (`detection/host_ae.py`) trains on a consistent data shape across both mock evaluation streams and live Linux captures, preventing silent training failures before Week 6 integration.
+
+---
+
 ## 2026-09-03b — Host Attack Kill-Chain Scenario Spec & Replayable Syscall Trace Generator (Week 4 Role D)
 **Author:** Avinash (Person D — Adversarial Eval & Delivery)
-**Commit:** 8e3fdc8
+**Commit:** 7f6499e
 
 ### What changed
 * `harness/host_attack_scenario.py` (new): Generator and replay harness for "Operation SilentWhisper" — a 5-stage stealth host kill-chain (`phishing email → dropper execve → process injection via ptrace → credential dumping → HTTPS C2 exfiltration`). Conforms strictly to the 8 tracepoints hooked by A's eBPF collector (`openat`, `execve`, `connect`, `setuid`, `clone`, `ptrace`, `init_module`, `mount`) and outputs replayable `SyscallRecord` streams.
