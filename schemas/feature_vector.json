@@ -1,9 +1,23 @@
 {
-  "version": "2.0",
-  "description": "Fixed-length numeric vector representing one network flow",
-  "length": 76,
-  "preprocessing": "MinMaxScaler — all values normalized to range [0, 1]",
-  "note": "Matches CICIDS2017 MachineLearningCSV feature set exactly. Use CICFlowMeter to generate compatible CSVs from raw pcap.",
-  "owner_produces": "A (Data & Capture)",
-  "owner_consumes": "B (Detection Modeling)"
+  "version": "3.0",
+  "description": "Fixed-length numeric vector representing one network flow with window context",
+  "length": 87,
+  "features": {
+    "flow": {
+      "count": 76,
+      "preprocessing": "MinMaxScaler — all values normalized to range [0, 1]",
+      "names_order": "see legacy/stub_detector._FEATURE_NAMES (pin_canonical order)"
+    },
+    "ctx_window": {
+      "count": 11,
+      "order": ["ws_flows", "ws_dst", "ws_ports", "ws_fwd", "ws_bwd", "ws_pkts_f", "ws_pkts_b", "ws_dur", "wd_flows", "wd_src", "wd_dur"],
+      "preprocessing": "Count-like dims: log1p then MinMaxScaler to [0,1]",
+      "definition": "ws_* = stats for the flow's src in its 60s window; wd_* = stats for its dst in the same window (build_ctx in exp_m5a_revival.py)",
+      "checkpoint_bundles": "detection/m5a_revived_ctx.pt (flow_lo/hi + ctx_lo/hi + canonical)"
+    }
+  },
+  "preprocessing_summary": "76 flow dims: MinMax + 11 ctx dims: log1p+MinMax, concatenated",
+  "note": "v2.0 was 76 dims (legacy autoencoder_v2-256.pt). v3.0 is 87 dims (revived ctx AE). Legacy consumers pinned to v2.0 must stay on legacy/stub_detector.",
+  "owner_produces": "A (Data & Capture) + B (Detection — ctx builder in exp_m5a_revival.py)",
+  "owner_consumes": "B (Detection Modeling — RevivedAE in train_m5a_revived.py, served by alert_pipeline.score_window)"
 }
