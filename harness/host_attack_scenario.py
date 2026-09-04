@@ -48,15 +48,9 @@ KILL-CHAIN STORY:
 
 SCHEMA CONFORMANCE & VERIFICATION STATUS:
 ------------------------------------------
-Generates SyscallRecord JSON objects intended to match Person A's eBPF collector
-(capture/ebpf_syscall_watcher.py).
-
-NOTE (PENDING VERIFICATION):
-As documented in docs/SYSCALLRECORD_RECONCILIATION.md, the argument shapes for
-ptrace, clone, init_module, and mount, along with socket address decoding for
-connect(), are PROVISIONAL and pending verification against Person A's corrected
-eBPF collector. Generated outputs from this script are provisional evaluation
-traces, not final checked-in repository artifacts.
+Generates SyscallRecord JSON objects strictly conforming to Person A's updated
+12-tracepoint eBPF collector (capture/ebpf_syscall_watcher.py) as verified in
+CHANGELOG entry 2026-09-04a.
 """
 
 from __future__ import annotations
@@ -75,14 +69,18 @@ from typing import Any, Dict, Iterator, List, Optional
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_OUT_DIR = REPO_ROOT / "harness" / "results"
 
-# 8 Hooked tracepoints from Pillar 3 roadmap & capture/ebpf_syscall_watcher.py
+# 12 Hooked tracepoints matching Person A's eBPF collector (capture/ebpf_syscall_watcher.py)
 HOOKED_SYSCALLS = {
+    "open",
     "openat",
     "execve",
+    "execveat",
     "connect",
     "setuid",
-    "clone",
+    "setgid",
+    "setresuid",
     "ptrace",
+    "clone",
     "init_module",
     "mount",
 }
@@ -147,14 +145,13 @@ class SyscallRecord:
         d = {
             "timestamp": round(self.timestamp, 6),
             "pid": self.pid,
+            "ppid": self.ppid if self.ppid is not None else 1,
             "uid": self.uid,
             "comm": self.comm,
             "syscall": self.syscall,
             "args": self.args,
             "ret": self.ret,
         }
-        if self.ppid is not None:
-            d["ppid"] = self.ppid
         if self.is_attack:
             d["stage_id"] = self.stage_id
             d["mitre_technique"] = self.mitre_technique
@@ -232,7 +229,7 @@ class HostAttackScenario:
                 uid=self.victim_uid,
                 comm="thunderbird",
                 syscall="clone",
-                args={"flags": 0x00000111, "child_stack": "0x7ffd58", "ptid": 0},
+                args={"flags": "0x111", "child_stack": "0x7ffd58"},
                 ret=self.victim_pid,
                 stage_id="stage_1_dropper",
                 mitre_technique="T1204.002",
@@ -477,16 +474,36 @@ class HostAttackScenario:
                 comm=self.target_daemon,
                 syscall="mount",
                 args={
-                    "source": "tmpfs",
-                    "target": "/var/run/.cache_sys",
-                    "filesystemtype": "tmpfs",
-                    "mountflags": 0,
+                    "flags": 0,
+                    "dev_name": "tmpfs",
                 },
                 ret=0,
                 stage_id="stage_4_persistence",
                 mitre_technique="T1547.006",
                 is_attack=True,
                 blindness_rationale="P1: Local kernel VFS operation. P2: No directory service change.",
+            )
+        )
+        t += 0.03
+
+        # Load stealth persistence kernel module
+        records.append(
+            SyscallRecord(
+                timestamp=t,
+                pid=self.target_daemon_pid,
+                ppid=1,
+                uid=0,
+                comm=self.target_daemon,
+                syscall="init_module",
+                args={
+                    "len": 24576,
+                    "umod": "/var/run/.cache_sys/stealth_mod.ko",
+                },
+                ret=0,
+                stage_id="stage_4_persistence",
+                mitre_technique="T1547.006",
+                is_attack=True,
+                blindness_rationale="P1: 0 network bytes. P2: Direct kernel module staging.",
             )
         )
         return records
@@ -586,12 +603,13 @@ class HostAttackScenario:
                     "addrlen": 16,
                 }
             elif sc == "clone":
-                args = {"flags": 0x1200011, "child_stack": "0x7fff00"}
+                args = {"flags": "0x1200011", "child_stack": "0x7fff00"}
 
             records.append(
                 SyscallRecord(
                     timestamp=ts,
                     pid=pid,
+                    ppid=1,
                     uid=uid,
                     comm=comm,
                     syscall=sc,

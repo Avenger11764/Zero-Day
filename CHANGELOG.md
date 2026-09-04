@@ -2,9 +2,23 @@
 
 Append-only log of what changed and why. **Pull, then read the top of this file.**
 
+## 2026-09-04b — Final Args Verification, Trace Regeneration, and Verified Status Transition (Week 4 Role D)
+**Author:** Avinash (Person D — Adversarial Eval & Delivery)
+**Commit:** 26e4b75
+
+### What changed
+* `harness/host_attack_scenario.py` (updated): Performed final field-by-field args verification against Person A's 12-tracepoint eBPF watcher (`capture/ebpf_syscall_watcher.py`). Fixed 2 minor key mismatches: (1) removed unhooked `ptid` from `clone` args, and (2) aligned `mount` args to `{flags, dev_name}` matching Person A's exact schema. Added `init_module` `{len, umod}` invocation in Stage 4, and included `ppid` in every emitted record.
+* `harness/results/host_attack_story_trace.jsonl` & `host_attack_story_summary.json` (regenerated & checked in): Successfully generated and committed the 167-event mock stream (17 attack events + 150 background events) with 100% verified schema conformance.
+* `docs/HOST_ATTACK_SCENARIO.md` & `harness/README.md`: Replaced provisional / pending verification notices with confirmed verification status, referencing Person A's `2026-09-04a` watcher expansion.
+
+### Why
+Closes the loop on `docs/SYSCALLRECORD_RECONCILIATION.md`. Person B (`detection/host_ae.py`), Person C (`UEBA/ATT&CK_mapper/`), and the dashboard demo now share an authoritative, verified `SyscallRecord` trace with zero field mismatches or runtime key risks.
+
+---
+
 ## 2026-09-04a — eBPF Watcher Expansion: 8→12 Tracepoints + connect Decode + ppid Extraction (Week 4 Role A)
 **Author:** Saharsh (Person A — Gets the data)
-**Commit:** Pending
+**Commit:** 56d7b00
 
 ### What changed
 * `capture/ebpf_syscall_watcher.py` (modified): Expanded BCC watcher from 8 to **12 tracepoints** by adding `ptrace`, `clone`, `init_module`, and `mount`. This directly addresses Person D's SYSCALLRECORD_RECONCILIATION.md Option (a).

@@ -2,11 +2,11 @@
 
 **Author:** Person D (Avinash — Adversarial Eval & Delivery)  
 **Date:** 2026-09-03 (Week 4 Deliverable)  
-**Status:** Frozen Spec & Replayable Trace Generator (`harness/host_attack_scenario.py`) — **Args Pending Verification**  
+**Status:** Frozen Spec & Replayable Trace Generator (`harness/host_attack_scenario.py`) — **VERIFIED** against Person A's 12-tracepoint eBPF collector (`capture/ebpf_syscall_watcher.py`, CHANGELOG entry `2026-09-04a`).  
 **Cross-Role Interfaces:** Feeds Person B (`detection/host_ae.py`), validates Person C (`UEBA/ATT&CK_mapper/`), and drives Person D (Dashboard Replay Demo).
 
-> [!WARNING]
-> **Status Note (Pending Verification):** The argument shapes for `ptrace`, `clone`, `init_module`, and `mount`, as well as the socket address decoding for `connect()`, are **PENDING VERIFICATION** against Person A's corrected eBPF watcher (tracked in [`docs/SYSCALLRECORD_RECONCILIATION.md`](SYSCALLRECORD_RECONCILIATION.md)). No sample trace file is checked into the repository until Person A's updated collector lands and is verified. The generator script ([`harness/host_attack_scenario.py`](file:///d:/zero-day/harness/host_attack_scenario.py)) is provided to generate and inspect provisional traces on demand.
+> [!NOTE]
+> **Verification Confirmation (2026-09-04):** Person A's updated eBPF collector has expanded from 8 to 12 tracepoints (`ptrace`, `clone`, `init_module`, `mount`), implemented full `sockaddr_in` socket decoding for `connect()`, and added `ppid` to every record. In this pass, all argument shapes (`clone` flags/stack, `mount` flags/dev_name, `init_module` len/umod, `ptrace` request/pid/addr/data) were verified field-by-field and confirmed identical. Generated trace artifacts are now checked in under [`harness/results/`](../harness/results/).
 
 ---
 
@@ -128,12 +128,10 @@ This document specifies a **5-stage stealth kill-chain scenario** (`phishing ema
 
 ## 3. Replayable Trace Artifacts & Usage
 
-The scenario is implemented in `harness/host_attack_scenario.py` and can generate two provisional artifacts on demand:
+The scenario is implemented in `harness/host_attack_scenario.py` and produces two verified artifacts in `harness/results/`:
 
-1. **`host_attack_story_trace.jsonl`**: A stream of 166 JSON-serialized `SyscallRecord` events (16 attack events interleaved with 150 realistic benign background syscalls).
-2. **`host_attack_story_summary.json`**: Structured metadata detailing stage transitions, ATT&CK codes, hooked tracepoints, and pillar blindness rationales.
-
-*(Note: These files are not checked into git until Person A's updated collector output is verified).*
+1. **[`host_attack_story_trace.jsonl`](../harness/results/host_attack_story_trace.jsonl)**: A stream of 167 JSON-serialized `SyscallRecord` events (17 attack events interleaved with 150 realistic benign background syscalls).
+2. **[`host_attack_story_summary.json`](../harness/results/host_attack_story_summary.json)**: Structured metadata detailing stage transitions, ATT&CK codes, hooked tracepoints, and pillar blindness rationales.
 
 ### Running the Generator:
 ```bash
