@@ -2,6 +2,30 @@
 
 Append-only log of what changed and why. **Pull, then read the top of this file.**
 
+## 2026-09-04a — eBPF Watcher Expansion: 8→12 Tracepoints + connect Decode + ppid Extraction (Week 4 Role A)
+**Author:** Saharsh (Person A — Gets the data)
+**Commit:** Pending
+
+### What changed
+* `capture/ebpf_syscall_watcher.py` (modified): Expanded BCC watcher from 8 to **12 tracepoints** by adding `ptrace`, `clone`, `init_module`, and `mount`. This directly addresses Person D's SYSCALLRECORD_RECONCILIATION.md Option (a).
+* **`connect` args decoded:** Replaced raw `uservaddr` hex pointer emission with proper `sockaddr_in` decode via `bpf_probe_read_user()`. Connect events now emit `{fd, family, ip, port, addrlen}` matching Person D's harness schema exactly. The old `{fd, uservaddr, addrlen}` shape is **removed** — any code parsing `args["uservaddr"]` will need updating (none exists yet).
+* **`ppid` added:** Every emitted JSON record now includes `ppid` extracted via `bpf_get_current_task()->real_parent->tgid` in the BPF helper. Enables parent-child process-tree anomaly detection for Person B's host autoencoder.
+* BPF `data_t` struct expanded with `u32 ppid`, `u16 sa_family`, `u16 sa_port`, `u32 sa_addr` fields.
+* Python `Data` ctypes struct and `print_event()` updated with 4 new `elif` branches for the new syscalls.
+
+### Why
+Person D's reconciliation report identified 3 critical mismatches between the harness and live collector:
+1. **`ptrace` not hooked** → Stage 2 (process injection `T1055.008`) produced zero live signal, undermining Pillar 3's core thesis.
+2. **`connect` raw pointer** → downstream consumers expecting `ip`/`port` would `KeyError`.
+3. **No `ppid`** → process-tree analysis impossible in live capture.
+
+All 3 are now resolved. The watcher output shape matches `harness/host_attack_scenario.py` for all overlapping syscalls.
+
+### Overhead estimate
+4 new tracepoints add < 0.5% CPU (each is a single `submit_event()` call on entry). The `ppid` extraction is one `bpf_probe_read_kernel()` pointer chase per event. Total overhead remains well under the 2% target.
+
+---
+
 ## 2026-09-03c — SyscallRecord Reconciliation Pass: Harness Spec vs. Live eBPF Collector (Week 4 Role D)
 **Author:** Avinash (Person D — Adversarial Eval & Delivery)
 **Commit:** 7bacfce
