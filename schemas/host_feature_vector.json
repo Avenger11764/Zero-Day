@@ -1,0 +1,89 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "HostFeatureVector",
+  "version": "1.0",
+  "description": "Fixed-length 128-dimensional numerical vector representing a host syscall window/trace for host anomaly detection and ATT&CK mapping.",
+  "length": 128,
+  "blocks": {
+    "unigrams_1gram": {
+      "indices": "0..49",
+      "count": 50,
+      "description": "Top-49 pinned benign unigram syscall frequencies + out-of-vocabulary UNK bin (dim 49), L1 normalized."
+    },
+    "bigrams_2gram": {
+      "indices": "50..69",
+      "count": 20,
+      "description": "Top-20 pinned benign 2-gram consecutive transition frequencies, L1 normalized."
+    },
+    "ngram_hash_motifs": {
+      "indices": "70..89",
+      "count": 20,
+      "description": "Higher-order (3-gram to 6-gram) sequence motif hash projections across 20 MD5 hash buckets."
+    },
+    "process_context": {
+      "indices": "90..99",
+      "count": 10,
+      "features": [
+        "ctx_is_root",
+        "ctx_uid_changes",
+        "ctx_ppid_is_init",
+        "ctx_comm_entropy",
+        "ctx_unique_pids",
+        "ctx_spawn_rate",
+        "ctx_shell_origin",
+        "ctx_priv_transition",
+        "ctx_orphan_rate",
+        "ctx_comm_len_norm"
+      ]
+    },
+    "return_distribution": {
+      "indices": "100..109",
+      "count": 10,
+      "features": [
+        "ret_success_rate",
+        "ret_error_rate",
+        "ret_eperm_ratio",
+        "ret_enoent_ratio",
+        "ret_eacces_ratio",
+        "ret_eexist_ratio",
+        "ret_econnrefused_ratio",
+        "ret_other_err_ratio",
+        "ret_mean_err_code",
+        "ret_err_entropy"
+      ]
+    },
+    "timing_dynamics": {
+      "indices": "110..119",
+      "count": 10,
+      "features": [
+        "time_mean_delta",
+        "time_std_delta",
+        "time_min_delta",
+        "time_max_delta",
+        "time_median_delta",
+        "time_burstiness",
+        "time_event_rate",
+        "time_inter_arrival_entropy",
+        "time_log_total_dur",
+        "time_log_count"
+      ]
+    },
+    "security_indicators": {
+      "indices": "120..127",
+      "count": 8,
+      "features": [
+        "sec_sensitive_path_hits",
+        "sec_execve_count_norm",
+        "sec_ptrace_flag",
+        "sec_rootkit_module_flag",
+        "sec_mount_flag",
+        "sec_net_connect_rate",
+        "sec_priv_port_connect",
+        "sec_attack_surface_score"
+      ]
+    }
+  },
+  "normalization": "All features are scaled to [0, 1] via L1 frequency normalization, log1p scaling, or bounded metric clipping.",
+  "owner_produces": "Person A (Data & Capture — capture/host_feature_extractor.py, detection/host_features.py)",
+  "owner_consumes": "Person B (Detection Modeling — detection/host_ae.py), Person C (SHAP & ATT&CK Mapper)"
+}

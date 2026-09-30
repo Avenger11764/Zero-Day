@@ -2,6 +2,20 @@
 
 Append-only log of what changed and why. **Pull, then read the top of this file.**
 
+## 2026-09-30 — Week 5 Host Telemetry Feature Extractor (128-D) + Held-Out Attack-Family Protocol
+**Author:** Saharsh (Person A — Data & Capture / Host Telemetry)
+
+### What changed
+* `capture/host_feature_extractor.py` (new): 128-dimensional multi-modal Host FeatureVector extraction engine. Captures 1-gram unigrams (50 dims), 2-gram bigrams (20 dims), 3-6 gram rolling polynomial hash motifs (20 dims), process context & tree lineage (10 dims), return values & POSIX errno distributions (10 dims), inter-arrival timing dynamics & burstiness (10 dims), and critical attack-surface indicators (8 dims).
+* `schemas/syscall_record.json` (new): Canonical schema definition for raw/replayed eBPF `SyscallRecord` events (reconciled across Person D's harness and Person A's 12-tracepoint eBPF watcher).
+* `schemas/host_feature_vector.json` (new): Formal schema specification for the 128-dimensional Host FeatureVector block.
+* `detection/host_features.py`: Added dynamic dataset path discovery and integrated with `capture/host_feature_extractor.py` with fast vectorized number-sequence processing.
+* `detection/host_held_out_protocol.py` (new): Zero-day held-out attack-family evaluation protocol runner. Trained purely on benign baseline traces (`Training_Data_Master`, 833 traces), calibrated on benign validation (`Validation_Data_Master`, 4,372 traces), and tested across all 6 held-out attack families (746 traces: `Adduser`, `Hydra_FTP`, `Hydra_SSH`, `Java_Meterpreter`, `Meterpreter`, `Web_Shell`).
+* `detection/held_out_host_results.json` (new): Benchmark artifact recording family-stratified AUROC, PR-AUC, TPR @ 1% FPR, and F1 scores.
+* `docs/WEEK5_DATA_HANDOVER.md` (new): Handover documentation and contracts for Person B (host AE modeling), Person C (SHAP attribution & ATT&CK mapping), and Person D (harness trace replay).
+
+---
+
 ## 2026-09-22 — References [1]-[40] only + Ch2-only scope + 25pp rebuild
 **Author:** Deep (Person B — Detection Modeling)
 

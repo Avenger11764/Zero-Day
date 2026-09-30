@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SyscallRecord",
+  "version": "2.0",
+  "description": "Standardized schema for single host syscall event emitted by Person A (eBPF collector or trace replay) and consumed by Person B (host detector) and Person C/D (evaluation/harness).",
+  "type": "object",
+  "properties": {
+    "timestamp": {
+      "type": "number",
+      "description": "Epoch timestamp in seconds (microsecond or nanosecond floating precision)."
+    },
+    "pid": {
+      "type": "integer",
+      "description": "Process ID of the emitting process."
+    },
+    "ppid": {
+      "type": "integer",
+      "description": "Parent Process ID (extracted via task->real_parent->tgid or trace context)."
+    },
+    "uid": {
+      "type": "integer",
+      "description": "User ID executing the syscall (0 indicates root)."
+    },
+    "comm": {
+      "type": "string",
+      "maxLength": 64,
+      "description": "Executable command name (Linux TASK_COMM_LEN, max 16 chars from kernel, or trace identifier)."
+    },
+    "syscall": {
+      "type": "string",
+      "description": "Canonical Linux syscall name (e.g. openat, execve, connect, ptrace, init_module, mount)."
+    },
+    "args": {
+      "type": "object",
+      "description": "Decoded syscall arguments dictionary.",
+      "properties": {
+        "filename": { "type": "string" },
+        "flags": { "type": ["integer", "string"] },
+        "mode": { "type": "integer" },
+        "fd": { "type": "integer" },
+        "family": { "type": "string", "enum": ["AF_INET", "AF_INET6", "AF_UNIX"] },
+        "ip": { "type": "string" },
+        "port": { "type": "integer" },
+        "addrlen": { "type": "integer" },
+        "uid": { "type": "integer" },
+        "gid": { "type": "integer" },
+        "ruid": { "type": "integer" },
+        "euid": { "type": "integer" },
+        "suid": { "type": "integer" },
+        "request": { "type": "integer" },
+        "pid": { "type": "integer" },
+        "addr": { "type": "string" },
+        "data": { "type": "string" },
+        "clone_flags": { "type": "string" },
+        "child_stack": { "type": "string" },
+        "len": { "type": "integer" },
+        "umod": { "type": "string" },
+        "dev_name": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "ret": {
+      "type": "integer",
+      "default": 0,
+      "description": "Syscall return value (0 for success, negative POSIX errno for failure in trace/exit probes)."
+    },
+    "stage_id": {
+      "type": ["string", "null"],
+      "description": "Evaluation metadata: MITRE kill-chain stage ID (e.g. stage_1_dropper, stage_2_injection). Person D harness annotation."
+    },
+    "mitre_technique": {
+      "type": ["string", "null"],
+      "description": "Evaluation metadata: MITRE ATT&CK technique ID (e.g. T1055.008, T1547.006). Person D harness annotation."
+    },
+    "is_attack": {
+      "type": "boolean",
+      "default": false,
+      "description": "Ground truth binary indicator for offline evaluation."
+    },
+    "blindness_rationale": {
+      "type": ["string", "null"],
+      "description": "Evaluation metadata explaining why network-only sensors fail on this event."
+    }
+  },
+  "required": ["timestamp", "pid", "uid", "comm", "syscall", "args"],
+  "owner_produces": "Person A (Data & Capture — capture/ebpf_syscall_watcher.py, data/download_practice_datasets.py)",
+  "owner_consumes": "Person B (Detection — detection/host_features.py), Person C (ATT&CK Mapper), Person D (Harness)"
+}

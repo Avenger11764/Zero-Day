@@ -35,7 +35,28 @@ from pathlib import Path
 
 import numpy as np
 
-DATA_ROOT = Path(__file__).resolve().parent.parent / "data" / "practice" / "raw_adfa_ld" / "ADFA-LD" / "ADFA-LD"
+import sys
+
+# Add parent directory to sys.path for capture module import
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from capture.host_feature_extractor import HostFeatureExtractor, resolve_data_root, SyscallRecord
+
+DATA_ROOT_CANDIDATES = [
+    Path(__file__).resolve().parent.parent / "data" / "practice" / "raw_adfa_ld" / "ADFA-LD",
+    Path(__file__).resolve().parent.parent / "data" / "practice" / "raw_adfa_ld" / "ADFA-LD" / "ADFA-LD",
+    Path(__file__).resolve().parent.parent / "data" / "practice" / "raw_adfa_ld" / "a-labelled-version-of-the-ADFA-LD-dataset-master",
+]
+
+def get_data_root() -> Path:
+    for c in DATA_ROOT_CANDIDATES:
+        if c.exists() and (c / "ADFA-LD+Syscall+List.txt").exists():
+            return c
+    for c in DATA_ROOT_CANDIDATES:
+        if c.exists():
+            return c
+    return DATA_ROOT_CANDIDATES[0]
+
+DATA_ROOT = get_data_root()
 NR_HEADER = DATA_ROOT / "ADFA-LD+Syscall+List.txt"
 OUT_RECORDS = Path(__file__).resolve().parent.parent / "data" / "practice" / "ADFA-LD_SyscallRecords"
 
@@ -45,13 +66,22 @@ _NR_RE = re.compile(r"#define\s+__NR_(\w+)\s+(\d+)")
 
 
 # ── number <-> name ───────────────────────────────────────────────────
-def load_nr_map(header: Path = NR_HEADER) -> dict[int, str]:
+def load_nr_map(header: Path | None = None) -> dict[int, str]:
     """Parse `#define __NR_name N` lines -> {number: name}."""
+    if header is None:
+        header = NR_HEADER
+    if not Path(header).exists():
+        for c in DATA_ROOT_CANDIDATES:
+            cand_hdr = c / "ADFA-LD+Syscall+List.txt"
+            if cand_hdr.exists():
+                header = cand_hdr
+                break
     m: dict[int, str] = {}
-    for line in Path(header).read_text(errors="replace").splitlines():
-        mo = _NR_RE.match(line.strip())
-        if mo:
-            m[int(mo.group(2))] = mo.group(1)
+    if Path(header).exists():
+        for line in Path(header).read_text(errors="replace").splitlines():
+            mo = _NR_RE.match(line.strip())
+            if mo:
+                m[int(mo.group(2))] = mo.group(1)
     return m
 
 
@@ -60,11 +90,13 @@ def _read_seq(path: Path) -> list[int]:
     return [int(t) for t in path.read_text(errors="replace").split()]
 
 
-def load_adfa(root: Path = DATA_ROOT) -> list[dict]:
+def load_adfa(root: Path | str | None = None) -> list[dict]:
     """Return [{id, split, family, seq}].
 
     split: 'train' | 'val_benign' | 'attack'; family: None (benign) or one of ATTACK_FAMS.
     """
+    if root is None or not (Path(root) / "Training_Data_Master").exists():
+        root = get_data_root()
     root = Path(root)
     traces: list[dict] = []
     for p in sorted((root / "Training_Data_Master").glob("*.txt")):
@@ -114,7 +146,7 @@ def index_sequence(seq: list[int], pin: dict) -> np.ndarray:
 
 def to_syscall_records(trace: dict, nr: dict[int, str], pid: int = 1000) -> list[dict]:
     """One trace -> SyscallRecord list (A's schema; D's harness can replay these)."""
-    return [{"timestamp": float(i), "pid": pid, "ppid": 1, "uid": 1000,
+    return [{"timestamp": float(i) * 0.001, "pid": pid, "ppid": 1, "uid": 1000,
              "comm": trace["id"], "syscall": nr.get(s, f"nr_{s}"), "args": {}, "ret": 0}
             for i, s in enumerate(trace["seq"])]
 
@@ -135,14 +167,15 @@ def write_syscall_records(traces: list[dict], nr: dict[int, str],
 
 def main():
     ap = argparse.ArgumentParser(description="Host feature extraction — Pillar 3 (week 5).")
-    ap.add_argument("--root", default=str(DATA_ROOT))
+    ap.add_argument("--root", default=None)
     ap.add_argument("--write-records", action="store_true",
                     help="also emit per-trace SyscallRecord JSONL into data/practice/ADFA-LD_SyscallRecords/")
     args = ap.parse_args()
 
-    nr = load_nr_map(Path(args.root) / "ADFA-LD+Syscall+List.txt")
+    root_dir = get_data_root() if args.root is None else Path(args.root)
+    nr = load_nr_map(root_dir / "ADFA-LD+Syscall+List.txt")
     print(f"syscall numbers mapped: {len(nr)} (e.g. 257->{nr.get(257)}, 59->{nr.get(59)})")
-    traces = load_adfa(Path(args.root))
+    traces = load_adfa(root_dir)
     n_train = sum(1 for t in traces if t["split"] == "train")
     n_val = sum(1 for t in traces if t["split"] == "val_benign")
     n_atk = sum(1 for t in traces if t["split"] == "attack")

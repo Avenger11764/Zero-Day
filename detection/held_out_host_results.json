@@ -1,0 +1,136 @@
+{
+  "protocol": "Held-Out Host Attack-Family Zero-Day Benchmark",
+  "author": "Person A (Saharsh - Data & Capture)",
+  "week": 5,
+  "dataset": "ADFA-LD Linux System Call Dataset",
+  "benign_train_size": 833,
+  "benign_val_size": 4372,
+  "attack_test_size": 746,
+  "thresholds": {
+    "calibrated_fpr_1pct": 2149.302978515625,
+    "calibrated_fpr_01pct": 22360.458984375
+  },
+  "macro_metrics": {
+    "unigram_baseline_macro_auroc": 0.7873402058249553,
+    "rich_context_128d_macro_auroc": 0.7525322356582835,
+    "rich_context_macro_tpr_at_1pct_fpr": 0.043939052662322814,
+    "rich_context_macro_f1": 0.14560601187295563,
+    "gain_over_unigram_auroc": -0.03480797016667181
+  },
+  "by_family": {
+    "Adduser": {
+      "trace_count": 91,
+      "unigram_baseline": {
+        "auroc": 0.8115781747986689,
+        "pr_auc": 0.0928799858885052,
+        "tpr_at_1pct_fpr": 0.13186813186813187,
+        "tpr_at_01pct_fpr": 0.0,
+        "best_f1": 0.20512820512820512
+      },
+      "rich_context_128d": {
+        "auroc": 0.7965273518795934,
+        "pr_auc": 0.0925124083548757,
+        "tpr_at_1pct_fpr": 0.13186813186813187,
+        "tpr_at_01pct_fpr": 0.0,
+        "best_f1": 0.20512820512820512
+      },
+      "calibrated_tpr_at_1pct_fpr": 0.13186813186813187,
+      "detected_traces": 12
+    },
+    "Hydra_FTP": {
+      "trace_count": 162,
+      "unigram_baseline": {
+        "auroc": 0.7666392757502852,
+        "pr_auc": 0.0830498985747142,
+        "tpr_at_1pct_fpr": 0.006172839506172839,
+        "tpr_at_01pct_fpr": 0.0,
+        "best_f1": 0.21862348178137653
+      },
+      "rich_context_128d": {
+        "auroc": 0.730483266126755,
+        "pr_auc": 0.07055301284365925,
+        "tpr_at_1pct_fpr": 0.006172839506172839,
+        "tpr_at_01pct_fpr": 0.0,
+        "best_f1": 0.16143497757847536
+      },
+      "calibrated_tpr_at_1pct_fpr": 0.006172839506172839,
+      "detected_traces": 1
+    },
+    "Hydra_SSH": {
+      "trace_count": 176,
+      "unigram_baseline": {
+        "auroc": 0.791524577892373,
+        "pr_auc": 0.09388564679626347,
+        "tpr_at_1pct_fpr": 0.028409090909090908,
+        "tpr_at_01pct_fpr": 0.0,
+        "best_f1": 0.1954507160909857
+      },
+      "rich_context_128d": {
+        "auroc": 0.7455384991266738,
+        "pr_auc": 0.07757177851872904,
+        "tpr_at_1pct_fpr": 0.028409090909090908,
+        "tpr_at_01pct_fpr": 0.0,
+        "best_f1": 0.16201117318435754
+      },
+      "calibrated_tpr_at_1pct_fpr": 0.028409090909090908,
+      "detected_traces": 5
+    },
+    "Java_Meterpreter": {
+      "trace_count": 124,
+      "unigram_baseline": {
+        "auroc": 0.8047195496266564,
+        "pr_auc": 0.0932996143445954,
+        "tpr_at_1pct_fpr": 0.08870967741935484,
+        "tpr_at_01pct_fpr": 0.0,
+        "best_f1": 0.15548281505728315
+      },
+      "rich_context_128d": {
+        "auroc": 0.7702258507216009,
+        "pr_auc": 0.08429287105050443,
+        "tpr_at_1pct_fpr": 0.08870967741935484,
+        "tpr_at_01pct_fpr": 0.0,
+        "best_f1": 0.1437908496732026
+      },
+      "calibrated_tpr_at_1pct_fpr": 0.08870967741935484,
+      "detected_traces": 11
+    },
+    "Meterpreter": {
+      "trace_count": 75,
+      "unigram_baseline": {
+        "auroc": 0.7533455321744433,
+        "pr_auc": 0.032914035514147136,
+        "tpr_at_1pct_fpr": 0.0,
+        "tpr_at_01pct_fpr": 0.0,
+        "best_f1": 0.08206958073148973
+      },
+      "rich_context_128d": {
+        "auroc": 0.6940774626410491,
+        "pr_auc": 0.02724860226466115,
+        "tpr_at_1pct_fpr": 0.0,
+        "tpr_at_01pct_fpr": 0.0,
+        "best_f1": 0.06954282034771411
+      },
+      "calibrated_tpr_at_1pct_fpr": 0.0,
+      "detected_traces": 0
+    },
+    "Web_Shell": {
+      "trace_count": 118,
+      "unigram_baseline": {
+        "auroc": 0.7962341247073054,
+        "pr_auc": 0.06356684696401396,
+        "tpr_at_1pct_fpr": 0.00847457627118644,
+        "tpr_at_01pct_fpr": 0.0,
+        "best_f1": 0.13603473227206947
+      },
+      "rich_context_128d": {
+        "auroc": 0.7783409834540296,
+        "pr_auc": 0.05855109222190316,
+        "tpr_at_1pct_fpr": 0.00847457627118644,
+        "tpr_at_01pct_fpr": 0.0,
+        "best_f1": 0.13172804532577906
+      },
+      "calibrated_tpr_at_1pct_fpr": 0.00847457627118644,
+      "detected_traces": 1
+    }
+  }
+}
