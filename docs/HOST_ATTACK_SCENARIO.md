@@ -205,3 +205,10 @@ As of Week 4, `schemas/` contains `feature_vector.json` and `scored_alert.json`.
 | **B** | Deep (Detection) | Replayable input stream to test and benchmark `detection/host_ae.py` without waiting for live Linux VMs. |
 | **C** | Aditya (Explainability) | Exact test scenario to validate the Syscall $\rightarrow$ ATT&CK mapper (`T1204.002`, `T1055.008`, `T1003.008`, `T1547.001`, `T1071.001`). |
 | **D** | Avinash (Self) | Core dataset driving the SOC Dashboard interactive attack replay demo. |
+
+ - - - 
+ 
+ # #   6 .   W e e k   5   E v a s i o n   V a r i a n t s 
+ 
+ F o r   a d v e r s a r i a l   e v a s i o n   v a r i a n t   d e t a i l s   ( F e a t u r e   P a d d i n g ,   T i m i n g   M o r p h ) ,   s e e   [ W E E K 5 _ H A R N E S S _ E V A S I O N . m d ] ( . / W E E K 5 _ H A R N E S S _ E V A S I O N . m d ) .  
+ 

@@ -158,6 +158,12 @@ function openDrawer(alert) {
     document.getElementById('drawer-dst').innerText = alert.dst_ip;
     document.getElementById('drawer-mitre').innerText = alert.mitre_technique;
     
+    // 3-Pillar Fusion Data
+    document.getElementById('fusion-network').innerText = (alert.network_score !== undefined) ? alert.network_score.toFixed(3) : 'N/A';
+    document.getElementById('fusion-identity').innerText = (alert.identity_score !== undefined) ? alert.identity_score.toFixed(3) : 'N/A';
+    document.getElementById('fusion-host').innerText = (alert.host_score !== undefined) ? alert.host_score.toFixed(3) : 'N/A';
+    document.getElementById('fusion-combined').innerText = `${Math.round(alert.confidence * 100)}%`;
+
     // Set explanations
     const explanationTitle = document.getElementById('drawer-explanation-title');
     const explanationDesc = document.getElementById('drawer-explanation-desc');

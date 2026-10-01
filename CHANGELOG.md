@@ -2,6 +2,16 @@
 
 Append-only log of what changed and why. **Pull, then read the top of this file.**
 
+## 2026-10-01 — Week 5: Host Evasion Generator & 3-Pillar Fusion UI
+**Author:** Avinash (Person D — Adversarial Eval & Delivery)
+
+### What changed
+* **128-D Feature Extraction Verified**: Successfully integrated the Week 4 kill-chain trace (`harness/results/host_attack_story_trace.jsonl`) with Person A's new `capture/host_feature_extractor.py`, confirming a valid 128-D vector with zero missing values.
+* **Host Evasion Generator Built**: Created `harness/host_evasion_variants.py` to synthesize adversarial variations (feature padding, timing morphs) from the baseline trace.
+* **Scoring Blocked (Pending Person B Integration)**: Person B has released `host_autoencoder_adfa.pt`, but `host_ae.py` still only accepts a simple V+3 vector (via `host_features.py`) instead of natively ingesting the rich 128-D block. Evaluation is paused until this is bridged.
+* **3-Pillar Fusion Card**: Updated `dashboard/index.html` and `dashboard/app.js` to render the fusion metrics (Network, Identity, Host scores) in the SOC alert drawer, using `dashboard/sampleData.js` loaded with the 4 kill-chain ATT&CK techniques.
+
+
 ## 2026-09-30 — Week 5 Host Telemetry Feature Extractor (128-D) + Held-Out Attack-Family Protocol
 **Author:** Saharsh (Person A — Data & Capture / Host Telemetry)
 

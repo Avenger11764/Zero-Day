@@ -11,92 +11,82 @@
 const sampleAlerts = [
   {
     "alert_id": "4fa85f64-5717-4562-b3fc-2c963f66afa1",
-    "timestamp": "2026-07-19T14:26:04Z",
+    "timestamp": "2026-09-04T10:15:00Z",
     "src_ip": "192.168.1.105",
     "dst_ip": "10.0.0.42",
-    "anomaly_score": 1.597088,
-    "confidence": 0.0,
-    "risk_score": 100,
-    "attack_type_guess": "Slow Drip Attack",
-    "mitre_technique": "T1046",
+    "anomaly_score": 0.965,
+    "confidence": 0.98,
+    "risk_score": 98,
+    "attack_type_guess": "Execution - Payload Dropper",
+    "mitre_technique": "T1204.002",
     "explanation": [
-      "Splitting aggregate flows into low volume drips failed to bypass baseline autoencoder detection since key volumetric ratios remain highly anomalous.",
-      "Perturbed features (fwd_act_data_pkts, pkt_len_max) trigger high reconstruction error even at divided scales."
+      "Process 'invoice_oct.sh' spawned via clone and execve locally.",
+      "No network activity or identity shift, but host syscall sequence matches malicious script dropper behavior."
     ],
-    "model_source": "autoencoder-v2-256",
-    "is_adversarial_test": true,
-    "feature_vector": [0.0] * 76 // Placeholder for visualization compatibility
+    "model_source": "ensembler-3-pillar",
+    "is_adversarial_test": false,
+    "network_score": 0.05,
+    "identity_score": 0.12,
+    "host_score": 0.94
   },
   {
     "alert_id": "4fa85f64-5717-4562-b3fc-2c963f66afa2",
-    "timestamp": "2026-07-19T14:25:34Z",
+    "timestamp": "2026-09-04T10:16:12Z",
     "src_ip": "192.168.1.105",
     "dst_ip": "10.0.0.42",
-    "anomaly_score": 0.977425,
-    "confidence": 0.022575,
-    "risk_score": 97,
-    "attack_type_guess": "Mimicry Attack",
-    "mitre_technique": "T1059.001",
+    "anomaly_score": 0.985,
+    "confidence": 0.99,
+    "risk_score": 99,
+    "attack_type_guess": "Privilege Escalation - Process Injection",
+    "mitre_technique": "T1055.008",
     "explanation": [
-      "Linear interpolation toward benign profile in step 10 remains flagged as anomalous.",
-      "High-impact packet length distributions have not yet converged closely enough to benign distribution thresholds."
+      "Process 'invoice_oct.sh' executed PTRACE_ATTACH and multiple PTRACE_POKETEXT operations targeting 'sssd'.",
+      "Network flow is zero. Identity monitor is blind. Detected purely via Pillar 3 syscall anomaly."
     ],
-    "model_source": "autoencoder-v2-256",
+    "model_source": "ensembler-3-pillar",
     "is_adversarial_test": true,
-    "feature_vector": [0.0] * 76
+    "network_score": 0.00,
+    "identity_score": 0.00,
+    "host_score": 0.99
   },
   {
     "alert_id": "4fa85f64-5717-4562-b3fc-2c963f66afa3",
-    "timestamp": "2026-07-19T14:22:04Z",
+    "timestamp": "2026-09-04T10:17:25Z",
     "src_ip": "192.168.1.105",
     "dst_ip": "10.0.0.42",
-    "anomaly_score": 0.490205,
-    "confidence": 0.509795,
-    "risk_score": 49,
-    "attack_type_guess": "Mimicry Attack",
-    "mitre_technique": "T1059.001",
+    "anomaly_score": 0.895,
+    "confidence": 0.92,
+    "risk_score": 92,
+    "attack_type_guess": "Persistence - Kernel Module",
+    "mitre_technique": "T1547.006",
     "explanation": [
-      "Linear interpolation at step 15 successfully evades detection.",
-      "Reconstruction error of high-impact features falls below 0.5 threshold as vector moves closer to target benign shape."
+      "Compromised 'sssd' process performed tmpfs mount and init_module 'stealth_mod.ko'.",
+      "Strong anomaly signal from host features. Identity pillar detects minor token anomaly."
     ],
-    "model_source": "autoencoder-v2-256",
+    "model_source": "ensembler-3-pillar",
     "is_adversarial_test": true,
-    "feature_vector": [0.0] * 76
+    "network_score": 0.00,
+    "identity_score": 0.45,
+    "host_score": 0.96
   },
   {
     "alert_id": "4fa85f64-5717-4562-b3fc-2c963f66afa4",
-    "timestamp": "2026-07-19T14:21:58Z",
-    "src_ip": "172.16.254.1",
-    "dst_ip": "10.0.0.88",
-    "anomaly_score": 0.977425,
-    "confidence": 0.022575,
-    "risk_score": 97,
-    "attack_type_guess": "Feature Padding Attack",
-    "mitre_technique": "T1059.001",
+    "timestamp": "2026-09-04T10:18:35Z",
+    "src_ip": "192.168.1.105",
+    "dst_ip": "198.51.100.42",
+    "anomaly_score": 0.995,
+    "confidence": 0.99,
+    "risk_score": 100,
+    "attack_type_guess": "Command & Control / Exfiltration",
+    "mitre_technique": "T1071.001",
     "explanation": [
-      "Direct perturbation of highly sensitive packet header statistics triggers high reconstruction error.",
-      "Interpolating only top 10 different features at step 10 is still flagged as out-of-distribution."
+      "Compromised process initiated encrypted C2 connection (AF_INET connect to 198.51.100.42:443).",
+      "Network flow shape was highly evasive (mimicking CDN telemetry), but multi-modal correlation triggers critical alert."
     ],
-    "model_source": "autoencoder-v2-256",
+    "model_source": "ensembler-3-pillar",
     "is_adversarial_test": true,
-    "feature_vector": [0.0] * 76
-  },
-  {
-    "alert_id": "4fa85f64-5717-4562-b3fc-2c963f66afa5",
-    "timestamp": "2026-07-19T14:21:42Z",
-    "src_ip": "203.0.113.44",
-    "dst_ip": "10.12.0.5",
-    "anomaly_score": 0.490205,
-    "confidence": 0.509795,
-    "risk_score": 49,
-    "attack_type_guess": "Feature Padding Attack",
-    "mitre_technique": "T1059.001",
-    "explanation": [
-      "Feature padding evasion at step 15 successfully reduces reconstruction error below 0.5 detection threshold.",
-      "Selective blending of top different features effectively hides anomalous packets."
-    ],
-    "model_source": "autoencoder-v2-256",
-    "is_adversarial_test": true,
-    "feature_vector": [0.0] * 76
+    "network_score": 0.35,
+    "identity_score": 0.65,
+    "host_score": 0.88
   }
 ];
