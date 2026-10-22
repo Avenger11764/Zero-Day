@@ -1,0 +1,129 @@
+{
+  "meta": {
+    "title": "Host Syscall Behavior → MITRE ATT&CK Mapper",
+    "version": "1.0",
+    "mapper_id": "host_syscall",
+    "source": "MITRE ATT&CK Enterprise",
+    "description": "Evidence-qualified candidate mappings from host syscall and endpoint telemetry to ATT&CK techniques.",
+    "warning": "A syscall or anomaly score alone does not prove a technique. Apply mappings only when required_events are observed and limitations are addressed."
+  },
+  "syscall_attack_profiles": [
+    {
+      "id": "SYS-001",
+      "attack_type": "Process injection using ptrace",
+      "platform": "Linux",
+      "mitre_tactic": "Defense Evasion",
+      "mitre_technique": "Ptrace System Calls",
+      "technique_id": "T1055.008",
+      "technique_url": "https://attack.mitre.org/techniques/T1055/008/",
+      "required_events": [
+        "ptrace against a process other than the caller's expected debugging target",
+        "process_vm_readv or corroborating remote-process memory access"
+      ],
+      "trigger_features": ["sec_ptrace_flag", "sec_attack_surface_score", "ctx_unique_pids"],
+      "limitations": [
+        "ptrace can be used legitimately by debuggers; target-process and caller context are necessary.",
+        "The current eBPF watcher must capture process_vm_readv for the full requested signature."
+      ],
+      "severity": "critical",
+      "implementation_status": "requires_process_vm_readv_collector_support"
+    },
+    {
+      "id": "SYS-002",
+      "attack_type": "Credential dumping from LSASS memory",
+      "platform": "Windows",
+      "mitre_tactic": "Credential Access",
+      "mitre_technique": "OS Credential Dumping: LSASS Memory",
+      "technique_id": "T1003.001",
+      "technique_url": "https://attack.mitre.org/techniques/T1003/001/",
+      "required_events": [
+        "OpenProcess access to lsass.exe with suspicious memory-read rights",
+        "MiniDumpWriteDump or equivalent LSASS memory-dump evidence"
+      ],
+      "trigger_features": [],
+      "limitations": [
+        "Requires Windows API or EDR telemetry; Linux eBPF syscall records do not observe these Windows APIs."
+      ],
+      "severity": "critical",
+      "implementation_status": "requires_windows_endpoint_telemetry"
+    },
+    {
+      "id": "SYS-003",
+      "attack_type": "Registry Run key persistence",
+      "platform": "Windows",
+      "mitre_tactic": "Persistence",
+      "mitre_technique": "Registry Run Keys / Startup Folder",
+      "technique_id": "T1547.001",
+      "technique_url": "https://attack.mitre.org/techniques/T1547/001/",
+      "required_events": [
+        "Registry value creation or modification under a Run/RunOnce or recognized startup location",
+        "Value data that launches an executable or script"
+      ],
+      "trigger_features": [],
+      "limitations": [
+        "RegSetValue without registry path and value data is insufficient.",
+        "Requires Windows registry telemetry."
+      ],
+      "severity": "high",
+      "implementation_status": "requires_windows_endpoint_telemetry"
+    },
+    {
+      "id": "SYS-004",
+      "attack_type": "Kernel module persistence",
+      "platform": "Linux",
+      "mitre_tactic": "Persistence",
+      "mitre_technique": "Kernel Modules and Extensions",
+      "technique_id": "T1547.006",
+      "technique_url": "https://attack.mitre.org/techniques/T1547/006/",
+      "required_events": [
+        "init_module or finit_module loads an unexpected or untrusted module",
+        "Module identity, provenance, or privilege context supports suspiciousness"
+      ],
+      "trigger_features": ["sec_rootkit_module_flag", "ctx_is_root", "sec_attack_surface_score"],
+      "limitations": [
+        "Module loading is a legitimate administrative action; syscall presence alone is not sufficient to label persistence."
+      ],
+      "severity": "high",
+      "implementation_status": "feature_supported_requires_context"
+    },
+    {
+      "id": "SYS-005",
+      "attack_type": "Abuse of setuid/setgid for privilege escalation",
+      "platform": "Linux",
+      "mitre_tactic": "Privilege Escalation",
+      "mitre_technique": "Setuid and Setgid",
+      "technique_id": "T1548.001",
+      "technique_url": "https://attack.mitre.org/techniques/T1548/001/",
+      "required_events": [
+        "setuid, setresuid, or setgid causes an unexpected privilege transition",
+        "Process identity and parent/child context indicate unauthorized elevation"
+      ],
+      "trigger_features": ["ctx_priv_transition", "ctx_uid_changes", "ctx_is_root"],
+      "limitations": [
+        "A privilege-changing syscall is not inherently malicious; compare resulting identity and process context with expected behavior."
+      ],
+      "severity": "high",
+      "implementation_status": "feature_supported_requires_context"
+    },
+    {
+      "id": "SYS-006",
+      "attack_type": "Mass file encryption for impact",
+      "platform": "Linux",
+      "mitre_tactic": "Impact",
+      "mitre_technique": "Data Encrypted for Impact",
+      "technique_id": "T1486",
+      "technique_url": "https://attack.mitre.org/techniques/T1486/",
+      "required_events": [
+        "Rapid writes or file replacements across many files",
+        "Write/truncate/rename flags and corroborating content or file-change evidence"
+      ],
+      "trigger_features": ["time_event_rate", "time_burstiness"],
+      "limitations": [
+        "Rapid openat activity by itself is not evidence of encryption.",
+        "The current 128-D host vector does not encode write flags or file-content changes; do not fire this mapping from openat rate alone."
+      ],
+      "severity": "critical",
+      "implementation_status": "requires_file_write_and_change_telemetry"
+    }
+  ]
+}

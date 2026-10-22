@@ -2,6 +2,7 @@
   "_meta": {
     "description": "Maps synthetic identity anomaly types to MITRE ATT&CK Enterprise tactics/techniques",
     "version": "14.1",
+    "mapper_id": "identity_ueba_reference",
     "url": "https://attack.mitre.org",
     "note": "Fill in technique IDs by searching at https://attack.mitre.org/techniques/enterprise/"
   },

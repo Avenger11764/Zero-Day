@@ -2,6 +2,7 @@
   "meta": {
     "title": "Network Flow Feature → MITRE ATT&CK Attack Mapper",
     "version": "1.0",
+    "mapper_id": "network_flow",
     "description": "Maps CICIDS2017 CICFlowMeter features to likely network attack types based on SHAP anomaly contributions",
     "source": "CICIDS2017 dataset + MITRE ATT&CK Framework"
   },
@@ -11,7 +12,7 @@
       "mitre_technique": "T1498.001",
       "mitre_tactic": "Impact",
       "mitre_url": "https://attack.mitre.org/techniques/T1498/",
-      "trigger_features": ["flow_pkts_s", "fwd_pkts_s", "bwd_pkts_s", "flow_byts_s"],
+      "trigger_features": ["flow_pkts_s", "fwd_pkts_s", "bwd_pkts_s", "flow_byts_s", "wd_src", "bwd_pkt_len_max", "subflow_bwd_pkts"],
       "pattern": "Extremely high packet rate and byte rate with sustained flow",
       "severity": "critical"
     },
@@ -38,7 +39,7 @@
       "mitre_technique": "T1046",
       "mitre_tactic": "Discovery",
       "mitre_url": "https://attack.mitre.org/techniques/T1046/",
-      "trigger_features": ["tot_fwd_pkts", "tot_bwd_pkts", "fwd_pkt_len_min", "rst_flag_cnt", "syn_flag_cnt", "init_fwd_win_byts"],
+      "trigger_features": ["ws_dst", "ws_ports", "tot_fwd_pkts", "tot_bwd_pkts", "rst_flag_cnt", "syn_flag_cnt"],
       "pattern": "Many short flows with minimal packets, SYN/RST flags, small window sizes",
       "severity": "medium"
     },
@@ -119,7 +120,7 @@
       "mitre_technique": "T1046",
       "mitre_tactic": "Discovery",
       "mitre_url": "https://attack.mitre.org/techniques/T1046/",
-      "trigger_features": ["syn_flag_cnt", "rst_flag_cnt", "fin_flag_cnt", "ack_flag_cnt", "ece_flag_cnt", "cwr_flag_count", "fwd_seg_size_min"],
+      "trigger_features": ["ws_ports", "ws_dst", "syn_flag_cnt", "rst_flag_cnt", "fwd_seg_size_min"],
       "pattern": "Elevated flag counts with minimal payload — port/service enumeration",
       "severity": "medium"
     }

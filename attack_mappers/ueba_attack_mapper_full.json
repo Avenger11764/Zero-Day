@@ -2,6 +2,7 @@
   "meta": {
     "title": "Identity UEBA — MITRE ATT&CK Full Mapping",
     "version": "1.0",
+    "mapper_id": "identity_ueba",
     "generated": "2025-07-05",
     "total_anomalies": 74,
     "source_categories": {
