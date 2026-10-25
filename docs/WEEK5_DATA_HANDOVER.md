@@ -81,7 +81,7 @@ The 128-dimensional `HostFeatureVector` is partitioned into 7 functional blocks:
 
 ### For Person C (SHAP Explainer & ATT&CK Mapper — Aditya):
 - **Feature Names**: Use `HostFeatureExtractor.FEATURE_NAMES` for direct SHAP attribution.
-- **Rule Engine Mapping**: Map features `120..127` and process context `90..99` directly into MITRE ATT&CK technique IDs in `detection/attack_mapper_full.json`.
+- **Rule Engine Mapping**: Use `attack_mappers/host_syscall_attack_mapper.json` for evidence-qualified syscall-to-ATT&CK mappings. Map features `120..127` and process context `90..99` only when the rule's required telemetry is present.
 
 ### For Person D (Harness & Adversarial Evaluation — Avinash):
 - **Trace Replay**: Person D can stream synthetic traces from `harness/host_attack_scenario.py` directly into `HostFeatureExtractor.extract_from_records()` without schema mismatch.

@@ -51,14 +51,116 @@
       "type": "boolean"
     },
     "feature_vector": {
-  "type": "array",
-  "items": {
-    "type": "number"
-  },
-  "minItems": 76,
-  "maxItems": 76,
-  "description": "Raw 76-element normalized input vector — required by C for SHAP analysis"
-}
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 76,
+      "maxItems": 76,
+      "description": "Raw 76-element normalized input vector — required by C for network SHAP analysis"
+    },
+    "host_anomaly_score": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Optional host-model anomaly score. Threshold calibration belongs to the host detector."
+    },
+    "host_mapping_status": {
+      "type": "string",
+      "enum": ["below_threshold", "no_match", "candidate"],
+      "description": "Optional host-side ATT&CK mapping status; candidate is not a confirmed technique."
+    },
+    "host_attack_mappings": {
+      "type": "array",
+      "description": "Optional evidence-qualified host ATT&CK candidates.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "attack_type": {"type": "string"},
+          "mitre_tactic": {"type": "string"},
+          "mitre_technique": {"type": "string"},
+          "technique_id": {"type": "string", "pattern": "^T[0-9]{4}(\\.[0-9]{3})?$"},
+          "technique_url": {"type": "string", "format": "uri"},
+          "severity": {"type": "string"},
+          "evidence": {"type": "array", "items": {"type": "string"}},
+          "evidence_complete": {"type": "boolean"},
+          "matched_features": {"type": "object"},
+          "limitations": {"type": "array", "items": {"type": "string"}}
+        },
+        "required": [
+          "attack_type",
+          "mitre_tactic",
+          "mitre_technique",
+          "technique_id",
+          "technique_url",
+          "severity",
+          "evidence",
+          "evidence_complete",
+          "matched_features",
+          "limitations"
+        ]
+      }
+    },
+    "host_explanation": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Optional host mapping rationale, including why no ATT&CK candidate was emitted."
+    },
+    "pillar_scores": {
+      "type": "object",
+      "description": "Optional normalized anomaly scores in [0, 1] in fixed network/identity/host order.",
+      "properties": {
+        "network": {"type": "number", "minimum": 0, "maximum": 1},
+        "identity": {"type": "number", "minimum": 0, "maximum": 1},
+        "host": {"type": "number", "minimum": 0, "maximum": 1}
+      },
+      "required": ["network", "identity", "host"],
+      "additionalProperties": false
+    },
+    "network_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Optional normalized network anomaly score; mirrors pillar_scores.network for dashboard compatibility."
+    },
+    "identity_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Optional normalized identity anomaly score; mirrors pillar_scores.identity for dashboard compatibility."
+    },
+    "host_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Optional normalized host anomaly score; mirrors pillar_scores.host for dashboard compatibility."
+    },
+    "risk_probability": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Optional calibrated positive-class probability from the learned risk-fusion model."
+    },
+    "risk_model_source": {
+      "type": "string",
+      "description": "Identifier for the fitted and calibrated risk model that produced risk_probability."
+    },
+    "host_shap_features": {
+      "type": "array",
+      "description": "Optional privacy-minimized host SHAP attributions; raw feature values and event identities are omitted.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "feature": {"type": "string"},
+          "shap_value": {"type": "number"},
+          "direction": {
+            "type": "string",
+            "enum": ["increases_anomaly", "decreases_anomaly", "neutral"]
+          }
+        },
+        "required": ["feature", "shap_value", "direction"],
+        "additionalProperties": false
+      }
+    }
   },
   "required": [
     "alert_id",

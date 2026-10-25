@@ -2,6 +2,53 @@
 
 Append-only log of what changed and why. **Pull, then read the top of this file.**
 
+## 2026-10-25 — Person C Weeks 4–6 status and team handoff
+**Author:** Aditya (Person C — Trust & Risk)
+
+### What changed
+* Added `docs/PERSON_C_WEEKS4_6_STATUS_AND_HANDOFF.md`, a shareable summary of Person C's Week 4 mapper, Week 5 SHAP/risk-fusion interfaces, Week 6 alert/dashboard work, validation performed, unresolved constraints, and concrete handoff requests for A, B, and D.
+
+## 2026-10-25 — Week 6 Person C: alert consumer compatibility and team handoff
+**Author:** Aditya (Person C — Trust & Risk)
+
+### What changed
+* Added `docs/PERSON_C_WEEK4_5_HANDOFF.md` documenting Person C's Week 4/5 deliverables, the unresolved A/B data/model inputs, and the Week 6 API/dashboard integration gates for A, B, and D.
+* Kept the grouped `pillar_scores` contract and added top-level `network_score`, `identity_score`, and `host_score` aliases because the dashboard detail view currently reads those fields.
+* Clarified that pillar values are normalized scores in `[0, 1]`; only `risk_probability` is the calibrated positive-class probability from the learned fusion model.
+* Expanded recursive host-identity key removal and added coverage for nested process IDs, command lines, paths, and module names.
+* Extended the dashboard alert drawer to read either grouped or top-level pillar scores and display optional host ATT&CK evidence and privacy-minimized SHAP contributions using text nodes. A local browser check with a representative synthetic payload rendered all three scores, risk probability, mapping evidence, and a SHAP feature. Documented that the dashboard remains a static preview pending D's live API/WebSocket handoff.
+
+## 2026-10-22 — Week 5/6 Person C: host SHAP and unified risk interfaces
+**Author:** Aditya (Person C — Trust & Risk)
+
+### What changed
+* Re-ran Checkpoint-1 network SHAP on the added Monday CICIDS2017 BENIGN data: one seeded example completed with a score of 0.000374 and ranked feature attributions.
+* Sampled 20 seeded PortScan-labeled rows: 3/20 exceeded the existing 0.005 threshold. SHAP ran successfully; this small sample is a smoke check, not a performance estimate or a reason to retune the detector.
+* Added a host reconstruction-error SHAP interface that requires the model's exact input layout and uses canonical 128-D feature names or checkpoint-vocabulary names. It omits raw feature values from alert-ready explanations.
+* Added a three-pillar risk-fusion contract and unified alert builder. It accepts only an already fitted/calibrated predictor; no weights, fit, or calibration are fabricated without aligned labeled scores.
+* Added optional `pillar_scores`, `risk_probability`, `risk_model_source`, and `host_shap_features` to `schemas/scored_alert.json`. The unified builder strips raw host IDs, process names, paths, and arguments; host mapper evidence no longer echoes process IDs, registry paths, or module names.
+* Local `data/` contains network CICIDS CSVs only. The saved host AE checkpoint is 153-D, while the host feature handover specifies 128-D, so real host SHAP and calibrated fusion remain blocked pending the compatible host model/data handoff.
+* Validation: all 16 Python unit tests pass; repeated Checkpoint-1 SHAP runs with the same seed produced identical JSON. The host feature extractor self-test reports 128 dimensions, and the saved checkpoint's vocabulary resolves to 153 names.
+
+## 2026-10-22 — Week 4 Person C: evidence-aware host ATT&CK enrichment
+**Author:** Aditya (Person C — Trust & Risk)
+
+### What changed
+* Added `detection/host_syscall_mapper.py` to combine a calibrated host anomaly threshold, syscall/endpoint events, and named host features into optional `ScoredAlert` host-mapping fields.
+* Host mappings are candidates with evidence and limitations. The mapper ignores harness ground-truth labels, requires paired `ptrace`/`process_vm_readv` evidence for a complete T1055.008 signature, and never maps `openat` activity alone to T1486.
+* Extended `schemas/scored_alert.json` additively; existing network-only alerts remain valid. Added nine focused mapper tests.
+* Verified the existing network SHAP CLI starts and still loads all 13 profiles from the moved active network mapper. A full baseline explanation was not re-run because the Monday benign CSV is not present locally; the checkpoint exists.
+* Runtime enrichment is exposed as a callable seam but is not wired into `alert_pipeline.py`: the current producer does not yet provide B's host score. Keep that integration pending the host-model handoff rather than changing B's pipeline.
+
+## 2026-10-22 — Separate host-syscall ATT&CK mapper and mapper directory
+**Author:** Aditya (Person C — Trust & Risk)
+
+### What changed
+* Moved the active network mapper and UEBA mapping catalogs into `attack_mappers/`, preserving the separate mapper responsibilities.
+* Added `attack_mappers/host_syscall_attack_mapper.json` with evidence-qualified Linux and Windows syscall/endpoint mappings, required telemetry, feature references, and implementation limitations.
+* Updated network SHAP lookup, the legacy SHAP mapper path, and the Week 5 handover to use the new mapper locations.
+* Marked LSASS and registry rules as Windows-telemetry-only; rapid `openat` alone does not trigger T1486.
+
 ## 2026-10-01 — Week 5: Host Evasion Generator & 3-Pillar Fusion UI
 **Author:** Avinash (Person D — Adversarial Eval & Delivery)
 

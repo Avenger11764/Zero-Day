@@ -32,6 +32,12 @@ MODEL_PATH = os.path.join(
     os.path.dirname(__file__),
     "m5a_revived_ctx.pt"
 )
+ATTACK_MAPPER_PATH = os.path.abspath(os.path.join(
+    os.path.dirname(__file__),
+    "..",
+    "attack_mappers",
+    "network_attack_mapper_legacy.json",
+))
 
 FLOW_FEATURE_NAMES = [
     "flow_duration", "flow_byts_s", "flow_pkts_s", "fwd_pkts_s", "bwd_pkts_s",

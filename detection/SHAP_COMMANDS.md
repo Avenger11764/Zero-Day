@@ -9,6 +9,21 @@
 
 ---
 
+## Host-AE SHAP interface (Week 5)
+
+`detection/host_shap_explainer.py` exposes `explain_host_anomaly()` for a
+reconstruction autoencoder and model-ready host vectors. Pass a benign
+background matrix and feature names matching the model's exact training
+representation. The canonical 128-D handover uses
+`HostFeatureExtractor.FEATURE_NAMES`; legacy V+3 checkpoints can derive names
+from checkpoint vocabulary with `feature_names_from_checkpoint()`.
+
+The checked-in `host_autoencoder_adfa.pt` currently expects 153 inputs, not
+the handover's 128-D vector. Do not pair it with the 128-D names or claim a
+host SHAP result until B supplies a compatible checkpoint and host traces.
+Returned attributions omit raw feature values for the Week 6 alert privacy
+contract.
+
 ## Quick Reference — All Flags
 
 | Flag | Default | What it controls |
@@ -21,7 +36,7 @@
 | `--all-labels` | off | Explain ALL rows (bypasses default BENIGN filter) |
 | `--label NAME` | _(none)_ | Filter CSV rows by label substring for testing (e.g. `PortScan`, `Web`, `DDoS`) |
 | `--shuffle` | off | Randomly sample rows from CSV before picking `--n-flows` |
-| `--mapper PATH` | _(auto)_ | Path to network attack mapper JSON (e.g. `detection/network_attack_mapper.json`) |
+| `--mapper PATH` | _(auto)_ | Path to network attack mapper JSON (e.g. `attack_mappers/network_attack_mapper.json`) |
 | `--threshold T` | `0.005` | Anomaly score threshold for BENIGN vs ANOMALOUS verdict |
 | `--window N` | `60` | Time-window bucket size in seconds (must match training) |
 | `--out-json PATH` | _(none)_ | Save full results as JSON |
@@ -36,7 +51,7 @@
 ## 0 — Real-World Deployment: Unlabelled Live Traffic CSV
 
 > **In real-world deployment, network traffic flows do NOT have labels.**  
-> The script processes raw numerical features, computes reconstruction MSE scores, and classifies attack families using SHAP attributions and `network_attack_mapper.json` without needing any label column!
+> The script processes raw numerical features, computes reconstruction MSE scores, and classifies attack families using SHAP attributions and `attack_mappers/network_attack_mapper.json` without needing any label column!
 
 ```bash
 /home/dell/Documents/Coding/7Project_finalYear/.zeroD/bin/python detection/shap_revived_ctx.py \
@@ -52,7 +67,7 @@
 2. Randomly shuffles and samples 50 flows.
 3. Passes features to `m5a_revived_ctx.pt` to compute raw MSE scores.
 4. Uses `DeepExplainer` to calculate exact mathematical SHAP attributions per feature.
-5. Matches top positive SHAP features against `network_attack_mapper.json` profiles to produce MITRE ATT&CK verdicts (`PortScan`, `DDoS`, `Patator`, `Web Attack`, `Exfiltration`, etc.) or `BENIGN`.
+5. Matches top positive SHAP features against network profiles in `attack_mappers/network_attack_mapper.json` to produce MITRE ATT&CK verdicts (`PortScan`, `DDoS`, `Patator`, `Web Attack`, `Exfiltration`, etc.) or `BENIGN`.
 
 ---
 

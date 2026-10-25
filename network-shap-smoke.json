@@ -1,0 +1,89 @@
+[
+  {
+    "flow_idx": 0,
+    "anomaly_score": 0.0003739267122000456,
+    "classification": {
+      "verdict": "BENIGN",
+      "attack_family": "\u2014",
+      "mitre_id": "\u2014",
+      "mitre_tactic": "\u2014",
+      "mitre_technique": "\u2014",
+      "mitre_url": "\u2014",
+      "severity": "none",
+      "confidence": "high",
+      "reason": "score 0.000374 < threshold 0.0050 \u2014 within benign range"
+    },
+    "top_features": [
+      {
+        "rank": 1,
+        "feature": "fwd_blk_rate_avg",
+        "shap_value": -0.013969309628009796,
+        "input_scaled": 0.9999986886978149,
+        "direction": "\u2193 anomaly"
+      },
+      {
+        "rank": 2,
+        "feature": "fwd_iat_min",
+        "shap_value": -0.013471275568008423,
+        "input_scaled": 0.9975982904434204,
+        "direction": "\u2193 anomaly"
+      },
+      {
+        "rank": 3,
+        "feature": "init_fwd_win_byts",
+        "shap_value": -0.013232192024588585,
+        "input_scaled": 0.9975982904434204,
+        "direction": "\u2193 anomaly"
+      },
+      {
+        "rank": 4,
+        "feature": "fwd_iat_mean",
+        "shap_value": -0.012903979048132896,
+        "input_scaled": 0.9663702249526978,
+        "direction": "\u2193 anomaly"
+      },
+      {
+        "rank": 5,
+        "feature": "rst_flag_cnt",
+        "shap_value": 0.0006371645722538233,
+        "input_scaled": 1.0,
+        "direction": "\u2191 anomaly"
+      },
+      {
+        "rank": 6,
+        "feature": "flow_duration",
+        "shap_value": 0.0005920281982980669,
+        "input_scaled": 0.7505607604980469,
+        "direction": "\u2191 anomaly"
+      },
+      {
+        "rank": 7,
+        "feature": "syn_flag_cnt",
+        "shap_value": 0.0005138872656971216,
+        "input_scaled": 1.0,
+        "direction": "\u2191 anomaly"
+      },
+      {
+        "rank": 8,
+        "feature": "fwd_iat_std",
+        "shap_value": 0.0002656582510098815,
+        "input_scaled": 0.1666666716337204,
+        "direction": "\u2191 anomaly"
+      },
+      {
+        "rank": 9,
+        "feature": "wd_dur",
+        "shap_value": -0.000261070643318817,
+        "input_scaled": 0.08651495724916458,
+        "direction": "\u2193 anomaly"
+      },
+      {
+        "rank": 10,
+        "feature": "ws_pkts_f",
+        "shap_value": 0.00014652741083409637,
+        "input_scaled": 0.034856852144002914,
+        "direction": "\u2191 anomaly"
+      }
+    ]
+  }
+]

@@ -151,33 +151,119 @@ function updateAlertMetrics() {
 function openDrawer(alert) {
     selectedAlert = alert;
     
-    document.getElementById('drawer-title').innerText = alert.attack_type_guess;
-    document.getElementById('drawer-anomaly').innerText = alert.anomaly_score.toFixed(3);
-    document.getElementById('drawer-confidence').innerText = `${Math.round(alert.confidence * 100)}%`;
-    document.getElementById('drawer-src').innerText = alert.src_ip;
-    document.getElementById('drawer-dst').innerText = alert.dst_ip;
-    document.getElementById('drawer-mitre').innerText = alert.mitre_technique;
+    document.getElementById('drawer-title').textContent = alert.attack_type_guess;
+    document.getElementById('drawer-anomaly').textContent = Number(alert.anomaly_score).toFixed(3);
+    const riskProbability = alert.risk_probability ?? alert.confidence;
+    document.getElementById('drawer-confidence').textContent = `${Math.round(riskProbability * 100)}%`;
+    document.getElementById('drawer-src').textContent = alert.src_ip ?? 'N/A';
+    document.getElementById('drawer-dst').textContent = alert.dst_ip ?? 'N/A';
+    document.getElementById('drawer-mitre').textContent = alert.mitre_technique ?? 'N/A';
     
     // 3-Pillar Fusion Data
-    document.getElementById('fusion-network').innerText = (alert.network_score !== undefined) ? alert.network_score.toFixed(3) : 'N/A';
-    document.getElementById('fusion-identity').innerText = (alert.identity_score !== undefined) ? alert.identity_score.toFixed(3) : 'N/A';
-    document.getElementById('fusion-host').innerText = (alert.host_score !== undefined) ? alert.host_score.toFixed(3) : 'N/A';
-    document.getElementById('fusion-combined').innerText = `${Math.round(alert.confidence * 100)}%`;
+    const pillarScores = alert.pillar_scores ?? {};
+    const networkScore = alert.network_score ?? pillarScores.network;
+    const identityScore = alert.identity_score ?? pillarScores.identity;
+    const hostScore = alert.host_score ?? pillarScores.host;
+    document.getElementById('fusion-network').textContent = formatPillarScore(networkScore);
+    document.getElementById('fusion-identity').textContent = formatPillarScore(identityScore);
+    document.getElementById('fusion-host').textContent = formatPillarScore(hostScore);
+    document.getElementById('fusion-combined').textContent = `${Math.round(riskProbability * 100)}%`;
 
     // Set explanations
     const explanationTitle = document.getElementById('drawer-explanation-title');
     const explanationDesc = document.getElementById('drawer-explanation-desc');
     
     if (alert.explanation && alert.explanation.length > 0) {
-        explanationTitle.innerText = alert.explanation[0].split(':')[0] || 'Trigger Signature';
-        explanationDesc.innerText = alert.explanation[0].split(':').slice(1).join(':') || alert.explanation[0];
+        explanationTitle.textContent = alert.explanation[0].split(':')[0] || 'Trigger Signature';
+        explanationDesc.textContent = alert.explanation[0].split(':').slice(1).join(':') || alert.explanation[0];
     } else {
-        explanationTitle.innerText = 'Classifier Trigger';
-        explanationDesc.innerText = 'Threat score exceeded default confidence margin thresholds.';
+        explanationTitle.textContent = 'Classifier Trigger';
+        explanationDesc.textContent = 'Threat score exceeded default confidence margin thresholds.';
     }
+
+    renderHostMappings(alert);
+    renderHostShapFeatures(alert.host_shap_features);
     
     if (alertDrawer) {
         alertDrawer.classList.remove('translate-x-full');
+    }
+}
+
+function formatPillarScore(score) {
+    if (score === undefined || score === null || score === '') return 'N/A';
+    const value = Number(score);
+    return Number.isFinite(value) ? value.toFixed(3) : 'N/A';
+}
+
+function renderHostMappings(alert) {
+    const container = document.getElementById('drawer-host-mappings');
+    container.replaceChildren();
+    const mappings = Array.isArray(alert.host_attack_mappings) ? alert.host_attack_mappings : [];
+
+    if (mappings.length === 0) {
+        const empty = document.createElement('p');
+        empty.textContent = alert.host_mapping_status
+            ? `No technique candidates (${alert.host_mapping_status}).`
+            : 'No host mapping supplied.';
+        container.appendChild(empty);
+    }
+
+    for (const mapping of mappings) {
+        const card = document.createElement('article');
+        card.className = 'bg-surface-container-highest/30 p-md border border-outline-variant space-y-xs';
+
+        const heading = document.createElement('p');
+        heading.className = 'font-bold text-on-surface';
+        heading.textContent = `${mapping.technique_id ?? 'ATT&CK'} — ${mapping.mitre_technique ?? mapping.attack_type ?? 'Candidate'}`;
+        card.appendChild(heading);
+
+        if (mapping.mitre_tactic || mapping.severity) {
+            const details = document.createElement('p');
+            details.textContent = [mapping.mitre_tactic, mapping.severity].filter(Boolean).join(' · ');
+            card.appendChild(details);
+        }
+
+        const evidence = Array.isArray(mapping.evidence) ? mapping.evidence : [];
+        for (const item of evidence) {
+            const line = document.createElement('p');
+            line.textContent = `Evidence: ${item}`;
+            card.appendChild(line);
+        }
+
+        const completeness = document.createElement('p');
+        completeness.textContent = mapping.evidence_complete
+            ? 'Required evidence complete'
+            : 'Candidate evidence is incomplete';
+        card.appendChild(completeness);
+        container.appendChild(card);
+    }
+
+    const rationale = Array.isArray(alert.host_explanation) ? alert.host_explanation : [];
+    for (const item of rationale) {
+        const line = document.createElement('p');
+        line.textContent = item;
+        container.appendChild(line);
+    }
+}
+
+function renderHostShapFeatures(features) {
+    const container = document.getElementById('drawer-host-shap');
+    container.replaceChildren();
+    const items = Array.isArray(features) ? features : [];
+
+    if (items.length === 0) {
+        const empty = document.createElement('li');
+        empty.textContent = 'No host feature explanation supplied.';
+        container.appendChild(empty);
+        return;
+    }
+
+    for (const item of items) {
+        const line = document.createElement('li');
+        const contribution = Number(item.shap_value);
+        const formatted = Number.isFinite(contribution) ? contribution.toFixed(5) : 'N/A';
+        line.textContent = `${item.feature ?? 'Feature'}: ${formatted} (${item.direction ?? 'direction unavailable'})`;
+        container.appendChild(line);
     }
 }
 
@@ -520,4 +606,3 @@ function deployHarnessSimulation(techniqueName) {
         triggerNotification(`${displayName} simulation complete! Results loaded into Live Timeline chart.`, 'success');
     }, 1200);
 }
-

@@ -86,9 +86,9 @@ _FIDX: dict[str, int] = {n: i for i, n in enumerate(REVIVED_FEATURE_NAMES)}
 # --------------------------------------------------------------------------- #
 # Flow-level attack classifier (CICIDS2017 families + MITRE ATT&CK)           #
 #                                                                               #
-# NOTE: this is intentionally separate from detection/attack_mapper_full.json  #
-# which covers UEBA / identity anomalies. M5a scores network FLOWS, so the    #
-# classification rules reference flow-level features (IAT, flags, rates, ctx). #
+# NOTE: this is the network mapper, separate from the UEBA and host mappers.    #
+# M5a scores network FLOWS, so the rules reference flow-level features (IAT,    #
+# flags, rates, and window context).                                            #
 # --------------------------------------------------------------------------- #
 def _fv(name: str, xrow: np.ndarray) -> float:
     """Scaled input value [0,1] for a named feature."""
@@ -106,8 +106,8 @@ def _load_json_mapper(mapper_path: str | Path | None = None) -> list[dict]:
     if mapper_path:
         candidates.append(Path(mapper_path))
     candidates.extend([
-        ROOT / "detection" / "network_attack_mapper.json",
-        ROOT / "legacy" / "network_attack_mapper.json",
+        ROOT / "attack_mappers" / "network_attack_mapper.json",
+        ROOT / "attack_mappers" / "network_attack_mapper_legacy.json",
     ])
     for c in candidates:
         if c.exists():
@@ -813,8 +813,8 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument(
         "--mapper", default="",
-        help="Path to network attack mapper JSON file (e.g. detection/network_attack_mapper.json "
-             "or legacy/network_attack_mapper.json). Defaults to auto-detecting.",
+        help="Path to network attack mapper JSON file (e.g. attack_mappers/network_attack_mapper.json "
+             "or attack_mappers/network_attack_mapper_legacy.json). Defaults to auto-detecting.",
     )
     p.add_argument("--verbose", action="store_true")
     return p
