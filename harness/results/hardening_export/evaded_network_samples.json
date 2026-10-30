@@ -1,0 +1,138 @@
+[
+  {
+    "sample_id": "m5b_evasion_slow_scan_p10",
+    "source": "harness_relational_m5b_evasion",
+    "pillar": "network",
+    "technique": "slow_scan",
+    "param": 10,
+    "is_adversarial": true,
+    "label": "adversarial",
+    "target_model": "GraphAutoencoder (M5b)",
+    "schema_ref": "schemas/feature_vector.json",
+    "evaluation_metrics": {
+      "attacker_score": 0.000661,
+      "threshold": 0.000924,
+      "rank": 1077,
+      "of": 83394,
+      "percentile": 98.709,
+      "m5a_flag_rate": 0.005
+    }
+  },
+  {
+    "sample_id": "m5b_evasion_slow_scan_p20",
+    "source": "harness_relational_m5b_evasion",
+    "pillar": "network",
+    "technique": "slow_scan",
+    "param": 20,
+    "is_adversarial": true,
+    "label": "adversarial",
+    "target_model": "GraphAutoencoder (M5b)",
+    "schema_ref": "schemas/feature_vector.json",
+    "evaluation_metrics": {
+      "attacker_score": 0.000185,
+      "threshold": 0.000924,
+      "rank": 2242,
+      "of": 83404,
+      "percentile": 97.312,
+      "m5a_flag_rate": 0.005
+    }
+  },
+  {
+    "sample_id": "m5b_evasion_slow_scan_p50",
+    "source": "harness_relational_m5b_evasion",
+    "pillar": "network",
+    "technique": "slow_scan",
+    "param": 50,
+    "is_adversarial": true,
+    "label": "adversarial",
+    "target_model": "GraphAutoencoder (M5b)",
+    "schema_ref": "schemas/feature_vector.json",
+    "evaluation_metrics": {
+      "attacker_score": 6e-05,
+      "threshold": 0.000924,
+      "rank": 3869,
+      "of": 83434,
+      "percentile": 95.363,
+      "m5a_flag_rate": 0.005
+    }
+  },
+  {
+    "sample_id": "m5b_evasion_distributed_scan_p8",
+    "source": "harness_relational_m5b_evasion",
+    "pillar": "network",
+    "technique": "distributed_scan",
+    "param": 8,
+    "is_adversarial": true,
+    "label": "adversarial",
+    "target_model": "GraphAutoencoder (M5b)",
+    "schema_ref": "schemas/feature_vector.json",
+    "evaluation_metrics": {
+      "attacker_score": 0.000858,
+      "threshold": 0.000924,
+      "rank": 892,
+      "of": 83392,
+      "percentile": 98.93,
+      "m5a_flag_rate": 0.005
+    }
+  },
+  {
+    "sample_id": "m5b_evasion_distributed_scan_p16",
+    "source": "harness_relational_m5b_evasion",
+    "pillar": "network",
+    "technique": "distributed_scan",
+    "param": 16,
+    "is_adversarial": true,
+    "label": "adversarial",
+    "target_model": "GraphAutoencoder (M5b)",
+    "schema_ref": "schemas/feature_vector.json",
+    "evaluation_metrics": {
+      "attacker_score": 0.000211,
+      "threshold": 0.000924,
+      "rank": 2104,
+      "of": 83400,
+      "percentile": 97.477,
+      "m5a_flag_rate": 0.005
+    }
+  },
+  {
+    "sample_id": "m5b_evasion_distributed_scan_p32",
+    "source": "harness_relational_m5b_evasion",
+    "pillar": "network",
+    "technique": "distributed_scan",
+    "param": 32,
+    "is_adversarial": true,
+    "label": "adversarial",
+    "target_model": "GraphAutoencoder (M5b)",
+    "schema_ref": "schemas/feature_vector.json",
+    "evaluation_metrics": {
+      "attacker_score": 6.1e-05,
+      "threshold": 0.000924,
+      "rank": 3822,
+      "of": 83416,
+      "percentile": 95.418,
+      "m5a_flag_rate": 0.005
+    }
+  },
+  {
+    "sample_id": "flow_ae_evasion_mimicry_attack",
+    "source": "harness_flow_ae_baseline_evasion",
+    "pillar": "network",
+    "technique": "mimicry_attack",
+    "is_adversarial": true,
+    "label": "adversarial",
+    "target_model": "Autoencoder (M5a)",
+    "schema_ref": "schemas/feature_vector.json",
+    "unflagged_step_count": 143
+  },
+  {
+    "sample_id": "flow_ae_evasion_feature_padding_attack",
+    "source": "harness_flow_ae_baseline_evasion",
+    "pillar": "network",
+    "technique": "feature_padding_attack",
+    "is_adversarial": true,
+    "label": "adversarial",
+    "target_model": "Autoencoder (M5a)",
+    "schema_ref": "schemas/feature_vector.json",
+    "unflagged_step_count": 143
+  }
+]

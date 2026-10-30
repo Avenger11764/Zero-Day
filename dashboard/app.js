@@ -123,9 +123,12 @@ function renderThreatFeed() {
             </td>
             <td class="px-lg py-md text-primary font-data-mono">${alert.mitre_technique}</td>
             <td class="px-lg py-md">
-                ${alert.is_adversarial_test ? 
-                    '<span class="bg-tertiary-fixed text-on-tertiary-fixed-variant px-1.5 py-0.5 rounded-sm text-[10px] font-bold">ADVERSARIAL</span>' : 
-                    '<span class="bg-primary-fixed text-primary px-1.5 py-0.5 rounded-sm text-[10px] font-bold">LIVE_TRAFFIC</span>'
+                ${alert.badge_text ? 
+                    `<span class="bg-surface-container-highest text-on-surface px-1.5 py-0.5 rounded-sm text-[10px] font-bold border border-outline-variant">${alert.badge_text}</span>` :
+                    (alert.is_adversarial_test ? 
+                        '<span class="bg-tertiary-fixed text-on-tertiary-fixed-variant px-1.5 py-0.5 rounded-sm text-[10px] font-bold">ADVERSARIAL</span>' : 
+                        '<span class="bg-primary-fixed text-primary px-1.5 py-0.5 rounded-sm text-[10px] font-bold">LIVE_TRAFFIC</span>'
+                    )
                 }
             </td>
         `;

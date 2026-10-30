@@ -1,0 +1,8 @@
+{
+  "export_target": "network_retraining",
+  "sample_count": 8,
+  "exported_file": "evaded_network_samples.json",
+  "source_evaluation": "harness/results/m5b_evasion.json + autoencoder_v2_baseline_v2.csv",
+  "label": "adversarial",
+  "schema_ref": "schemas/feature_vector.json"
+}

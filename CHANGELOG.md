@@ -2,6 +2,17 @@
 
 Append-only log of what changed and why. **Pull, then read the top of this file.**
 
+## 2026-10-29 — Week 5-6: Host Evasion Primed, Hardening Exporter & Dashboard Snapshot
+**Author:** Avinash (Person D — Adversarial Eval & Delivery)
+
+### What changed
+* **Housekeeping fixes**: Re-encoded `docs/WEEK5_HARNESS_EVASION.md` from malformed UTF-16 back to clean UTF-8 with preserved wording and corrected date to 2026-10-01. Fixed absolute file paths in `dashboard/README.md` to relative links.
+* **Host Evasion Scoring Evaluator (`harness/run_host_evasion.py`)**: Built host evasion test suite that extracts 128-D vectors from baseline and evasion variants via `capture/host_feature_extractor.py`. Implemented compatibility guard: detects Person B's 153-D ADFA checkpoint / 32-D skeleton and halts scoring under Case B rather than forcing incompatible dimensions. Encoded method rule requiring baseline detection before evasion scoring.
+* **Interface Request to Person B (`docs/REQUEST_TO_PERSON_B.md`)**: Formalized half-page request for 128-D Host Autoencoder model checkpoint, scaler parameters, and calibrated threshold.
+* **Hardening-Loop Scaffold (`harness/export_evaded_for_retraining.py`)**: Built non-retraining exporter for adversarial hardening. Exported 8 network-side evaded configurations from `harness/results/m5b_evasion.json` and `autoencoder_v2_baseline_v2.csv` into `harness/results/hardening_export/` with schema manifest.
+* **Dashboard Real Snapshot (`harness/build_dashboard_snapshot.py`)**: Created generator to rebuild `dashboard/sampleData.js` from verified evaluation files (`host_attack_story_summary.json` and `m5b_evasion.csv`). Maintained strict static snapshot boundary (no live API, no WebSocket). Preserved transparent labeling: real network evasions badged as `MEASURED_NET`, while uncalibrated host/identity values remain clearly badged as `STAGED_HOST` / `STAGED_PREVIEW`.
+* **Documentation (`docs/WEEK6_HARNESS_EVASION.md`)**: Documented Week 5-6 status, Case B blockage details, measured vs. staged metrics, and handoff items.
+
 ## 2026-10-25 — Person C Weeks 4–6 status and team handoff
 **Author:** Aditya (Person C — Trust & Risk)
 
